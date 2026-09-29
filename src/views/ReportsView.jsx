@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { Printer, FileText, Download, CheckCircle } from 'lucide-react';
 
@@ -39,7 +39,7 @@ export default function ReportsView() {
 
           <button
             onClick={handlePrint}
-            className="px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl shadow-md transition-colors inline-flex items-center gap-2"
+            className="px-5 py-2.5 bg-brand-primary hover:bg-brand-primary text-white font-bold text-xs rounded-xl shadow-md transition-colors inline-flex items-center gap-2"
           >
             <Printer className="w-4 h-4" /> Print / Save PDF
           </button>
@@ -51,15 +51,17 @@ export default function ReportsView() {
         {/* Report Document Branding Header */}
         <div className="flex items-center justify-between border-b-2 border-slate-900 pb-6">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-[#0b172a] text-white flex items-center justify-center font-black text-xl font-mono">
-              T
-            </div>
+            <img
+              src="/tumaini-logo.svg"
+              alt="Tumaini Children's Village"
+              className="w-14 h-14 object-contain"
+            />
             <div>
               <h1 className="text-xl font-black text-slate-900 tracking-wider font-mono">
                 TUMAINI CHILDREN'S VILLAGE
               </h1>
-              <p className="text-xs font-bold text-purple-600 uppercase font-mono tracking-widest">
-                CHILD DEVELOPMENT TRACKING SYSTEM • OFFICIAL REPORT
+              <p className="text-xs font-bold text-brand-primary uppercase font-mono tracking-widest">
+                CHILD DEVELOPMENT TRACKING SYSTEM â€¢ OFFICIAL REPORT
               </p>
             </div>
           </div>
@@ -78,7 +80,7 @@ export default function ReportsView() {
           </div>
           <div>
             <span className="text-[10px] font-bold text-slate-400 uppercase font-mono block">AGE / GRADE</span>
-            <span className="text-sm font-bold text-slate-900">{child.age} yrs • {child.grade}</span>
+            <span className="text-sm font-bold text-slate-900">{child.age} yrs â€¢ {child.grade}</span>
           </div>
           <div>
             <span className="text-[10px] font-bold text-slate-400 uppercase font-mono block">COTTAGE</span>
@@ -91,7 +93,7 @@ export default function ReportsView() {
         </div>
 
         {/* Personal Statement Quote */}
-        <div className="p-4 bg-purple-50 rounded-2xl border border-purple-100 italic text-xs text-purple-900 font-medium">
+        <div className="p-4 bg-brand-primary-light rounded-2xl border border-brand-primary-light italic text-xs text-brand-primary font-medium">
           "{child.personalStatement}"
         </div>
 
@@ -111,12 +113,12 @@ export default function ReportsView() {
             <tbody className="divide-y divide-slate-100">
               <tr>
                 <td className="p-3 font-bold">Computer & Digital Literacy</td>
-                <td className="p-3 font-mono text-purple-600 font-bold">ADVANCED (85%)</td>
+                <td className="p-3 font-mono text-brand-primary font-bold">ADVANCED (85%)</td>
                 <td className="p-3 text-slate-600">Demonstrates high proficiency in typing, Word, and basic coding logic.</td>
               </tr>
               <tr>
                 <td className="p-3 font-bold">Bible & Discipleship</td>
-                <td className="p-3 font-mono text-indigo-600 font-bold">INTERMEDIATE (70%)</td>
+                <td className="p-3 font-mono text-brand-primary font-bold">INTERMEDIATE (70%)</td>
                 <td className="p-3 text-slate-600">Regularly recites memory verses and participates in cottage devotion.</td>
               </tr>
               <tr>
@@ -138,14 +140,14 @@ export default function ReportsView() {
           <div className="space-y-2">
             <h4 className="text-xs font-bold text-slate-900 font-mono uppercase">Key Strengths Noticed</h4>
             <p className="text-xs text-slate-700 bg-slate-50 p-3 rounded-xl">
-              {child.keyStrength} • Demonstrates peer mentorship and eagerness to assist younger children in the IT lab.
+              {child.keyStrength} â€¢ Demonstrates peer mentorship and eagerness to assist younger children in the IT lab.
             </p>
           </div>
 
           <div className="space-y-2">
             <h4 className="text-xs font-bold text-slate-900 font-mono uppercase">Active Development Targets</h4>
             <p className="text-xs text-slate-700 bg-slate-50 p-3 rounded-xl">
-              Focus area: {child.currentFocus} • Next milestone target set for end of term evaluation.
+              {(child.goals || []).map((goal) => goal.title).join(' • ') || 'No development targets recorded.'}
             </p>
           </div>
         </div>
@@ -168,3 +170,4 @@ export default function ReportsView() {
     </div>
   );
 }
+

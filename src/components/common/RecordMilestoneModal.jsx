@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import Modal from './Modal';
 
 export default function RecordMilestoneModal({ isOpen, onClose, childrenList = [], onRecordMilestone }) {
@@ -32,7 +32,7 @@ export default function RecordMilestoneModal({ isOpen, onClose, childrenList = [
           <select
             value={formData.childId}
             onChange={(e) => setFormData({ ...formData, childId: e.target.value })}
-            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#134E5E] bg-white"
+            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#0C3440] bg-white"
           >
             {childrenList.map((c) => (
               <option key={c.id} value={c.id}>
@@ -50,7 +50,7 @@ export default function RecordMilestoneModal({ isOpen, onClose, childrenList = [
             placeholder="e.g. Achieved 40 WPM Touch Typing Certification"
             value={formData.title}
             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#134E5E]"
+            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#0C3440]"
           />
         </div>
 
@@ -61,7 +61,7 @@ export default function RecordMilestoneModal({ isOpen, onClose, childrenList = [
             placeholder="Explain what the child accomplished and why it is being celebrated..."
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#134E5E]"
+            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#0C3440]"
           />
         </div>
 
@@ -75,7 +75,7 @@ export default function RecordMilestoneModal({ isOpen, onClose, childrenList = [
           </button>
           <button
             type="submit"
-            className="px-6 py-2.5 text-xs font-bold text-white bg-[#134E5E] hover:bg-[#0E3D4A] rounded-xl transition-colors shadow-md shadow-[#134E5E]/20"
+            className="px-6 py-2.5 text-xs font-bold text-white bg-[#0C3440] hover:bg-[#164957] rounded-xl transition-colors shadow-md shadow-[#0C3440]/20"
           >
             Save Milestone
           </button>
@@ -84,3 +84,4 @@ export default function RecordMilestoneModal({ isOpen, onClose, childrenList = [
     </Modal>
   );
 }
+

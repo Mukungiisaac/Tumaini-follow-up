@@ -1,9 +1,9 @@
-@import "tailwindcss";
+﻿@import "tailwindcss";
 
 @layer base {
   body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background-color: #f8faf9;
+    background-color: #f7f8f6;
     color: #0f172a;
     -webkit-font-smoothing: antialiased;
   }
@@ -11,20 +11,68 @@
 
 /* System Brand Colors derived from swatches */
 :root {
-  --sidebar-bg: #0c3440;       /* Dark Petrol Teal */
-  --sidebar-hover: #134e5e;    /* Deep Petrol Teal */
-  --teal-primary: #134e5e;     /* Primary Petrol Teal */
-  --teal-dark: #0c3440;        /* Dark Petrol Teal */
-  --teal-hover: #0e3d4a;       /* Darker Teal Hover */
-  --teal-light: #ebf5f7;      /* Light Petrol Teal Tint */
-  --teal-border: #bbe0e6;     /* Petrol Teal Border Tint */
-  --taupe-accent: #c2b59b;    /* Warm Taupe / Sand Gold */
-  --taupe-dark: #75674d;      /* Deep Taupe / Brown */
-  --taupe-light: #f7f4ee;     /* Soft Warm Taupe Tint */
-  --taupe-border: #dcd4c4;    /* Warm Taupe Border Tint */
+  --sidebar-bg: #0c3440;       /* Deep Petrol Teal */
+  --sidebar-hover: #0c3440;    /* Deep Petrol Teal */
+  --teal-primary: #0c3440;     /* Deep Petrol Teal */
+  --teal-dark: #082730;        /* Dark Petrol Teal */
+  --teal-hover: #164957;       /* Lighter Petrol Teal */
+  --teal-light: #e8f0f0;       /* Light Petrol Teal Tint */
+  --teal-border: #b8ced0;      /* Petrol Teal Border Tint */
+  --taupe-accent: #d99b3c;     /* Warm Ochre Gold */
+  --taupe-dark: #8a5f20;       /* Deep Ochre */
+  --taupe-light: #fbf3e4;      /* Soft Ochre Tint */
+  --taupe-border: #e6c98f;     /* Ochre Border Tint */
   --black-default: #0f172a;   /* Default High-Contrast Black/Slate */
   --white-default: #ffffff;   /* Crisp White */
 }
+
+/* Brand Color Utility Classes - Maps Tailwind colors to CSS variables */
+
+/* Primary Teal/Petrol - Used for main CTAs, headers, primary UI */
+.bg-brand-primary { background-color: var(--teal-primary); }
+.text-brand-primary { color: var(--teal-primary); }
+.border-brand-primary { border-color: var(--teal-primary); }
+.bg-brand-primary-light { background-color: var(--teal-light); }
+.text-brand-primary-light { color: var(--teal-light); }
+.border-brand-primary-light { border-color: var(--teal-border); }
+
+/* Taupe/Accent - Used for secondary actions, accents, warm highlights */
+.bg-brand-accent { background-color: var(--taupe-accent); }
+.text-brand-accent { color: var(--taupe-accent); }
+.border-brand-accent { border-color: var(--taupe-accent); }
+.bg-brand-accent-light { background-color: var(--taupe-light); }
+.text-brand-accent-light { color: var(--taupe-accent); }
+.border-brand-accent-light { border-color: var(--taupe-border); }
+
+/* Keep legacy literal brand utilities aligned with the current palette. */
+@layer utilities {
+  .bg-\[\#0C3440\], .bg-\[\#0C3440\], .bg-\[\#0C3440\], .bg-\[\#0c3440\] { background-color: var(--teal-primary) !important; }
+  .text-\[\#0C3440\], .text-\[\#0C3440\], .text-\[\#0C3440\], .text-\[\#0c3440\] { color: var(--teal-primary) !important; }
+  .border-\[\#0C3440\], .border-\[\#0C3440\], .border-\[\#0C3440\], .border-\[\#0c3440\] { border-color: var(--teal-primary) !important; }
+  .bg-\[\#D99B3C\], .bg-\[\#D99B3C\] { background-color: var(--taupe-accent) !important; }
+  .text-\[\#D99B3C\], .text-\[\#D99B3C\] { color: var(--taupe-accent) !important; }
+  .border-\[\#D99B3C\], .border-\[\#D99B3C\] { border-color: var(--taupe-accent) !important; }
+  .bg-\[\#E8F0F0\], .bg-\[\#E8F0F0\] { background-color: var(--teal-light) !important; }
+  .text-\[\#E8F0F0\], .text-\[\#E8F0F0\] { color: var(--teal-light) !important; }
+  .border-\[\#B8CED0\], .border-\[\#B8CED0\] { border-color: var(--teal-border) !important; }
+  .bg-\[\#FBF3E4\], .bg-\[\#FBF3E4\] { background-color: var(--taupe-light) !important; }
+  .text-\[\#8A5F20\], .text-\[\#8A5F20\] { color: var(--taupe-dark) !important; }
+  .border-\[\#E6C98F\], .border-\[\#E6C98F\] { border-color: var(--taupe-border) !important; }
+}
+
+/* Black & White Defaults */
+.bg-brand-black { background-color: var(--black-default); }
+.text-brand-black { color: var(--black-default); }
+.bg-brand-white { background-color: var(--white-default); }
+.text-brand-white { color: var(--white-default); }
+
+/* Status Indicators - Map semantic colors to brand palette */
+.status-success { background-color: var(--teal-primary); color: var(--white-default); }
+.status-success-light { background-color: var(--teal-light); color: var(--teal-primary); border-color: var(--teal-border); }
+.status-progress { background-color: var(--taupe-accent); color: var(--white-default); }
+.status-progress-light { background-color: var(--taupe-light); color: var(--taupe-dark); border-color: var(--taupe-border); }
+.status-pending { background-color: var(--black-default); color: var(--white-default); }
+.status-pending-light { background-color: #f0f0f0; color: var(--black-default); border-color: #e0e0e0; }
 
 /* Glassmorphism & Micro Utilities */
 .glass-panel {
@@ -72,3 +120,4 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+

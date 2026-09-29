@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { SKILL_LEVELS } from '../../data/mockData';
 import { Star } from 'lucide-react';
 
@@ -27,3 +27,4 @@ export default function SkillLevelBadge({ levelKey, showLabel = true, size = 'md
     </button>
   );
 }
+

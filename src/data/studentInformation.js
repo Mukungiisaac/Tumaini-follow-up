@@ -1,0 +1,23 @@
+export const EMPTY_STUDENT_INFORMATION = {
+  admissionNumber: '',
+  stream: '',
+  schoolName: '',
+  examIndexNumber: '',
+  examYear: '',
+  birthCertificateName: { firstName: '', middleName: '', lastName: '' },
+  birthCertificateEntryNumber: '',
+  dateOfBirth: '',
+  nationality: '',
+  countryOfBirth: '',
+  countyOfBirth: '',
+  subCountyOfBirth: '',
+  locationOfBirth: '',
+  religion: '',
+  medicalCondition: '',
+  educationalNeeds: '',
+  caseHistory: '',
+  howJoined: '',
+  mother: {},
+  father: {},
+  guardian: {}
+};

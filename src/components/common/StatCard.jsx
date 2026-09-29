@@ -1,21 +1,21 @@
-import React from 'react';
+﻿import React from 'react';
 
 export default function StatCard({ icon: Icon, title, value, subtitle, color = 'teal', onClick }) {
   const colorMap = {
-    teal: { bg: 'bg-[#EBF5F7]', text: 'text-[#134E5E]', iconBg: 'bg-[#D4ECF0]', border: 'border-[#BBE0E6]' },
-    taupe: { bg: 'bg-[#F7F4EE]', text: 'text-[#75674D]', iconBg: 'bg-[#EFECE4]', border: 'border-[#DCD4C4]' },
-    purple: { bg: 'bg-[#EBF5F7]', text: 'text-[#134E5E]', iconBg: 'bg-[#D4ECF0]', border: 'border-[#BBE0E6]' },
-    indigo: { bg: 'bg-[#F7F4EE]', text: 'text-[#75674D]', iconBg: 'bg-[#EFECE4]', border: 'border-[#DCD4C4]' },
-    blue: { bg: 'bg-[#EBF5F7]', text: 'text-[#134E5E]', iconBg: 'bg-[#D4ECF0]', border: 'border-[#BBE0E6]' },
+    teal: { bg: 'bg-[#E8F0F0]', text: 'text-[#0C3440]', iconBg: 'bg-[#D4E4E4]', border: 'border-[#B8CED0]' },
+    taupe: { bg: 'bg-[#FBF3E4]', text: 'text-[#8A5F20]', iconBg: 'bg-[#F4E7CC]', border: 'border-[#E6C98F]' },
+    purple: { bg: 'bg-[#E8F0F0]', text: 'text-[#0C3440]', iconBg: 'bg-[#D4E4E4]', border: 'border-[#B8CED0]' },
+    indigo: { bg: 'bg-[#FBF3E4]', text: 'text-[#8A5F20]', iconBg: 'bg-[#F4E7CC]', border: 'border-[#E6C98F]' },
+    blue: { bg: 'bg-[#E8F0F0]', text: 'text-[#0C3440]', iconBg: 'bg-[#D4E4E4]', border: 'border-[#B8CED0]' },
     emerald: { bg: 'bg-emerald-50/80', text: 'text-emerald-700', iconBg: 'bg-emerald-100', border: 'border-emerald-200' },
-    amber: { bg: 'bg-[#F7F4EE]', text: 'text-[#75674D]', iconBg: 'bg-[#EFECE4]', border: 'border-[#DCD4C4]' },
+    amber: { bg: 'bg-[#FBF3E4]', text: 'text-[#8A5F20]', iconBg: 'bg-[#F4E7CC]', border: 'border-[#E6C98F]' },
     rose: { bg: 'bg-rose-50/80', text: 'text-rose-700', iconBg: 'bg-rose-100', border: 'border-rose-200' },
   }[color] || { bg: 'bg-slate-50', text: 'text-slate-800', iconBg: 'bg-slate-100', border: 'border-slate-200' };
 
   return (
     <div
       onClick={onClick}
-      className={`bg-white rounded-2xl p-4 border border-slate-200/80 shadow-xs hover:shadow-md hover:border-[#134E5E]/40 transition-all duration-200 flex flex-col justify-between ${
+      className={`bg-white rounded-2xl p-4 border border-slate-200/80 shadow-xs hover:shadow-md hover:border-[#0C3440]/40 transition-all duration-200 flex flex-col justify-between ${
         onClick ? 'cursor-pointer group' : ''
       }`}
     >
@@ -41,3 +41,4 @@ export default function StatCard({ icon: Icon, title, value, subtitle, color = '
     </div>
   );
 }
+

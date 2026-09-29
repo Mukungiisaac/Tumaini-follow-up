@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { useOutletContext, useNavigate } from 'react-router-dom';
-import { SKILL_LEVELS } from '../data/mockData';
+import { GRADE_LEVELS, SKILL_LEVELS } from '../data/mockData';
 import { Star, Filter, CheckCircle2, ChevronDown } from 'lucide-react';
 
 export default function ProgressTrackingView() {
@@ -10,7 +10,7 @@ export default function ProgressTrackingView() {
   const [gradeFilter, setGradeFilter] = useState('ALL GRADES');
   const [activeCellPopover, setActiveCellPopover] = useState(null); // { childId, category }
 
-  const gradesList = ['ALL GRADES', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Form 1', 'Form 2', 'Form 3', 'Form 4'];
+  const gradesList = ['ALL GRADES', ...GRADE_LEVELS];
 
   const categories = [
     { key: 'computer', label: 'COMPUTER' },
@@ -99,7 +99,7 @@ export default function ProgressTrackingView() {
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="w-5 h-5 rounded-full bg-indigo-200" />
+            <span className="w-5 h-5 rounded-full bg-brand-primary-light" />
             <span>Learning</span>
           </div>
 
@@ -156,11 +156,11 @@ export default function ProgressTrackingView() {
                         className="w-11 h-11 rounded-full object-cover ring-2 ring-slate-100 group-hover:ring-purple-400 transition-all"
                       />
                       <div>
-                        <h4 className="text-sm font-bold text-slate-900 group-hover:text-purple-600 transition-colors">
+                        <h4 className="text-sm font-bold text-slate-900 group-hover:text-brand-primary transition-colors">
                           {child.name}
                         </h4>
                         <p className="text-[11px] text-slate-500 font-medium">
-                          {child.grade} • Mentor: {child.mentor}
+                          {child.grade} â€¢ Mentor: {child.mentor}
                         </p>
                       </div>
                     </div>
@@ -194,7 +194,7 @@ export default function ProgressTrackingView() {
                           ) : levelKey === 'WITH_HELP' ? (
                             <span className="w-8 h-8 rounded-full bg-blue-300 shadow-xs" />
                           ) : levelKey === 'LEARNING' ? (
-                            <span className="w-8 h-8 rounded-full bg-indigo-200 shadow-xs" />
+                            <span className="w-8 h-8 rounded-full bg-brand-primary-light shadow-xs" />
                           ) : (
                             <span className="w-8 h-8 rounded-full border-2 border-slate-200 bg-slate-100 shadow-xs" />
                           )}
@@ -213,11 +213,11 @@ export default function ProgressTrackingView() {
                                   handleUpdateChildSkill(child.id, cat.key, lk);
                                   setActiveCellPopover(null);
                                 }}
-                                className="w-full px-2.5 py-1.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-purple-50 hover:text-purple-700 flex items-center justify-between"
+                                className="w-full px-2.5 py-1.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-brand-primary-light hover:text-brand-primary flex items-center justify-between"
                               >
                                 <span>{SKILL_LEVELS[lk].label}</span>
                                 {levelKey === lk && (
-                                  <CheckCircle2 className="w-3.5 h-3.5 text-purple-600" />
+                                  <CheckCircle2 className="w-3.5 h-3.5 text-brand-primary" />
                                 )}
                               </button>
                             ))}
@@ -235,3 +235,4 @@ export default function ProgressTrackingView() {
     </div>
   );
 }
+

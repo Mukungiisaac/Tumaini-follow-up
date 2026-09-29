@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 
 export default function Avatar({ src, name = '', size = 'md', className = '' }) {
   const [imageError, setImageError] = useState(false);
@@ -23,7 +23,7 @@ export default function Avatar({ src, name = '', size = 'md', className = '' }) 
   if (!src || imageError) {
     return (
       <div
-        className={`${sizeClasses} rounded-full bg-gradient-to-br from-purple-600 to-indigo-700 text-white font-bold flex items-center justify-center shrink-0 shadow-xs border border-white/20 ${className}`}
+        className={`${sizeClasses} rounded-full bg-gradient-to-br from-[#0C3440] to-[#0C3440] text-white font-bold flex items-center justify-center shrink-0 shadow-xs border border-white/20 ${className}`}
         title={name}
       >
         {getInitials(name)}
@@ -40,3 +40,4 @@ export default function Avatar({ src, name = '', size = 'md', className = '' }) 
     />
   );
 }
+

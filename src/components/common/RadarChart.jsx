@@ -1,7 +1,7 @@
-import React from 'react';
+﻿import React from 'react';
 
 export default function RadarChart({ metrics, size = 260 }) {
-  // 5 categories in order: Top (0°), Top-Right (72°), Bottom-Right (144°), Bottom-Left (216°), Top-Left (288°)
+  // 5 categories in order: Top (0Â°), Top-Right (72Â°), Bottom-Right (144Â°), Bottom-Left (216Â°), Top-Left (288Â°)
   const categories = [
     { key: 'computer', label: 'COMPUTER', val: metrics?.computer || 85 },
     { key: 'mathScience', label: 'MATH & SCI', val: metrics?.mathScience || 80 },
@@ -128,3 +128,4 @@ export default function RadarChart({ metrics, size = 260 }) {
     </div>
   );
 }
+

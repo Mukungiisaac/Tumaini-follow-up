@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { MOCK_COMPUTER_CURRICULUM } from '../data/mockData';
 import { Laptop, CheckCircle2, BookOpen, Layers, Award, Terminal, Code } from 'lucide-react';
 
@@ -20,7 +20,7 @@ export default function ComputerCurriculumView() {
       {/* Header Banner */}
       <div className="bg-[#0b172a] text-white p-8 rounded-3xl shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         <div className="space-y-2">
-          <div className="flex items-center gap-2 text-purple-300 text-xs font-mono uppercase font-bold tracking-widest">
+          <div className="flex items-center gap-2 text-brand-primary-light text-xs font-mono uppercase font-bold tracking-widest">
             <Laptop className="w-4 h-4" /> EMPLOYTMENT-ORIENTED IT CURRICULUM
           </div>
           <h2 className="text-2xl lg:text-3xl font-black tracking-tight">
@@ -33,7 +33,7 @@ export default function ComputerCurriculumView() {
 
         <div className="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/10 text-center shrink-0">
           <span className="text-2xl font-black text-white font-mono">42</span>
-          <p className="text-[10px] text-purple-200 uppercase font-mono tracking-wider">Active Tech Learners</p>
+          <p className="text-[10px] text-brand-primary-light uppercase font-mono tracking-wider">Active Tech Learners</p>
         </div>
       </div>
 
@@ -45,8 +45,8 @@ export default function ComputerCurriculumView() {
             onClick={() => setSelectedLevel(lvl.level)}
             className={`p-4 rounded-2xl text-left border transition-all ${
               selectedLevel === lvl.level
-                ? 'bg-purple-600 text-white border-purple-600 shadow-lg shadow-purple-900/20'
-                : 'bg-white text-slate-800 border-slate-100 hover:border-purple-200'
+                ? 'bg-brand-primary text-white border-brand-primary shadow-lg shadow-purple-900/20'
+                : 'bg-white text-slate-800 border-slate-100 hover:border-brand-primary-light'
             }`}
           >
             <span className="text-[10px] font-bold font-mono uppercase tracking-widest block mb-1 opacity-80">
@@ -78,7 +78,7 @@ export default function ComputerCurriculumView() {
               >
                 <div>
                   <div className="flex items-start justify-between mb-3">
-                    <span className="px-3 py-1 bg-purple-50 text-purple-700 text-xs font-bold rounded-full font-mono">
+                    <span className="px-3 py-1 bg-brand-primary-light text-brand-primary text-xs font-bold rounded-full font-mono">
                       {mod.lessonsCount} Lessons
                     </span>
                     <button
@@ -98,7 +98,7 @@ export default function ComputerCurriculumView() {
 
                   {/* Practical Project Card */}
                   <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100 space-y-1 mb-4">
-                    <span className="text-[10px] font-bold text-purple-600 font-mono uppercase tracking-widest flex items-center gap-1">
+                    <span className="text-[10px] font-bold text-brand-primary font-mono uppercase tracking-widest flex items-center gap-1">
                       <Award className="w-3.5 h-3.5" /> PRACTICAL PROJECT
                     </span>
                     <p className="text-xs font-bold text-slate-900">{mod.project}</p>
@@ -112,7 +112,7 @@ export default function ComputerCurriculumView() {
                     <ul className="space-y-1.5 text-xs text-slate-600">
                       {mod.objectives.map((obj, i) => (
                         <li key={i} className="flex items-center gap-2">
-                          <span className="w-1.5 h-1.5 rounded-full bg-purple-500 shrink-0" />
+                          <span className="w-1.5 h-1.5 rounded-full bg-brand-primary shrink-0" />
                           <span>{obj}</span>
                         </li>
                       ))}
@@ -127,3 +127,4 @@ export default function ComputerCurriculumView() {
     </div>
   );
 }
+

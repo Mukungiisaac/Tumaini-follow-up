@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import Modal from './Modal';
 
 export default function EditGoalModal({ isOpen, onClose, goal, onUpdateGoal }) {
@@ -57,7 +57,7 @@ export default function EditGoalModal({ isOpen, onClose, goal, onUpdateGoal }) {
             value={formData.title}
             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
             placeholder="e.g. Master PowerPoint Presentation"
-            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#134E5E]"
+            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0C3440]"
           />
         </div>
 
@@ -70,7 +70,7 @@ export default function EditGoalModal({ isOpen, onClose, goal, onUpdateGoal }) {
             <select
               value={formData.area}
               onChange={(e) => setFormData({ ...formData, area: e.target.value })}
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#134E5E]"
+              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0C3440]"
             >
               <option value="Computer">Computer & IT</option>
               <option value="Bible">Bible & Discipleship</option>
@@ -90,7 +90,7 @@ export default function EditGoalModal({ isOpen, onClose, goal, onUpdateGoal }) {
               type="date"
               value={formData.targetDate}
               onChange={(e) => setFormData({ ...formData, targetDate: e.target.value })}
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#134E5E]"
+              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0C3440]"
             />
           </div>
         </div>
@@ -105,7 +105,7 @@ export default function EditGoalModal({ isOpen, onClose, goal, onUpdateGoal }) {
             <select
               value={formData.status}
               onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#134E5E]"
+              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0C3440]"
             >
               <option value="Not Started">Not Started</option>
               <option value="In Progress">In Progress</option>
@@ -117,7 +117,7 @@ export default function EditGoalModal({ isOpen, onClose, goal, onUpdateGoal }) {
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <label className="text-xs font-bold text-slate-700 uppercase">Current Progress (%)</label>
-              <span className="text-xs font-bold text-[#134E5E] font-mono">{formData.progress}%</span>
+              <span className="text-xs font-bold text-[#0C3440] font-mono">{formData.progress}%</span>
             </div>
             <input
               type="range"
@@ -132,7 +132,7 @@ export default function EditGoalModal({ isOpen, onClose, goal, onUpdateGoal }) {
                 else if (val > 0 && st === 'Not Started') st = 'In Progress';
                 setFormData({ ...formData, progress: val, status: st });
               }}
-              className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#134E5E]"
+              className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#0C3440]"
             />
           </div>
         </div>
@@ -147,7 +147,7 @@ export default function EditGoalModal({ isOpen, onClose, goal, onUpdateGoal }) {
             value={formData.note}
             onChange={(e) => setFormData({ ...formData, note: e.target.value })}
             placeholder="Log current progress details, next steps, or rehearsals..."
-            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#134E5E]"
+            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0C3440]"
           />
         </div>
 
@@ -162,7 +162,7 @@ export default function EditGoalModal({ isOpen, onClose, goal, onUpdateGoal }) {
           </button>
           <button
             type="submit"
-            className="px-5 py-2 text-xs font-bold text-white bg-[#134E5E] hover:bg-[#0E3D4A] rounded-xl shadow-md shadow-[#134E5E]/20 transition-all"
+            className="px-5 py-2 text-xs font-bold text-white bg-[#0C3440] hover:bg-[#164957] rounded-xl shadow-md shadow-[#0C3440]/20 transition-all"
           >
             Save Changes
           </button>
@@ -171,3 +171,4 @@ export default function EditGoalModal({ isOpen, onClose, goal, onUpdateGoal }) {
     </Modal>
   );
 }
+

@@ -5,6 +5,21 @@ export const MOCK_MENTORS = [
   { id: 'm4', name: 'Esther M.', role: 'Arts & Creative Mentor', avatar: '/assets/children/esther_l.jpg', email: 'esther.m@tumaini.org' },
 ];
 
+export const HOUSE_IDS = ['1', '2', '3', '4', '5', '6'];
+
+export const GRADE_LEVELS = [
+  'Playgroup',
+  'PP1',
+  'PP2',
+  ...Array.from({ length: 9 }, (_, index) => `Grade ${index + 1}`)
+];
+
+export const MOCK_HOUSES = HOUSE_IDS.map((id) => ({
+  id,
+  parentOne: '',
+  parentTwo: ''
+}));
+
 export const SKILL_LEVELS = {
   NOT_INTRODUCED: { id: 'NOT_INTRODUCED', label: 'Not Yet Introduced', color: 'bg-slate-200 text-slate-600 border-slate-300', dot: 'bg-slate-400', level: 0 },
   LEARNING: { id: 'LEARNING', label: 'Learning', color: 'bg-[#F7F4EE] text-[#75674D] border-[#DCD4C4]', dot: 'bg-[#C2B59B]', level: 1 },
@@ -20,12 +35,12 @@ export const MOCK_CHILDREN = [
     fullName: 'Samuel Omondi',
     age: 13,
     grade: 'Grade 7',
-    cottage: "Cottage 'B'",
+    houseId: '',
+    cottage: 'Unassigned',
     mentor: 'David K.',
     image: '/assets/children/samuel_o.jpg',
     status: 'ON TRACK',
     keyStrength: 'Computer Engineering',
-    currentFocus: 'Web Development & Coding',
     personalStatement: "I want to be a computer engineer and build things that help people.",
     overviewMetrics: {
       computer: 85,
@@ -64,12 +79,12 @@ export const MOCK_CHILDREN = [
     fullName: 'Elias Kariuki',
     age: 12,
     grade: 'Grade 6',
-    cottage: 'Hope House',
+    houseId: '',
+    cottage: 'Unassigned',
     mentor: 'John D.',
     image: '/assets/children/elias_k.jpg',
     status: 'ON TRACK',
     keyStrength: 'Problem Solving',
-    currentFocus: 'Touch Typing & Logic',
     personalStatement: "I love solving math puzzles and learning how computers turn on.",
     overviewMetrics: {
       computer: 60,
@@ -100,12 +115,12 @@ export const MOCK_CHILDREN = [
     fullName: 'Amina Hassan',
     age: 12,
     grade: 'Grade 6',
-    cottage: 'Joy Villa',
+    houseId: '',
+    cottage: 'Unassigned',
     mentor: 'Sarah Johnson',
     image: '/assets/children/amina_h.jpg',
     status: 'PROGRESSING',
     keyStrength: 'Leadership',
-    currentFocus: 'Discipleship & Group Leading',
     personalStatement: "My dream is to become a teacher so every child has a opportunity to learn.",
     overviewMetrics: {
       computer: 70,
@@ -135,12 +150,12 @@ export const MOCK_CHILDREN = [
     fullName: 'Samuel Ochieng',
     age: 14,
     grade: 'Grade 8',
-    cottage: 'Peace Cabin',
+    houseId: '',
+    cottage: 'Unassigned',
     mentor: 'Esther M.',
     image: '/assets/children/samuel_och.jpg',
     status: 'NEEDS SUPPORT',
     keyStrength: 'Creative Arts',
-    currentFocus: 'Social Skills & Focus',
     personalStatement: "I like drawing colorful pictures of airplanes and singing songs.",
     overviewMetrics: {
       computer: 50,
@@ -168,13 +183,13 @@ export const MOCK_CHILDREN = [
     name: 'Grace Wanjiku',
     fullName: 'Grace Wanjiku',
     age: 16,
-    grade: 'Form 2 (High School)',
-    cottage: 'Hope House',
+    grade: 'Grade 9',
+    houseId: '',
+    cottage: 'Unassigned',
     mentor: 'Sarah Johnson',
     image: '/assets/children/grace_w.jpg',
     status: 'ON TRACK',
     keyStrength: 'Mathematics',
-    currentFocus: 'Advanced IT & Excel',
     personalStatement: "I want to study data science and lead technology programs in Kenya.",
     overviewMetrics: {
       computer: 95,
@@ -204,12 +219,12 @@ export const MOCK_CHILDREN = [
     fullName: 'Sarah Mutua',
     age: 15,
     grade: 'Grade 9',
-    cottage: 'Joy Villa',
+    houseId: '',
+    cottage: 'Unassigned',
     mentor: 'David K.',
     image: '/assets/children/sarah_m.jpg',
     status: 'NEEDS SUPPORT',
     keyStrength: 'Creative Writing',
-    currentFocus: 'Math Fractions & Tutoring',
     personalStatement: "I enjoy writing short stories and learning how things work.",
     overviewMetrics: {
       computer: 65,
@@ -236,12 +251,12 @@ export const MOCK_CHILDREN = [
     fullName: 'David Kiplagat',
     age: 14,
     grade: 'Grade 8',
-    cottage: "Cottage 'B'",
+    houseId: '',
+    cottage: 'Unassigned',
     mentor: 'Sarah Johnson',
     image: '/assets/children/david_k.jpg',
     status: 'NEEDS SUPPORT',
     keyStrength: 'Robotics Interest',
-    currentFocus: 'Social Confidence & Group Play',
     personalStatement: "I want to build robots that can explore space.",
     overviewMetrics: {
       computer: 75,
@@ -267,13 +282,13 @@ export const MOCK_CHILDREN = [
     name: 'Esther L.',
     fullName: 'Esther Lukindo',
     age: 15,
-    grade: 'Form 1 (High School)',
-    cottage: 'Peace Cabin',
+    grade: 'Grade 9',
+    houseId: '',
+    cottage: 'Unassigned',
     mentor: 'John D.',
     image: '/assets/children/esther_l.jpg',
     status: 'PROGRESSING',
     keyStrength: 'Bible Studies',
-    currentFocus: 'Review Goal Follow-up',
     personalStatement: "Faith and diligence guide everything I do.",
     overviewMetrics: {
       computer: 78,
@@ -287,7 +302,7 @@ export const MOCK_CHILDREN = [
       { id: 's1', name: 'Digital Communication', category: 'Computer', level: 'INDEPENDENT', note: 'Manages chapel presentation slides.' }
     ],
     observations: [
-      { id: 'ob9', date: '2026-08-09', area: 'Goals Follow-up', text: 'Reviewed personal development roadmap for Form 1 term 3.', strength: 'Goal Clarity', challenge: 'Balancing studies and chores', nextStep: 'Check in bi-weekly.' }
+      { id: 'ob9', date: '2026-08-09', area: 'Goals Follow-up', text: 'Reviewed personal development roadmap for Grade 9 term 3.', strength: 'Goal Clarity', challenge: 'Balancing studies and chores', nextStep: 'Check in bi-weekly.' }
     ],
     goals: [
       { id: 'g9', title: 'Complete Westminster Catechism Q1-25', area: 'Bible', targetDate: '2026-09-30', progress: 80, status: 'In Progress', note: 'On track.' }
@@ -295,87 +310,6 @@ export const MOCK_CHILDREN = [
     milestones: [
       { id: 'm7', date: '2026-07-04', title: 'Discipleship Excellence Badge', description: 'Awarded for leading weekly junior devotions.' }
     ]
-  }
-];
-
-export const MOCK_DASHBOARD_STATS = {
-  totalChildren: 124,
-  activeMentorships: 86,
-  computerLearners: 42,
-  bibleProgressPct: '95%',
-  mathSupportNeeds: 18,
-  activeGoalsCount: 215
-};
-
-export const MOCK_NEEDS_ATTENTION = [
-  {
-    id: 'na1',
-    childId: 'c6',
-    name: 'Sarah M.',
-    age: 11,
-    image: '/assets/children/sarah_m.jpg',
-    category: 'Math Support',
-    color: 'bg-rose-50 text-rose-700 border-rose-200',
-    badgeBg: 'bg-rose-100 text-rose-800',
-    description: 'Struggling with fractions in term math tests.',
-    actionText: 'Assign Peer Tutor'
-  },
-  {
-    id: 'na2',
-    childId: 'c7',
-    name: 'David K.',
-    age: 9,
-    image: '/assets/children/david_k.jpg',
-    category: 'Social Confidence',
-    color: 'bg-purple-50 text-purple-700 border-purple-200',
-    badgeBg: 'bg-purple-100 text-purple-800',
-    description: 'Hesitant to participate in small group discussions.',
-    actionText: 'Schedule 1-on-1'
-  },
-  {
-    id: 'na3',
-    childId: 'c8',
-    name: 'Esther L.',
-    age: 14,
-    image: '/assets/children/esther_l.jpg',
-    category: 'Goal Follow-up',
-    color: 'bg-amber-50 text-amber-700 border-amber-200',
-    badgeBg: 'bg-amber-100 text-amber-800',
-    description: 'Review progress on independent science project.',
-    actionText: 'Review Target'
-  }
-];
-
-export const MOCK_RECENT_PROGRESS = [
-  {
-    id: 'rp1',
-    childId: 'c1',
-    childName: 'Samuel O.',
-    image: '/assets/children/samuel_o.jpg',
-    category: 'Computer',
-    timeAgo: '2H AGO',
-    title: 'Completed first web project',
-    badgeColor: 'bg-blue-100 text-blue-700'
-  },
-  {
-    id: 'rp2',
-    childId: 'c5',
-    childName: 'Grace W.',
-    image: '/assets/children/grace_w.jpg',
-    category: 'Music',
-    timeAgo: '4H AGO',
-    title: 'Learned a new guitar chord progression',
-    badgeColor: 'bg-purple-100 text-purple-700'
-  },
-  {
-    id: 'rp3',
-    childId: 'c2',
-    childName: 'Elias K.',
-    image: '/assets/children/elias_k.jpg',
-    category: 'Bible',
-    timeAgo: 'YESTERDAY',
-    title: 'Memorized 10 scripture verses',
-    badgeColor: 'bg-emerald-100 text-emerald-700'
   }
 ];
 

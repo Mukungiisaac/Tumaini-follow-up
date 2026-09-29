@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Tumaini Children's Village</title>
+  <desc id="desc">Tumaini Children's Village logo</desc>
+  <circle cx="256" cy="256" r="244" fill="#fff" stroke="#159447" stroke-width="18"/>
+  <g fill="#cf2029">
+    <path d="M256 91l12 48 22-45 4 49 31-42-13 48 39-32-23 44 47-20-34 35 49-6-43 26 46 9-50 10 40 26-49-7 32 38-44-22 18 47-37-34 3 49-27-43-13 47-11-49-27 43 3-49-37 34 18-47-44 22 32-38-49 7 46-26-50-10 46-9-43-26 49 6-34-35 47 20-23-44 39 32-13-48 31 42 4-49 22 45z"/>
+    <path d="M198 220c0-42 26-69 58-69s58 27 58 69v18h-26v-18c0-26-13-43-32-43s-32 17-32 43v18h-26z" fill="#fff"/>
+  </g>
+  <rect x="91" y="218" width="330" height="91" fill="#169447"/>
+  <text x="256" y="278" text-anchor="middle" font-family="Arial, sans-serif" font-size="57" font-weight="900" letter-spacing="-4" fill="#ffc832">TUMAINI</text>
+  <text x="256" y="337" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" letter-spacing="2.5" fill="#cf2029">CHILDREN'S VILLAGE</text>
+</svg>

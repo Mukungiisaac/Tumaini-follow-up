@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import Modal from './Modal';
 
 export default function RecordObservationModal({ isOpen, onClose, childrenList = [], onRecordObservation }) {
@@ -38,11 +38,11 @@ export default function RecordObservationModal({ isOpen, onClose, childrenList =
           <select
             value={formData.childId}
             onChange={(e) => setFormData({ ...formData, childId: e.target.value })}
-            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#134E5E] bg-white"
+            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#0C3440] bg-white"
           >
             {childrenList.map((c) => (
               <option key={c.id} value={c.id}>
-                {c.name} ({c.grade} • {c.cottage})
+                {c.name} ({c.grade} â€¢ {c.cottage})
               </option>
             ))}
           </select>
@@ -53,7 +53,7 @@ export default function RecordObservationModal({ isOpen, onClose, childrenList =
           <select
             value={formData.area}
             onChange={(e) => setFormData({ ...formData, area: e.target.value })}
-            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#134E5E] bg-white"
+            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#0C3440] bg-white"
           >
             <option value="Computer">Computer & Digital Skills</option>
             <option value="Bible & Discipleship">Bible & Discipleship</option>
@@ -72,7 +72,7 @@ export default function RecordObservationModal({ isOpen, onClose, childrenList =
             placeholder="Write a brief, meaningful observation..."
             value={formData.text}
             onChange={(e) => setFormData({ ...formData, text: e.target.value })}
-            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#134E5E]"
+            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#0C3440]"
           />
         </div>
 
@@ -84,7 +84,7 @@ export default function RecordObservationModal({ isOpen, onClose, childrenList =
               placeholder="e.g. Speed Math, Helping Peers"
               value={formData.strength}
               onChange={(e) => setFormData({ ...formData, strength: e.target.value })}
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#134E5E]"
+              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#0C3440]"
             />
           </div>
           <div>
@@ -94,7 +94,7 @@ export default function RecordObservationModal({ isOpen, onClose, childrenList =
               placeholder="e.g. Shyness, Math anxiety"
               value={formData.challenge}
               onChange={(e) => setFormData({ ...formData, challenge: e.target.value })}
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#134E5E]"
+              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#0C3440]"
             />
           </div>
         </div>
@@ -106,7 +106,7 @@ export default function RecordObservationModal({ isOpen, onClose, childrenList =
             placeholder="e.g. Assign peer tutor for fractions"
             value={formData.nextStep}
             onChange={(e) => setFormData({ ...formData, nextStep: e.target.value })}
-            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#134E5E]"
+            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#0C3440]"
           />
         </div>
 
@@ -120,7 +120,7 @@ export default function RecordObservationModal({ isOpen, onClose, childrenList =
           </button>
           <button
             type="submit"
-            className="px-6 py-2.5 text-xs font-bold text-white bg-[#134E5E] hover:bg-[#0E3D4A] rounded-xl transition-colors shadow-md shadow-[#134E5E]/20"
+            className="px-6 py-2.5 text-xs font-bold text-white bg-[#0C3440] hover:bg-[#164957] rounded-xl transition-colors shadow-md shadow-[#0C3440]/20"
           >
             Save Observation
           </button>
@@ -129,3 +129,4 @@ export default function RecordObservationModal({ isOpen, onClose, childrenList =
     </Modal>
   );
 }
+

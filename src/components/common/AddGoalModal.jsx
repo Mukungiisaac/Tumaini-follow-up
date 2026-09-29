@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import Modal from './Modal';
 
 export default function AddGoalModal({ isOpen, onClose, childrenList = [], onAddGoal }) {
@@ -37,7 +37,7 @@ export default function AddGoalModal({ isOpen, onClose, childrenList = [], onAdd
           <select
             value={formData.childId}
             onChange={(e) => setFormData({ ...formData, childId: e.target.value })}
-            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#134E5E] bg-white"
+            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#0C3440] bg-white"
           >
             {childrenList.map((c) => (
               <option key={c.id} value={c.id}>
@@ -55,7 +55,7 @@ export default function AddGoalModal({ isOpen, onClose, childrenList = [], onAdd
             placeholder="e.g. Create and present a PowerPoint deck independently"
             value={formData.title}
             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#134E5E]"
+            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#0C3440]"
           />
         </div>
 
@@ -65,7 +65,7 @@ export default function AddGoalModal({ isOpen, onClose, childrenList = [], onAdd
             <select
               value={formData.area}
               onChange={(e) => setFormData({ ...formData, area: e.target.value })}
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#134E5E] bg-white"
+              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#0C3440] bg-white"
             >
               <option value="Computer">Computer</option>
               <option value="Bible">Bible & Discipleship</option>
@@ -82,7 +82,7 @@ export default function AddGoalModal({ isOpen, onClose, childrenList = [], onAdd
               type="date"
               value={formData.targetDate}
               onChange={(e) => setFormData({ ...formData, targetDate: e.target.value })}
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#134E5E]"
+              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#0C3440]"
             />
           </div>
         </div>
@@ -94,7 +94,7 @@ export default function AddGoalModal({ isOpen, onClose, childrenList = [], onAdd
             placeholder="Key milestones or resources provided..."
             value={formData.note}
             onChange={(e) => setFormData({ ...formData, note: e.target.value })}
-            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#134E5E]"
+            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#0C3440]"
           />
         </div>
 
@@ -108,7 +108,7 @@ export default function AddGoalModal({ isOpen, onClose, childrenList = [], onAdd
           </button>
           <button
             type="submit"
-            className="px-6 py-2.5 text-xs font-bold text-white bg-[#134E5E] hover:bg-[#0E3D4A] rounded-xl transition-colors shadow-md shadow-[#134E5E]/20"
+            className="px-6 py-2.5 text-xs font-bold text-white bg-[#0C3440] hover:bg-[#164957] rounded-xl transition-colors shadow-md shadow-[#0C3440]/20"
           >
             Save Goal
           </button>
@@ -117,3 +117,4 @@ export default function AddGoalModal({ isOpen, onClose, childrenList = [], onAdd
     </Modal>
   );
 }
+

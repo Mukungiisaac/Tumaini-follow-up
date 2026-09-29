@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -49,7 +49,7 @@ export default function Sidebar({ isCollapsed, isMobileOpen, onCloseMobile, isOp
     <div className="space-y-1.5 mb-6">
       {title ? (
         collapsed ? (
-          <div className="my-3 border-t border-slate-800/60 mx-2" />
+          <div className="my-3 border-t border-white/15 mx-2" />
         ) : (
           <h4 className="px-4 text-[10px] font-bold tracking-widest text-slate-400 uppercase font-mono mb-2 transition-all">
             {title}
@@ -67,12 +67,12 @@ export default function Sidebar({ isCollapsed, isMobileOpen, onCloseMobile, isOp
             className={({ isActive }) =>
               `group relative flex items-center transition-all duration-200 ${
                 collapsed
-                  ? 'justify-center w-11 h-11 mx-auto rounded-xl'
-                  : 'gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold'
+                  ? 'justify-center w-11 h-11 mx-auto rounded-lg'
+                  : 'gap-3 px-4 py-2.5 rounded-lg text-sm font-semibold'
               } ${
                 isActive
-                  ? 'bg-[#134E5E] text-white shadow-lg shadow-[#0C3440]/40 font-bold border-l-4 border-[#C2B59B]'
-                  : 'text-slate-300 hover:text-white hover:bg-[#134E5E]/30'
+                  ? 'bg-white/12 text-white font-semibold border-l-2 border-[#D99B3C]'
+                  : 'text-slate-300 hover:text-white hover:bg-white/8'
               }`
             }
           >
@@ -82,7 +82,7 @@ export default function Sidebar({ isCollapsed, isMobileOpen, onCloseMobile, isOp
 
             {/* Hover Tooltip when sidebar is collapsed */}
             {collapsed && (
-              <div className="absolute left-full ml-3 px-3 py-1.5 bg-[#0C3440] text-white text-xs font-semibold rounded-lg shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none z-50 border border-[#134E5E] flex items-center gap-1.5">
+              <div className="absolute left-full ml-3 px-3 py-1.5 bg-[#0C3440] text-white text-xs font-semibold rounded-md shadow-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none z-50 border border-white/15 flex items-center gap-1.5">
                 <span>{item.name}</span>
               </div>
             )}
@@ -94,28 +94,31 @@ export default function Sidebar({ isCollapsed, isMobileOpen, onCloseMobile, isOp
 
   return (
     <>
-      {/* Mobile Backdrop */}
+      {/* Mobile Backdrop - Smooth animation */}
       {mobileOpen && (
         <div
           onClick={handleCloseMobile}
-          className="fixed inset-0 z-40 bg-slate-950/60 backdrop-blur-xs lg:hidden"
+          className="fixed inset-0 z-40 bg-slate-950/30 backdrop-blur-[2px] lg:hidden animate-in fade-in duration-200"
         />
       )}
 
-      {/* Sidebar Panel */}
+      {/* Sidebar Panel - Smooth slide animation */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 z-50 bg-[#0c3440] text-slate-100 flex flex-col transition-all duration-300 ease-in-out sidebar-shadow ${
-          mobileOpen ? 'translate-x-0 w-64' : '-translate-x-full lg:translate-x-0'
+        id="primary-sidebar"
+        className={`fixed top-0 bottom-0 left-0 z-50 bg-[#0c3440]/95 backdrop-blur-xl border-r border-white/10 text-slate-100 flex flex-col transition-all duration-300 ease-in-out sidebar-shadow ${
+          mobileOpen ? 'translate-x-0 w-64 animate-in slide-in-from-left duration-300' : '-translate-x-full lg:translate-x-0'
         } ${collapsed ? 'lg:w-20' : 'lg:w-64'}`}
       >
         {/* Header Branding */}
-        <div className={`flex items-center border-b border-[#134E5E]/60 transition-all ${
-          collapsed ? 'justify-center px-3 py-5' : 'justify-between px-6 py-5'
+        <div className={`flex items-center border-b border-[#0C3440]/60 transition-all ${
+          collapsed ? 'justify-center px-3 py-5' : 'justify-between px-5 py-5'
         }`}>
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-[#134E5E] text-white flex items-center justify-center font-black text-base shadow-md ring-2 ring-[#C2B59B]/60 shrink-0">
-              T
-            </div>
+            <img
+              src="/tumaini-logo.svg"
+              alt="Tumaini Children's Village"
+              className="w-10 h-10 object-contain shrink-0"
+            />
             {!collapsed && (
               <div className="overflow-hidden transition-all">
                 <h1 className="text-sm font-black tracking-wider uppercase text-white font-mono leading-tight">
@@ -127,11 +130,11 @@ export default function Sidebar({ isCollapsed, isMobileOpen, onCloseMobile, isOp
               </div>
             )}
           </div>
-          
-          {/* Mobile close button */}
           <button
             onClick={handleCloseMobile}
-            className="lg:hidden p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800"
+            className="lg:hidden p-2 text-slate-300 hover:text-white rounded-lg hover:bg-white/10 transition-colors"
+            title="Close navigation"
+            aria-label="Close navigation"
           >
             <X className="w-5 h-5" />
           </button>
@@ -147,7 +150,7 @@ export default function Sidebar({ isCollapsed, isMobileOpen, onCloseMobile, isOp
         </nav>
 
         {/* Footer Tagline */}
-        <div className="p-3 border-t border-slate-800/80 bg-slate-950/40 text-center">
+        <div className="p-3 border-t border-white/10 bg-slate-950/20 text-center">
           {collapsed ? (
             <span className="text-[9px] font-bold text-slate-400 font-mono">v2.4</span>
           ) : (
@@ -160,3 +163,4 @@ export default function Sidebar({ isCollapsed, isMobileOpen, onCloseMobile, isOp
     </>
   );
 }
+

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { useOutletContext, useNavigate } from 'react-router-dom';
 import Avatar from '../components/common/Avatar';
 import { Target, Plus, CheckCircle2, Clock, Edit3 } from 'lucide-react';
@@ -26,8 +26,8 @@ export default function GoalsView() {
   });
 
   const getStatusBadge = (status) => {
-    if (status === 'Completed') return 'bg-emerald-50 text-emerald-700 border-emerald-200/80';
-    if (status === 'In Progress') return 'bg-purple-50 text-purple-700 border-purple-200/80';
+    if (status === 'Completed') return 'bg-brand-primary-light text-brand-primary border-brand-primary-light';
+    if (status === 'In Progress') return 'bg-brand-accent-light text-brand-accent border-brand-accent-light';
     return 'bg-slate-100 text-slate-600 border-slate-200/80';
   };
 
@@ -44,7 +44,7 @@ export default function GoalsView() {
 
         <button
           onClick={openAddGoalModal}
-          className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl shadow-xs transition-all inline-flex items-center gap-2"
+          className="px-4 py-2 bg-brand-primary hover:bg-teal-hover text-white font-bold text-xs rounded-xl shadow-xs transition-all inline-flex items-center gap-2"
         >
           <Plus className="w-4 h-4" /> Set New Goal
         </button>
@@ -77,13 +77,13 @@ export default function GoalsView() {
           filteredGoals.map((goal) => (
             <div
               key={goal.id}
-              className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-xs space-y-3.5 flex flex-col justify-between hover:shadow-md hover:border-purple-200 transition-all group"
+              className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-xs space-y-3.5 flex flex-col justify-between hover:shadow-md hover:border-brand-primary transition-all group"
             >
               <div>
                 {/* Header info row */}
                 <div className="flex items-center justify-between gap-2 mb-2.5">
                   <div className="flex items-center gap-2">
-                    <span className="px-2.5 py-0.5 bg-purple-50 text-purple-700 text-[10px] font-bold rounded-md border border-purple-100/60">
+                    <span className="px-2.5 py-0.5 bg-brand-accent-light text-brand-accent text-[10px] font-bold rounded-md border border-brand-accent-light">
                       {goal.area}
                     </span>
                     <span className={`px-2 py-0.5 text-[9px] font-bold rounded-md border ${getStatusBadge(goal.status)}`}>
@@ -93,7 +93,7 @@ export default function GoalsView() {
 
                   <button
                     onClick={() => openEditGoalModal && openEditGoalModal(goal)}
-                    className="p-1.5 text-slate-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors flex items-center gap-1 text-[11px] font-semibold"
+                    className="p-1.5 text-slate-400 hover:text-brand-primary hover:bg-brand-primary-light rounded-lg transition-colors flex items-center gap-1 text-[11px] font-semibold"
                     title="Edit Goal & Details"
                   >
                     <Edit3 className="w-3.5 h-3.5" />
@@ -113,7 +113,7 @@ export default function GoalsView() {
                     className="ring-1 ring-slate-200 group-hover/child:ring-purple-400"
                   />
                   <div className="min-w-0">
-                    <h5 className="text-xs font-bold text-slate-800 group-hover/child:text-purple-600 leading-tight truncate">
+                    <h5 className="text-xs font-bold text-slate-800 group-hover/child:text-brand-primary leading-tight truncate">
                       {goal.childName}
                     </h5>
                     <span className="text-[10px] text-slate-400 font-medium">{goal.childGrade}</span>
@@ -143,11 +143,11 @@ export default function GoalsView() {
               <div className="pt-2 space-y-1.5 border-t border-slate-100">
                 <div className="flex items-center justify-between text-xs font-bold">
                   <span className="text-slate-400 font-mono text-[9px]">PROGRESS</span>
-                  <span className="text-purple-600 font-mono text-xs">{goal.progress}%</span>
+                  <span className="text-brand-primary font-mono text-xs">{goal.progress}%</span>
                 </div>
                 <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-purple-600 rounded-full transition-all duration-300"
+                    className="h-full bg-brand-primary rounded-full transition-all duration-300"
                     style={{ width: `${goal.progress}%` }}
                   />
                 </div>
@@ -159,3 +159,4 @@ export default function GoalsView() {
     </div>
   );
 }
+

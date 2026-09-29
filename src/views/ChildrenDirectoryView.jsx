@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { useOutletContext, useNavigate } from 'react-router-dom';
 import Avatar from '../components/common/Avatar';
 import {
@@ -10,18 +10,15 @@ import {
   ChevronRight,
   FileEdit,
   Sparkles,
-  Target,
-  AlertTriangle,
-  CheckCircle,
-  TrendingUp,
   Edit3
 } from 'lucide-react';
+import { GRADE_LEVELS, HOUSE_IDS } from '../data/mockData';
 
 export default function ChildrenDirectoryView() {
   const { childrenList, searchQuery, openAddChildModal, openEditChildModal, openRecordObsModal } = useOutletContext();
   const navigate = useNavigate();
 
-  const [selectedCottage, setSelectedCottage] = useState('All');
+  const [selectedHouse, setSelectedHouse] = useState('All');
   const [selectedGrade, setSelectedGrade] = useState('All');
   const [selectedStatus, setSelectedStatus] = useState('All');
   const [layoutMode, setLayoutMode] = useState('grid'); // 'grid' | 'list'
@@ -31,46 +28,41 @@ export default function ChildrenDirectoryView() {
     const matchesSearch =
       !searchQuery ||
       child.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      child.cottage.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      child.keyStrength.toLowerCase().includes(searchQuery.toLowerCase());
+      (child.houseId ? `house ${child.houseId}` : 'unassigned').includes(searchQuery.toLowerCase()) ||
+      (child.keyStrength || '').toLowerCase().includes(searchQuery.toLowerCase());
 
-    const matchesCottage = selectedCottage === 'All' || child.cottage === selectedCottage;
+    const matchesHouse = selectedHouse === 'All' || (selectedHouse === 'Unassigned' ? !child.houseId : child.houseId === selectedHouse);
     const matchesGrade =
-      selectedGrade === 'All' ||
-      child.grade === selectedGrade ||
-      child.grade.includes(selectedGrade.split(' ')[0] + ' ' + (selectedGrade.split(' ')[1] || ''));
+      selectedGrade === 'All' || child.grade === selectedGrade;
     const matchesStatus = selectedStatus === 'All' || child.status === selectedStatus;
 
-    return matchesSearch && matchesCottage && matchesGrade && matchesStatus;
+    return matchesSearch && matchesHouse && matchesGrade && matchesStatus;
   });
 
   const getStatusBadge = (status) => {
     if (status === 'ON TRACK') {
       return {
         bg: 'bg-emerald-50 text-emerald-700 border-emerald-200/80',
-        dot: 'bg-emerald-500',
-        icon: CheckCircle
+        dot: 'bg-emerald-500'
       };
     }
     if (status === 'PROGRESSING') {
       return {
-        bg: 'bg-indigo-50 text-indigo-700 border-indigo-200/80',
-        dot: 'bg-indigo-500',
-        icon: TrendingUp
+        bg: 'bg-amber-50 text-amber-800 border-amber-200',
+        dot: 'bg-amber-500'
       };
     }
     return {
       bg: 'bg-rose-50 text-rose-700 border-rose-200/80',
-      dot: 'bg-rose-500',
-      icon: AlertTriangle
+      dot: 'bg-rose-500'
     };
   };
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300 relative pb-16 max-w-7xl mx-auto">
       {/* Header Filter Bar */}
-      <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-3.5">
+      <div className="bg-white rounded-xl p-5 sm:p-6 border border-slate-200 shadow-xs space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {/* Search Bar */}
           <div className="md:col-span-2 space-y-1">
             <label className="text-[10px] font-bold tracking-widest text-slate-400 uppercase font-mono">
@@ -80,29 +72,27 @@ export default function ChildrenDirectoryView() {
               <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
-                placeholder="Search by name, cottage, or key strength..."
+                placeholder="Search by name, house, or key strength..."
                 value={searchQuery}
                 readOnly
-                className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0C3440]"
               />
             </div>
           </div>
 
-          {/* Cottage Filter */}
+          {/* House Filter */}
           <div className="space-y-1">
             <label className="text-[10px] font-bold tracking-widest text-slate-400 uppercase font-mono">
-              COTTAGE
+              HOUSE
             </label>
             <select
-              value={selectedCottage}
-              onChange={(e) => setSelectedCottage(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+              value={selectedHouse}
+              onChange={(e) => setSelectedHouse(e.target.value)}
+              className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0C3440]"
             >
-              <option value="All">All Cottages</option>
-              <option value="Cottage 'B'">Cottage 'B'</option>
-              <option value="Hope House">Hope House</option>
-              <option value="Joy Villa">Joy Villa</option>
-              <option value="Peace Cabin">Peace Cabin</option>
+              <option value="All">All Houses</option>
+              <option value="Unassigned">Unassigned</option>
+              {HOUSE_IDS.map((id) => <option key={id} value={id}>House {id}</option>)}
             </select>
           </div>
 
@@ -114,26 +104,19 @@ export default function ChildrenDirectoryView() {
             <select
               value={selectedGrade}
               onChange={(e) => setSelectedGrade(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0C3440]"
             >
               <option value="All">All Grades</option>
-              <option value="Grade 6">Grade 6</option>
-              <option value="Grade 7">Grade 7</option>
-              <option value="Grade 8">Grade 8</option>
-              <option value="Grade 9">Grade 9</option>
-              <option value="Form 1 (High School)">Form 1 (High School)</option>
-              <option value="Form 2 (High School)">Form 2 (High School)</option>
-              <option value="Form 3 (High School)">Form 3 (High School)</option>
-              <option value="Form 4 (High School)">Form 4 (High School)</option>
+              {GRADE_LEVELS.map((grade) => <option key={grade} value={grade}>{grade}</option>)}
             </select>
           </div>
         </div>
       </div>
 
       {/* Directory Controls Bar */}
-      <div className="flex items-center justify-between px-1">
-        <p className="text-xs text-slate-500 font-medium font-mono">
-          Showing <span className="font-bold text-slate-800">{filteredChildren.length}</span> children
+      <div className="flex flex-wrap items-center justify-between gap-3 px-1">
+        <p className="text-sm text-slate-600">
+          <span className="font-semibold text-slate-900">{filteredChildren.length}</span> children
         </p>
 
         <div className="flex items-center gap-2">
@@ -141,7 +124,7 @@ export default function ChildrenDirectoryView() {
           <select
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
-            className="px-3 py-1.5 bg-white border border-slate-200/80 rounded-xl text-xs font-semibold text-slate-700 shadow-2xs"
+            className="px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#0C3440]"
           >
             <option value="All">All Statuses</option>
             <option value="ON TRACK">ON TRACK</option>
@@ -150,10 +133,12 @@ export default function ChildrenDirectoryView() {
           </select>
 
           {/* View Toggle */}
-          <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200/60">
+          <div className="flex items-center bg-slate-100 p-1 rounded-lg border border-slate-200">
             <button
               onClick={() => setLayoutMode('grid')}
-              className={`p-1.5 rounded-lg transition-all ${
+              title="Grid view"
+              aria-label="Grid view"
+              className={`p-2 rounded-md transition-all ${
                 layoutMode === 'grid' ? 'bg-white text-slate-900 shadow-2xs font-bold' : 'text-slate-500 hover:text-slate-900'
               }`}
             >
@@ -161,7 +146,9 @@ export default function ChildrenDirectoryView() {
             </button>
             <button
               onClick={() => setLayoutMode('list')}
-              className={`p-1.5 rounded-lg transition-all ${
+              title="List view"
+              aria-label="List view"
+              className={`p-2 rounded-md transition-all ${
                 layoutMode === 'list' ? 'bg-white text-slate-900 shadow-2xs font-bold' : 'text-slate-500 hover:text-slate-900'
               }`}
             >
@@ -176,85 +163,82 @@ export default function ChildrenDirectoryView() {
         <div className="bg-white rounded-2xl p-10 text-center border border-slate-200/80 space-y-2 shadow-xs">
           <Sparkles className="w-8 h-8 text-slate-300 mx-auto" />
           <h3 className="text-sm font-bold text-slate-800">No children match your filter</h3>
-          <p className="text-xs text-slate-500">Try adjusting your cottage or grade level filter selection.</p>
+          <p className="text-xs text-slate-500">Try adjusting your house or grade level filter selection.</p>
         </div>
       ) : layoutMode === 'grid' ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
           {filteredChildren.map((child) => {
             const badge = getStatusBadge(child.status);
             return (
               <div
                 key={child.id}
-                className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-xs hover:shadow-md hover:border-purple-200 transition-all flex flex-col justify-between group"
+                className="bg-white rounded-xl p-5 sm:p-6 border border-slate-200 shadow-xs hover:shadow-md hover:border-[#0C3440]/30 transition-all flex flex-col min-h-[300px]"
               >
-                <div>
-                  {/* Top Row: Photo & Status Badge */}
-                  <div className="flex items-start justify-between mb-3">
+                <div className="flex-1">
+                  <div className="flex items-start gap-4">
                     <Avatar
                       src={child.image}
                       name={child.name}
                       size="lg"
-                      className="ring-2 ring-slate-100 shadow-xs"
+                      className="ring-1 ring-slate-200 shrink-0"
                     />
-                    <span className={`px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full border ${badge.bg}`}>
-                      {child.status}
-                    </span>
-                  </div>
-
-                  {/* Name & Details */}
-                  <div className="space-y-0.5 mb-3">
-                    <h3 className="text-sm font-bold text-slate-800 leading-tight">
-                      {child.name}
-                    </h3>
-                    <p className="text-xs text-slate-500 font-medium truncate">
-                      {child.age} yrs • {child.grade} • {child.cottage}
-                    </p>
-                  </div>
-
-                  {/* Key Strength Tag */}
-                  <div className="space-y-2 mb-4">
-                    <div>
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 font-mono block mb-1">
-                        KEY STRENGTH
-                      </span>
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-purple-50 text-purple-700 rounded-lg text-xs font-semibold border border-purple-100/60">
-                        <Sparkles className="w-3 h-3 shrink-0" />
-                        <span className="truncate">{child.keyStrength}</span>
-                      </span>
-                    </div>
-
-                    {/* Current Focus Tag */}
-                    <div>
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 font-mono block mb-1">
-                        CURRENT FOCUS
-                      </span>
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-indigo-50 text-indigo-700 rounded-lg text-xs font-semibold border border-indigo-100/60">
-                        <Target className="w-3 h-3 shrink-0" />
-                        <span className="truncate">{child.currentFocus}</span>
-                      </span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start justify-between gap-2">
+                        <h3 className="text-base font-semibold text-slate-900 leading-snug break-words">
+                          {child.name}
+                        </h3>
+                        <span className={`inline-flex items-center gap-1.5 px-2 py-1 text-[10px] font-semibold rounded-full border whitespace-nowrap ${badge.bg}`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${badge.dot}`} />
+                          {child.status}
+                        </span>
+                      </div>
+                      <p className="mt-1 text-sm text-slate-500">
+                        {child.age} years old
+                      </p>
                     </div>
                   </div>
+
+                  <div className="grid grid-cols-2 gap-3 mt-5 py-4 border-y border-slate-100">
+                    <div>
+                      <span className="block text-[10px] font-semibold uppercase tracking-wide text-slate-400">Grade</span>
+                      <span className="mt-1 block text-sm font-medium text-slate-800">{child.grade}</span>
+                    </div>
+                    <div>
+                      <span className="block text-[10px] font-semibold uppercase tracking-wide text-slate-400">House</span>
+                      <span className="mt-1 block text-sm font-medium text-slate-800">{child.houseId ? `House ${child.houseId}` : 'Unassigned'}</span>
+                    </div>
+                  </div>
+
+                  <dl className="mt-4 space-y-3">
+                    <div>
+                      <dt className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Key strength</dt>
+                      <dd className="mt-0.5 text-sm font-medium text-[#0C3440] break-words">{child.keyStrength || 'Not recorded'}</dd>
+                    </div>
+                    <div>
+                      <dt className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Date joined</dt>
+                      <dd className="mt-0.5 text-sm text-slate-700 break-words">{child.joinedDate || 'Not recorded'}</dd>
+                    </div>
+                  </dl>
                 </div>
 
-                {/* Card Actions Footer */}
-                <div className="flex items-center gap-1.5 pt-3 border-t border-slate-100">
+                <div className="flex items-center gap-2 mt-5 pt-4 border-t border-slate-100">
                   <button
                     onClick={() => navigate(`/children/${child.id}`)}
-                    className="flex-1 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-purple-600 hover:text-white rounded-lg transition-colors text-center"
+                    className="flex-1 py-2 text-sm font-semibold text-white bg-[#0C3440] hover:bg-[#164957] rounded-lg transition-colors text-center"
                   >
-                    View Profile
+                    Open profile
                   </button>
                   <button
                     onClick={() => openEditChildModal(child)}
                     title="Edit Child Profile"
-                    className="p-1.5 text-slate-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg border border-slate-200 transition-colors"
+                    className="p-2 text-slate-600 hover:text-[#0C3440] hover:bg-[#E8F0F0] rounded-lg border border-slate-200 transition-colors"
                   >
                     <Edit3 className="w-4 h-4" />
                   </button>
                   <button
                     onClick={openRecordObsModal}
                     title="Log Observation"
-                    className="p-1.5 bg-[#0b172a] text-white hover:bg-slate-800 rounded-lg transition-colors"
+                    className="p-2 text-[#0C3440] hover:bg-[#E8F0F0] rounded-lg border border-slate-200 transition-colors"
                   >
                     <FileEdit className="w-4 h-4" />
                   </button>
@@ -285,7 +269,7 @@ export default function ChildrenDirectoryView() {
                       </span>
                     </div>
                     <p className="text-[11px] text-slate-500">
-                      {child.age} yrs • {child.grade} • {child.cottage} • Mentor: {child.mentor}
+                      {child.age} years old | {child.grade} | {child.houseId ? `House ${child.houseId}` : 'Unassigned'} | Mentor: {child.mentor}
                     </p>
                   </div>
                 </div>
@@ -293,24 +277,24 @@ export default function ChildrenDirectoryView() {
                 <div className="hidden md:flex items-center gap-4 text-xs">
                   <div className="text-right">
                     <span className="text-[9px] text-slate-400 font-mono block">STRENGTH</span>
-                    <span className="font-semibold text-purple-700">{child.keyStrength}</span>
+                    <span className="font-semibold text-[#0C3440]">{child.keyStrength}</span>
                   </div>
                   <div className="text-right">
-                    <span className="text-[9px] text-slate-400 font-mono block">FOCUS</span>
-                    <span className="font-semibold text-indigo-700">{child.currentFocus}</span>
+                    <span className="text-[9px] text-slate-400 font-mono block">ADMISSION</span>
+                    <span className="font-semibold text-slate-700">{child.studentInformation?.admissionNumber || 'Not recorded'}</span>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-1.5">
                   <button
                     onClick={() => openEditChildModal(child)}
-                    className="px-2.5 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition-colors flex items-center gap-1"
+                    className="px-2.5 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-[#E8F0F0] hover:text-[#0C3440] rounded-lg transition-colors flex items-center gap-1"
                   >
                     <Edit3 className="w-3.5 h-3.5" /> Edit
                   </button>
                   <button
                     onClick={() => navigate(`/children/${child.id}`)}
-                    className="px-3 py-1.5 text-xs font-semibold text-white bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors"
+                    className="px-3 py-1.5 text-xs font-semibold text-white bg-[#0C3440] hover:bg-[#164957] rounded-lg transition-colors"
                   >
                     Profile
                   </button>
@@ -326,7 +310,7 @@ export default function ChildrenDirectoryView() {
         <button className="p-1.5 rounded-lg border border-slate-200 text-slate-400 hover:text-slate-800 hover:bg-slate-100 transition-colors">
           <ChevronLeft className="w-4 h-4" />
         </button>
-        <button className="w-7 h-7 rounded-lg bg-[#0b172a] text-white text-xs font-bold font-mono">
+        <button className="w-7 h-7 rounded-lg bg-[#0C3440] text-white text-xs font-bold font-mono">
           1
         </button>
         <button className="w-7 h-7 rounded-lg hover:bg-slate-100 text-slate-600 text-xs font-bold font-mono">
@@ -348,7 +332,7 @@ export default function ChildrenDirectoryView() {
       <button
         onClick={openAddChildModal}
         title="Add New Child"
-        className="fixed bottom-6 right-8 z-30 p-3.5 bg-purple-600 hover:bg-purple-700 text-white rounded-full shadow-2xl shadow-purple-900/40 flex items-center gap-2 text-xs font-bold font-mono tracking-wider transition-transform hover:scale-105"
+        className="fixed bottom-6 right-8 z-30 p-3.5 bg-[#0C3440] hover:bg-[#164957] text-white rounded-full shadow-2xl shadow-[#0C3440]/50 flex items-center gap-2 text-xs font-bold font-mono tracking-wider transition-transform hover:scale-105"
       >
         <UserPlus className="w-4 h-4" />
         <span className="hidden sm:inline">ADD CHILD</span>
@@ -356,3 +340,4 @@ export default function ChildrenDirectoryView() {
     </div>
   );
 }
+

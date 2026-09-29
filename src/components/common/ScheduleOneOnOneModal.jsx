@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import Modal from './Modal';
 import { MOCK_MENTORS, MEETING_LOCATIONS } from '../../data/mockData';
 import { Calendar, Clock, MapPin, UserCheck, MessageSquare, Sparkles } from 'lucide-react';
@@ -99,18 +99,18 @@ export default function ScheduleOneOnOneModal({
     <Modal isOpen={isOpen} onClose={onClose} title="Schedule 1-on-1 Session" maxWidth="max-w-xl">
       <form onSubmit={handleSubmit} className="space-y-4 overflow-x-hidden">
         {/* Child & Mentor Selector Card */}
-        <div className="bg-[#F7F4EE] p-3.5 sm:p-4 rounded-2xl border border-[#DCD4C4] grid grid-cols-1 sm:grid-cols-2 gap-3.5 min-w-0">
+        <div className="bg-[#FBF3E4] p-3.5 sm:p-4 rounded-2xl border border-[#E6C98F] grid grid-cols-1 sm:grid-cols-2 gap-3.5 min-w-0">
           {/* Target Child Selector */}
           <div className="flex items-center gap-3 min-w-0">
             {selectedChild && (
               <img
                 src={selectedChild.image}
                 alt={selectedChild.name}
-                className="w-10 h-10 rounded-full object-cover ring-2 ring-[#C2B59B] shadow-xs shrink-0"
+                className="w-10 h-10 rounded-full object-cover ring-2 ring-[#D99B3C] shadow-xs shrink-0"
               />
             )}
             <div className="min-w-0 flex-1">
-              <span className="text-[10px] font-bold uppercase font-mono tracking-wider text-[#75674D] block">
+              <span className="text-[10px] font-bold uppercase font-mono tracking-wider text-[#8A5F20] block">
                 TARGET CHILD
               </span>
               <select
@@ -120,7 +120,7 @@ export default function ScheduleOneOnOneModal({
               >
                 {childrenList.map((c) => (
                   <option key={c.id} value={c.id}>
-                    {c.name} ({c.grade} • {c.cottage})
+                    {c.name} ({c.grade} â€¢ {c.cottage})
                   </option>
                 ))}
               </select>
@@ -128,14 +128,14 @@ export default function ScheduleOneOnOneModal({
           </div>
 
           {/* Assigned Mentor Selector */}
-          <div className="sm:border-l sm:border-[#DCD4C4] sm:pl-3.5 min-w-0 flex flex-col justify-center">
+          <div className="sm:border-l sm:border-[#E6C98F] sm:pl-3.5 min-w-0 flex flex-col justify-center">
             <span className="text-[10px] font-bold uppercase font-mono tracking-wider text-slate-500 block">
               ASSIGNED MENTOR
             </span>
             <select
               value={formData.mentorName}
               onChange={(e) => setFormData({ ...formData, mentorName: e.target.value })}
-              className="w-full bg-transparent font-bold text-[#134E5E] text-xs focus:outline-none cursor-pointer truncate"
+              className="w-full bg-transparent font-bold text-[#0C3440] text-xs focus:outline-none cursor-pointer truncate"
             >
               {MOCK_MENTORS.map((m) => (
                 <option key={m.id} value={m.name}>
@@ -150,27 +150,27 @@ export default function ScheduleOneOnOneModal({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 min-w-0">
           <div className="min-w-0">
             <label className="flex items-center gap-1.5 text-xs font-bold text-slate-700 uppercase mb-1">
-              <Calendar className="w-3.5 h-3.5 text-[#134E5E] shrink-0" /> Meeting Date
+              <Calendar className="w-3.5 h-3.5 text-[#0C3440] shrink-0" /> Meeting Date
             </label>
             <input
               type="date"
               required
               value={formData.date}
               onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#134E5E] bg-white shadow-2xs"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#0C3440] bg-white shadow-2xs"
             />
           </div>
 
           <div className="min-w-0">
             <label className="flex items-center gap-1.5 text-xs font-bold text-slate-700 uppercase mb-1">
-              <Clock className="w-3.5 h-3.5 text-[#134E5E] shrink-0" /> Exact Time
+              <Clock className="w-3.5 h-3.5 text-[#0C3440] shrink-0" /> Exact Time
             </label>
             <input
               type="time"
               required
               value={formData.time}
               onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#134E5E] bg-white shadow-2xs"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#0C3440] bg-white shadow-2xs"
             />
           </div>
         </div>
@@ -178,12 +178,12 @@ export default function ScheduleOneOnOneModal({
         {/* Meeting Location / Place */}
         <div className="min-w-0">
           <label className="flex items-center gap-1.5 text-xs font-bold text-slate-700 uppercase mb-1">
-            <MapPin className="w-3.5 h-3.5 text-[#134E5E] shrink-0" /> Meeting Place / Location
+            <MapPin className="w-3.5 h-3.5 text-[#0C3440] shrink-0" /> Meeting Place / Location
           </label>
           <select
             value={formData.location}
             onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#134E5E] bg-white shadow-2xs truncate"
+            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#0C3440] bg-white shadow-2xs truncate"
           >
             {MEETING_LOCATIONS.map((loc) => (
               <option key={loc} value={loc}>
@@ -199,7 +199,7 @@ export default function ScheduleOneOnOneModal({
               placeholder="Specify custom place (e.g. Village Playground Gazebo, Dining Terrace...)"
               value={formData.customLocation}
               onChange={(e) => setFormData({ ...formData, customLocation: e.target.value })}
-              className="w-full mt-2 px-3.5 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-[#134E5E]"
+              className="w-full mt-2 px-3.5 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-[#0C3440]"
             />
           )}
         </div>
@@ -208,7 +208,7 @@ export default function ScheduleOneOnOneModal({
         <div className="min-w-0">
           <div className="flex items-center justify-between mb-1">
             <label className="flex items-center gap-1.5 text-xs font-bold text-slate-700 uppercase">
-              <MessageSquare className="w-3.5 h-3.5 text-[#134E5E] shrink-0" /> Focus Topic / Reason
+              <MessageSquare className="w-3.5 h-3.5 text-[#0C3440] shrink-0" /> Focus Topic / Reason
             </label>
             <span className="text-[10px] text-slate-400 font-medium hidden sm:inline">Quick suggestions below</span>
           </div>
@@ -218,7 +218,7 @@ export default function ScheduleOneOnOneModal({
             placeholder="e.g. Social confidence check-in or math support plan"
             value={formData.topic}
             onChange={(e) => setFormData({ ...formData, topic: e.target.value })}
-            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#134E5E] shadow-2xs"
+            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#0C3440] shadow-2xs"
           />
 
           {/* Preset chips */}
@@ -230,8 +230,8 @@ export default function ScheduleOneOnOneModal({
                 onClick={() => setFormData({ ...formData, topic: preset })}
                 className={`text-[10px] font-semibold px-2.5 py-1 rounded-lg border transition-colors cursor-pointer ${
                   formData.topic === preset
-                    ? 'bg-[#134E5E] text-white border-[#134E5E] font-bold'
-                    : 'bg-[#F7F4EE] text-[#75674D] border-[#DCD4C4] hover:bg-[#EFECE4]'
+                    ? 'bg-[#0C3440] text-white border-[#0C3440] font-bold'
+                    : 'bg-[#FBF3E4] text-[#8A5F20] border-[#E6C98F] hover:bg-[#F4E7CC]'
                 }`}
               >
                 {preset}
@@ -250,7 +250,7 @@ export default function ScheduleOneOnOneModal({
             placeholder="Key discussion points, preparation materials, or goals for this session..."
             value={formData.notes}
             onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#134E5E] resize-none shadow-2xs"
+            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#0C3440] resize-none shadow-2xs"
           />
         </div>
 
@@ -265,7 +265,7 @@ export default function ScheduleOneOnOneModal({
           </button>
           <button
             type="submit"
-            className="px-6 py-2.5 text-xs font-bold text-white bg-[#134E5E] hover:bg-[#0E3D4A] rounded-xl transition-colors shadow-md shadow-[#134E5E]/20 flex items-center gap-1.5 cursor-pointer shrink-0"
+            className="px-6 py-2.5 text-xs font-bold text-white bg-[#0C3440] hover:bg-[#164957] rounded-xl transition-colors shadow-md shadow-[#0C3440]/20 flex items-center gap-1.5 cursor-pointer shrink-0"
           >
             <UserCheck className="w-4 h-4" /> Schedule Session
           </button>
@@ -274,3 +274,4 @@ export default function ScheduleOneOnOneModal({
     </Modal>
   );
 }
+

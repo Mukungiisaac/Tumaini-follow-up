@@ -144,8 +144,8 @@ export default function AdminAuthGate({ children }) {
 
   if (status === 'loading' || status === 'checking-admin') {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-slate-50 text-sm text-slate-600">
-        Connecting securely...
+      <main className="flex min-h-screen items-center justify-center bg-slate-50">
+        <div role="status" aria-label="Connecting securely" className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-slate-600" />
       </main>
     );
   }

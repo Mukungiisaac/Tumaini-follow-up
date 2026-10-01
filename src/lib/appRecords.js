@@ -4,6 +4,7 @@ export async function listAppRecords() {
   const { data, error } = await supabase
     .from('app_records')
     .select('record_type, id, payload')
+    .order('record_type')
     .order('updated_at', { ascending: false });
 
   if (error) throw error;

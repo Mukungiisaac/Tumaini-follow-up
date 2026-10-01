@@ -464,7 +464,11 @@ export default function AppLayout() {
   };
 
   if (isDataLoading) {
-    return <main className="flex min-h-[60vh] items-center justify-center text-sm text-slate-600">Loading shared records...</main>;
+    return (
+      <main className="flex min-h-[60vh] items-center justify-center">
+        <div role="status" aria-label="Loading shared records" className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-slate-600" />
+      </main>
+    );
   }
 
   return (

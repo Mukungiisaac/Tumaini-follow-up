@@ -1,5 +1,20 @@
 # React + Vite
 
+## Host-Managed Admin Access
+
+The configured host email can authorize staff accounts from **Settings → Linked Admin Emails**. New addresses receive a Supabase invitation link and create their own password; passwords are never created or sent by the host.
+
+Configure `VITE_HOST_ADMIN_EMAIL` in the app's `.env.local` to match the active host admin account. Deploy the invitation function and set its server-side secrets:
+
+```sh
+supabase functions deploy manage-linked-admins --project-ref <project-ref>
+supabase secrets set HOST_ADMIN_EMAIL=<host-email> SITE_URL=<portal-origin> PUBLIC_SUPABASE_KEY=<publishable-key> SUPABASE_SERVICE_ROLE_KEY=<service-role-key> --project-ref <project-ref>
+```
+
+Keep the service-role key only in Supabase secrets. Never add it to a `VITE_` variable or commit it to the repository. Configure Supabase Auth's allowed redirect URLs to include `<portal-origin>/?set-password=1`. The host email must already have an active row in `public.admin_users`.
+
+For local use, set `SITE_URL` to the Vite origin, such as `http://localhost:5173`, and add that callback URL to Supabase Auth's redirect allowlist.
+
 This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
 
 Currently, two official plugins are available:

@@ -116,7 +116,7 @@ export default function ObservationsView() {
                       {obs.childName}
                     </h4>
                     <span className="text-[11px] font-medium text-slate-400">
-                      {obs.childGrade} â€¢ {obs.childCottage}
+                      {obs.childGrade} | {obs.childCottage}
                     </span>
                   </div>
                 </div>

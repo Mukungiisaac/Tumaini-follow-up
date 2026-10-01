@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from 'react';
+﻿import React, { useContext, useEffect, useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Header from './Header';
@@ -11,6 +11,10 @@ import EditGoalModal from '../common/EditGoalModal';
 import EditObservationModal from '../common/EditObservationModal';
 import ScheduleOneOnOneModal from '../common/ScheduleOneOnOneModal';
 import { MOCK_CHILDREN, MOCK_HOUSES, MOCK_SCHEDULED_SESSIONS } from '../../data/mockData';
+import { MOCK_ACTIVITIES } from '../../data/mockActivities';
+import { AdminAuthContext } from '../../lib/adminAuthContext';
+import { insertAppRecords, listAppRecords, removeAppRecord, saveAppRecord } from '../../lib/appRecords';
+import { isSupabaseConfigured, supabase } from '../../lib/supabase';
 
 function readStoredValue(key, fallback) {
   try {
@@ -32,6 +36,20 @@ function readStoredChildren() {
   });
 }
 
+function readSavedLocalRecords() {
+  const readArray = (key) => {
+    const value = readStoredValue(key, []);
+    return Array.isArray(value) ? value : [];
+  };
+
+  return {
+    children: readArray('tumaini-children'),
+    houses: readArray('tumaini-houses'),
+    sessions: readArray('tumaini-sessions'),
+    activities: readArray('tumaini-activities')
+  };
+}
+
 const DEFAULT_USER = {
   id: 'm1',
   name: 'Sarah Johnson',
@@ -43,53 +61,190 @@ const DEFAULT_USER = {
 };
 
 export default function AppLayout() {
+  const auth = useContext(AdminAuthContext);
+  const useRemoteRecords = isSupabaseConfigured;
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileViewport, setIsMobileViewport] = useState(() => window.matchMedia('(max-width: 1023px)').matches);
   const [searchQuery, setSearchQuery] = useState('');
   
   // App-wide state
-  const [childrenList, setChildrenList] = useState(readStoredChildren);
-  const [houses, setHouses] = useState(() => readStoredValue('tumaini-houses', MOCK_HOUSES));
-  const [scheduledSessions, setScheduledSessions] = useState(() => readStoredValue('tumaini-sessions', MOCK_SCHEDULED_SESSIONS));
-  const [currentUser, setCurrentUser] = useState(() => readStoredValue('tumaini-user', DEFAULT_USER));
+  const [childrenList, setChildrenList] = useState(() => useRemoteRecords ? [] : readStoredChildren());
+  const [houses, setHouses] = useState(() => useRemoteRecords ? [] : readStoredValue('tumaini-houses', MOCK_HOUSES));
+  const [scheduledSessions, setScheduledSessions] = useState(() => useRemoteRecords ? [] : readStoredValue('tumaini-sessions', MOCK_SCHEDULED_SESSIONS));
+  const [activities, setActivities] = useState(() => useRemoteRecords ? [] : readStoredValue('tumaini-activities', MOCK_ACTIVITIES));
+  const [localCurrentUser, setLocalCurrentUser] = useState(() => readStoredValue('tumaini-user', DEFAULT_USER));
+  const [isDataLoading, setIsDataLoading] = useState(useRemoteRecords);
+  const [dataError, setDataError] = useState('');
+  const [localImportCount, setLocalImportCount] = useState(0);
+  const [isImportingLocalData, setIsImportingLocalData] = useState(false);
+
+  const currentUser = useRemoteRecords && auth?.user
+    ? {
+        id: auth.user.id,
+        name: auth.user.user_metadata?.display_name || auth.admin?.display_name || auth.user.email,
+        email: auth.user.email,
+        role: 'Administrator',
+        avatar: auth.user.user_metadata?.avatar_url || '',
+        phone: auth.user.user_metadata?.phone || '',
+        department: auth.user.user_metadata?.department || ''
+      }
+    : localCurrentUser;
 
   useEffect(() => {
+    if (!useRemoteRecords) return undefined;
+
+    let isActive = true;
+    const loadRecords = async (showLoading = false) => {
+      if (showLoading) setIsDataLoading(true);
+      try {
+        console.log('START loading app records');
+        const records = await listAppRecords();
+        console.log('FINISHED loading app records', records);
+        if (!isActive) return;
+        setChildrenList(records.children);
+        setHouses(records.houses);
+        setScheduledSessions(records.sessions);
+        setActivities(records.activities);
+        if (showLoading) {
+          const remoteCount = Object.values(records).reduce((count, items) => count + items.length, 0);
+          const localRecords = readSavedLocalRecords();
+          const localCount = Object.values(localRecords).reduce((count, items) => count + items.length, 0);
+          setLocalImportCount(remoteCount === 0 ? localCount : 0);
+        }
+        setDataError('');
+      } catch {
+        if (isActive) setDataError('Could not load shared records from Supabase. Check the database tables and access policies.');
+      } finally {
+        if (isActive && showLoading) setIsDataLoading(false);
+      }
+    };
+
+    loadRecords(true);
+    const channel = supabase
+      .channel('shared-app-records')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'app_records' }, () => loadRecords())
+      .subscribe();
+
+    return () => {
+      isActive = false;
+      supabase.removeChannel(channel);
+    };
+  }, [useRemoteRecords]);
+
+  useEffect(() => {
+    if (useRemoteRecords) return;
     try {
       localStorage.setItem('tumaini-children', JSON.stringify(childrenList));
     } catch {
       // Keep the in-memory session usable when browser storage is unavailable or full.
     }
-  }, [childrenList]);
+  }, [childrenList, useRemoteRecords]);
 
   useEffect(() => {
+    if (useRemoteRecords) return;
     try {
       localStorage.setItem('tumaini-houses', JSON.stringify(houses));
     } catch {
       // Keep the in-memory session usable when browser storage is unavailable or full.
     }
-  }, [houses]);
+  }, [houses, useRemoteRecords]);
 
   useEffect(() => {
+    if (useRemoteRecords) return;
     try {
       localStorage.setItem('tumaini-sessions', JSON.stringify(scheduledSessions));
     } catch {
     }
-  }, [scheduledSessions]);
+  }, [scheduledSessions, useRemoteRecords]);
 
   useEffect(() => {
+    if (useRemoteRecords) return;
     try {
-      localStorage.setItem('tumaini-user', JSON.stringify(currentUser));
+      localStorage.setItem('tumaini-activities', JSON.stringify(activities));
     } catch {
     }
-  }, [currentUser]);
+  }, [activities, useRemoteRecords]);
 
-  const handleUpdateHouse = (updatedHouse) => {
-    setHouses((prev) => prev.map((house) => house.id === updatedHouse.id ? updatedHouse : house));
+  useEffect(() => {
+    if (useRemoteRecords) return;
+    try {
+      localStorage.setItem('tumaini-user', JSON.stringify(localCurrentUser));
+    } catch {
+    }
+  }, [localCurrentUser, useRemoteRecords]);
+
+  const persistRecord = async (recordType, record) => {
+    if (!useRemoteRecords) return true;
+    try {
+      await saveAppRecord(recordType, record, auth.user.id);
+      setDataError('');
+      return true;
+    } catch {
+      setDataError('Could not save this change to Supabase. Please try again.');
+      return false;
+    }
   };
 
-  const handleUpdateUser = (updatedUserData) => {
-    setCurrentUser(prev => ({ ...prev, ...updatedUserData }));
+  const handleImportLocalData = async () => {
+    const localRecords = readSavedLocalRecords();
+    const count = Object.values(localRecords).reduce((total, items) => total + items.length, 0);
+    if (count === 0 || !window.confirm(`Import ${count} records saved in this browser? This shares them with all active admins and does not remove the local copy.`)) return;
+
+    setIsImportingLocalData(true);
+    try {
+      const existingRecords = await listAppRecords();
+      const existingCount = Object.values(existingRecords).reduce((total, items) => total + items.length, 0);
+      if (existingCount > 0) {
+        setLocalImportCount(0);
+        setDataError('Import canceled because shared records already exist. No local records were copied.');
+        return;
+      }
+
+      await insertAppRecords(localRecords, auth.user.id);
+      const importedRecords = await listAppRecords();
+      setChildrenList(importedRecords.children);
+      setHouses(importedRecords.houses);
+      setScheduledSessions(importedRecords.sessions);
+      setActivities(importedRecords.activities);
+      setLocalImportCount(0);
+      setDataError('');
+    } catch {
+      setDataError('Could not import browser records. No local copy was removed; check for duplicate IDs and try again.');
+    } finally {
+      setIsImportingLocalData(false);
+    }
+  };
+
+  const mutateChild = async (childId, update) => {
+    const child = childrenList.find((item) => item.id === childId);
+    if (!child) return;
+    const updatedChild = update(child);
+    if (await persistRecord('children', updatedChild)) {
+      setChildrenList((prev) => prev.map((item) => item.id === childId ? updatedChild : item));
+    }
+  };
+
+  const handleUpdateHouse = (updatedHouse) => {
+    persistRecord('houses', updatedHouse).then((saved) => {
+      if (saved) setHouses((prev) => prev.map((house) => house.id === updatedHouse.id ? updatedHouse : house));
+    });
+  };
+
+  const handleUpdateUser = async (updatedUserData) => {
+    if (useRemoteRecords) {
+      try {
+        await auth.updateAdminProfile({
+          display_name: updatedUserData.name || updatedUserData.display_name || currentUser.name,
+          phone: updatedUserData.phone || currentUser.phone || '',
+          department: updatedUserData.department || currentUser.department || ''
+        });
+      } catch {
+        setDataError('Could not update the admin profile. Please try again.');
+      }
+      return;
+    }
+    setLocalCurrentUser((prev) => ({ ...prev, ...updatedUserData }));
   };
 
   // Modals state
@@ -128,16 +283,13 @@ export default function AppLayout() {
 
   // Handlers for state updates
   const handleAddChild = (newChild) => {
-    setChildrenList((prev) => [newChild, ...prev]);
+    persistRecord('children', newChild).then((saved) => {
+      if (saved) setChildrenList((prev) => [newChild, ...prev]);
+    });
   };
 
   const handleUpdateChild = (updatedChild) => {
-    setChildrenList((prev) => prev.map((child) => {
-      if (child.id !== updatedChild.id) return child;
-      const mergedChild = { ...child, ...updatedChild };
-      delete mergedChild.currentFocus;
-      return mergedChild;
-    }));
+    mutateChild(updatedChild.id, (child) => ({ ...child, ...updatedChild }));
   };
 
   const openEditChildModal = (childToEdit) => {
@@ -146,12 +298,9 @@ export default function AppLayout() {
   };
 
   const handleUpdateGoal = (childId, updatedGoal) => {
-    setChildrenList(prev => prev.map(c => {
-      if (c.id === childId) {
-        const updatedGoals = (c.goals || []).map(g => g.id === updatedGoal.id ? updatedGoal : g);
-        return { ...c, goals: updatedGoals };
-      }
-      return c;
+    mutateChild(childId, (child) => ({
+      ...child,
+      goals: (child.goals || []).map((goal) => goal.id === updatedGoal.id ? updatedGoal : goal)
     }));
   };
 
@@ -161,29 +310,28 @@ export default function AppLayout() {
   };
 
   const handleRecordObservation = (obs) => {
-    setChildrenList((prev) => prev.map(c => {
-      if (c.id === obs.childId) {
-        return { ...c, observations: [obs, ...(c.observations || [])] };
-      }
-      return c;
+    mutateChild(obs.childId, (child) => ({
+      ...child,
+      observations: [obs, ...(child.observations || [])]
     }));
   };
 
   const handleUpdateObservation = (updatedObs) => {
-    setChildrenList(prev => prev.map(c => {
-      const hasObs = (c.observations || []).some(o => o.id === updatedObs.id);
-      if (hasObs) {
-        return { ...c, observations: c.observations.map(o => o.id === updatedObs.id ? updatedObs : o) };
-      }
-      return c;
+    const child = childrenList.find((item) => item.observations?.some((observation) => observation.id === updatedObs.id));
+    if (!child) return;
+    mutateChild(child.id, (current) => ({
+      ...current,
+      observations: current.observations.map((observation) => observation.id === updatedObs.id ? updatedObs : observation)
     }));
   };
 
   const handleDeleteObservation = (obsId) => {
-    setChildrenList(prev => prev.map(c => ({
-      ...c,
-      observations: (c.observations || []).filter(o => o.id !== obsId)
-    })));
+    const child = childrenList.find((item) => item.observations?.some((observation) => observation.id === obsId));
+    if (!child) return;
+    mutateChild(child.id, (current) => ({
+      ...current,
+      observations: (current.observations || []).filter((observation) => observation.id !== obsId)
+    }));
   };
 
   const openEditObsModal = (obs) => {
@@ -192,43 +340,71 @@ export default function AppLayout() {
   };
 
   const handleAddGoal = (goal) => {
-    setChildrenList((prev) => prev.map(c => {
-      if (c.id === goal.childId) {
-        return { ...c, goals: [goal, ...(c.goals || [])] };
-      }
-      return c;
-    }));
+    mutateChild(goal.childId, (child) => ({ ...child, goals: [goal, ...(child.goals || [])] }));
   };
 
   const handleRecordMilestone = (milestone) => {
-    setChildrenList((prev) => prev.map(c => {
-      if (c.id === milestone.childId) {
-        return { ...c, milestones: [milestone, ...(c.milestones || [])] };
-      }
-      return c;
+    mutateChild(milestone.childId, (child) => ({
+      ...child,
+      milestones: [milestone, ...(child.milestones || [])]
     }));
-
   };
 
   const handleUpdateChildSkill = (childId, skillId, newLevel) => {
-    setChildrenList((prev) => prev.map(c => {
-      if (c.id === childId) {
-        const updatedSkills = (c.skillsMap || []).map(s => {
-          if (s.id === skillId) return { ...s, level: newLevel };
-          return s;
-        });
-        return { ...c, skillsMap: updatedSkills };
-      }
-      return c;
+    mutateChild(childId, (child) => ({
+      ...child,
+      skillLevels: { ...(child.skillLevels || {}), [skillId]: newLevel }
     }));
   };
 
   const handleScheduleSession = (newSession) => {
-    setScheduledSessions((prev) => [newSession, ...prev]);
+    persistRecord('sessions', newSession).then((saved) => {
+      if (saved) setScheduledSessions((prev) => [newSession, ...prev]);
+    });
   };
 
   const handleUpdateSessionStatus = (sessionId, newStatus) => {
-    setScheduledSessions(prev => prev.map(s => s.id === sessionId ? { ...s, status: newStatus } : s));
+    const session = scheduledSessions.find((item) => item.id === sessionId);
+    if (!session) return;
+    const updatedSession = { ...session, status: newStatus };
+    persistRecord('sessions', updatedSession).then((saved) => {
+      if (saved) setScheduledSessions((prev) => prev.map((item) => item.id === sessionId ? updatedSession : item));
+    });
+  };
+
+  const handleAddActivity = (activity) => {
+    persistRecord('activities', activity).then((saved) => {
+      if (saved) setActivities((prev) => [activity, ...prev]);
+    });
+  };
+
+  const handleUpdateActivity = (updatedActivity) => {
+    persistRecord('activities', updatedActivity).then((saved) => {
+      if (saved) setActivities((prev) => prev.map((activity) => activity.id === updatedActivity.id ? updatedActivity : activity));
+    });
+  };
+
+  const handleDeleteActivity = (activityId) => {
+    if (!window.confirm('Are you sure you want to delete this activity?')) return;
+    const deleteActivity = async () => {
+      if (useRemoteRecords) {
+        try {
+          await removeAppRecord('activities', activityId);
+        } catch {
+          setDataError('Could not delete this activity from Supabase. Please try again.');
+          return;
+        }
+      }
+      setActivities((prev) => prev.filter((activity) => activity.id !== activityId));
+    };
+    deleteActivity();
+  };
+
+  const handleUpdateAttendance = (activityId, attendees) => {
+    const activity = activities.find((item) => item.id === activityId);
+    if (!activity) return;
+    const updatedActivity = { ...activity, attendees };
+    handleUpdateActivity(updatedActivity);
   };
 
   const openScheduleModal = (childId = '') => {
@@ -261,6 +437,7 @@ export default function AppLayout() {
     childrenList,
     houses,
     scheduledSessions,
+    activities,
     searchQuery,
     currentUser,
     handleUpdateUser,
@@ -277,10 +454,18 @@ export default function AppLayout() {
     handleUpdateHouse,
     handleUpdateGoal,
     handleUpdateChildSkill,
+    handleAddActivity,
+    handleUpdateActivity,
+    handleDeleteActivity,
+    handleUpdateAttendance,
     handleUpdateObservation,
     handleDeleteObservation,
     openEditObsModal
   };
+
+  if (isDataLoading) {
+    return <main className="flex min-h-[60vh] items-center justify-center text-sm text-slate-600">Loading shared records...</main>;
+  }
 
   return (
     <div className="min-h-screen bg-[#f8fafc] text-slate-900 flex font-sans">
@@ -307,6 +492,25 @@ export default function AppLayout() {
 
         {/* Dynamic Page View Outlet */}
         <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">
+          {localImportCount > 0 && (
+            <section className="mb-4 flex flex-col gap-3 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-sm leading-5 text-amber-950">
+                This browser has {localImportCount} saved records, but the shared database is empty. Import them only if these are the records you want to share with all admins.
+              </p>
+              <button
+                onClick={handleImportLocalData}
+                disabled={isImportingLocalData}
+                className="shrink-0 rounded-md border border-amber-300 bg-white px-3 py-2 text-xs font-semibold text-amber-950 hover:bg-amber-100 disabled:opacity-60"
+              >
+                {isImportingLocalData ? 'Importing...' : 'Import browser records'}
+              </button>
+            </section>
+          )}
+          {dataError && (
+            <div role="alert" className="mb-4 rounded-md border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
+              {dataError}
+            </div>
+          )}
           <Outlet context={contextValue} />
         </main>
       </div>

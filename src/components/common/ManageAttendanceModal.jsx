@@ -1,12 +1,12 @@
 ﻿import React, { useState } from 'react';
 import Modal from './Modal';
-import { UserCheck, CheckCircle2, Search } from 'lucide-react';
+import { CheckCircle2, Search } from 'lucide-react';
 
 export default function ManageAttendanceModal({ isOpen, onClose, activity, childrenList, onUpdateAttendance }) {
-  if (!activity) return null;
-
-  const [attendees, setAttendees] = useState(activity.attendees || []);
   const [filterQuery, setFilterQuery] = useState('');
+  const attendees = activity?.attendees || [];
+
+  if (!activity) return null;
 
   const toggleAttendee = (childId) => {
     const isAttending = attendees.includes(childId);
@@ -16,7 +16,6 @@ export default function ManageAttendanceModal({ isOpen, onClose, activity, child
     } else {
       nextAttendees = [...attendees, childId];
     }
-    setAttendees(nextAttendees);
     if (onUpdateAttendance) {
       onUpdateAttendance(activity.id, nextAttendees);
     }
@@ -28,13 +27,13 @@ export default function ManageAttendanceModal({ isOpen, onClose, activity, child
   );
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={`Attendance â€” ${activity.title}`} maxWidth="max-w-lg">
+    <Modal isOpen={isOpen} onClose={onClose} title={`Attendance - ${activity.title}`} maxWidth="max-w-lg">
       <div className="space-y-4">
         {/* Attendance Summary */}
         <div className="bg-[#E8F0F0] p-4 rounded-2xl border border-[#B8CED0] flex items-center justify-between">
           <div>
             <h4 className="text-xs font-bold text-[#0C3440] font-mono uppercase">Check-In Status</h4>
-            <p className="text-xs text-slate-600 font-medium">{activity.location} â€¢ {activity.cottages}</p>
+            <p className="text-xs text-slate-600 font-medium">{activity.location} | {activity.cottages}</p>
           </div>
           <div className="text-right">
             <span className="text-lg font-black text-[#0C3440] font-mono">{attendees.length} / {childrenList.length}</span>
@@ -72,7 +71,7 @@ export default function ManageAttendanceModal({ isOpen, onClose, activity, child
                   <img src={c.image} alt={c.name} className="w-9 h-9 rounded-full object-cover ring-2 ring-slate-100" />
                   <div>
                     <h5 className="text-xs font-bold text-slate-900">{c.name}</h5>
-                    <span className="text-[10px] text-slate-500 font-medium">{c.grade} â€¢ {c.cottage}</span>
+                    <span className="text-[10px] text-slate-500 font-medium">{c.grade} | {c.cottage}</span>
                   </div>
                 </div>
 

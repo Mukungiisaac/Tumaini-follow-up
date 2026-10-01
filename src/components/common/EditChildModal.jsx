@@ -71,7 +71,7 @@ export default function EditChildModal({ isOpen, onClose, child, onUpdateChild }
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    const reader = new FileReader();
+        {/* Identity Fields */}
     reader.onload = (ev) => setFormData(f => ({ ...f, imageUrl: ev.target.result }));
     reader.readAsDataURL(file);
   };
@@ -110,10 +110,10 @@ export default function EditChildModal({ isOpen, onClose, child, onUpdateChild }
   const hasPhoto = !!formData.imageUrl;
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={`Edit Profile â€” ${child.name}`} maxWidth="max-w-3xl">
+    <Modal isOpen={isOpen} onClose={onClose} title={`Edit Profile - ${child.name}`} maxWidth="max-w-3xl">
       <form onSubmit={handleSubmit} className="space-y-4">
 
-        {/* â”€â”€ Profile Photo Section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* Profile Photo Section */}
         <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200/80 flex items-center gap-5">
           {/* Live preview */}
           <div className="relative shrink-0">
@@ -170,7 +170,7 @@ export default function EditChildModal({ isOpen, onClose, child, onUpdateChild }
           </div>
         </div>
 
-        {/* â”€â”€ Identity Fields â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* Identity Fields */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
           <div>
             <label className="block text-xs font-bold text-slate-700 uppercase font-mono mb-1">Short Display Name *</label>

@@ -2,7 +2,6 @@
 import { useOutletContext } from 'react-router-dom';
 import {
   Compass,
-  Calendar,
   Clock,
   MapPin,
   Users,
@@ -11,7 +10,6 @@ import {
   Filter,
   UserCheck,
   CheckCircle2,
-  Sparkles,
   BookOpen,
   Laptop,
   Calculator,
@@ -23,56 +21,30 @@ import PlanActivityModal from '../components/common/PlanActivityModal';
 import EditActivityModal from '../components/common/EditActivityModal';
 import ManageAttendanceModal from '../components/common/ManageAttendanceModal';
 
-export default function ActivitiesView() {
-  const { childrenList = [] } = useOutletContext();
+const DEFAULT_CATEGORIES = [
+  'Computer',
+  'Bible & Discipleship',
+  'Math & Science',
+  'Arts & Creative',
+  'Mentorship'
+];
 
-  const [activities, setActivities] = useState([
-    {
-      id: 'a1',
-      title: 'Friday Computer Lab Coding Challenge',
-      category: 'Computer',
-      date: '2026-10-24',
-      time: '15:30',
-      displayDate: 'This Friday â€¢ 3:30 PM',
-      location: 'IT Lab 1',
-      cottages: 'All Cottages',
-      mentor: 'David K.',
-      status: 'Upcoming',
-      attendees: ['c1', 'c2'],
-      description: 'Hands-on practice with touch typing speed, Scratch logic blocks, and digital file organization.'
-    },
-    {
-      id: 'a2',
-      title: 'Genesis Chapter 1-3 Discussion Circle',
-      category: 'Bible & Discipleship',
-      date: '2026-10-25',
-      time: '10:00',
-      displayDate: 'Saturday â€¢ 10:00 AM',
-      location: 'Village Chapel Hall',
-      cottages: 'Joy Villa & Hope House',
-      mentor: 'John D.',
-      status: 'Upcoming',
-      attendees: ['c1', 'c3', 'c4'],
-      description: 'Small group reflection on God as Creator, moral stewardship, and personal identity.'
-    },
-    {
-      id: 'a3',
-      title: 'STEM Solar Battery Circuit Workshop',
-      category: 'Math & Science',
-      date: '2026-10-28',
-      time: '16:00',
-      displayDate: 'Next Tuesday â€¢ 4:00 PM',
-      location: 'Science Workshop Room',
-      cottages: "Cottage 'B'",
-      mentor: 'Sarah Johnson',
-      status: 'Upcoming',
-      attendees: ['c2'],
-      description: 'Assembling mini solar circuits, measuring voltage output, and exploring renewable energy basics.'
-    }
-  ]);
+export default function ActivitiesView() {
+  const {
+    childrenList = [],
+    activities = [],
+    handleAddActivity,
+    handleUpdateActivity,
+    handleDeleteActivity,
+    handleUpdateAttendance
+  } = useOutletContext();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const categoryOptions = [...new Set([
+    ...DEFAULT_CATEGORIES,
+    ...activities.map((activity) => activity.category).filter(Boolean)
+  ])];
 
   // Modal states
   const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
@@ -80,28 +52,6 @@ export default function ActivitiesView() {
   const [editingActivity, setEditingActivity] = useState(null);
   const [isAttendanceModalOpen, setIsAttendanceModalOpen] = useState(false);
   const [selectedActivity, setSelectedActivity] = useState(null);
-
-  const handleAddActivity = (newActivity) => {
-    setActivities([newActivity, ...activities]);
-  };
-
-  const handleUpdateActivity = (updatedAct) => {
-    setActivities(prev =>
-      prev.map(act => (act.id === updatedAct.id ? updatedAct : act))
-    );
-  };
-
-  const handleDeleteActivity = (activityId) => {
-    if (window.confirm('Are you sure you want to delete this activity completely?')) {
-      setActivities(prev => prev.filter(act => act.id !== activityId));
-    }
-  };
-
-  const handleUpdateAttendance = (activityId, newAttendees) => {
-    setActivities(prev =>
-      prev.map(act => (act.id === activityId ? { ...act, attendees: newAttendees } : act))
-    );
-  };
 
   const openAttendanceModal = (act) => {
     setSelectedActivity(act);
@@ -124,68 +74,69 @@ export default function ActivitiesView() {
 
   const filteredActivities = activities.filter((act) => {
     const matchesCategory =
-      selectedCategory === 'All' || act.category.toLowerCase().includes(selectedCategory.toLowerCase());
+      selectedCategory === 'All' || act.category === selectedCategory;
     const matchesQuery =
       act.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       act.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
       act.mentor.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesQuery;
   });
+  const activeActivity = activities.find((activity) => activity.id === selectedActivity?.id) || selectedActivity;
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-300 max-w-7xl mx-auto">
-      {/* Header Banner */}
-      <div className="bg-[#0C3440] text-white p-6 sm:p-8 rounded-3xl shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6 border border-[#0C3440]/60">
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 text-[#D99B3C] text-xs font-mono uppercase font-bold tracking-widest">
-            <Compass className="w-4 h-4" /> GROUP ACTIVITIES & COMMUNITY WORKSHOPS
+    <div className="mx-auto max-w-7xl space-y-5 animate-in fade-in duration-300">
+      <header className="flex flex-col gap-4 border-b border-slate-200 pb-5 sm:flex-row sm:items-end sm:justify-between">
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.14em] text-brand-primary">
+            <Compass className="h-3.5 w-3.5" /> Group activities
           </div>
-          <h2 className="text-2xl lg:text-3xl font-black tracking-tight">
-            Group Activities & Workshops
+          <h2 className="text-2xl font-bold tracking-tight text-slate-900">
+            Activities & workshops
           </h2>
-          <p className="text-xs text-slate-300 max-w-xl leading-relaxed">
-            Schedule and track group events, tech challenges, chapel devotions, and interactive STEM workshops.
+          <p className="max-w-xl text-sm leading-relaxed text-slate-500">
+            Schedule sessions, coordinate attendance, and keep each event on track.
           </p>
         </div>
 
-        <div className="flex items-center gap-4 shrink-0">
-          <div className="bg-white/10 backdrop-blur-md p-3.5 rounded-2xl border border-white/10 text-center hidden sm:block">
-            <span className="text-xl font-black text-white font-mono">{activities.length}</span>
-            <p className="text-[10px] text-[#D99B3C] uppercase font-mono tracking-wider">Scheduled Events</p>
+        <div className="flex items-center justify-between gap-4 sm:justify-end">
+          <div className="text-left sm:text-right">
+            <span className="text-xl font-semibold tabular-nums text-slate-900">{activities.length}</span>
+            <p className="text-xs text-slate-500">Scheduled {activities.length === 1 ? 'event' : 'events'}</p>
           </div>
 
           <button
             onClick={() => setIsPlanModalOpen(true)}
-            className="px-5 py-3 bg-[#0C3440] hover:bg-[#164957] text-white rounded-2xl font-bold text-xs shadow-lg shadow-[#0C3440]/50 border border-[#D99B3C]/40 transition-all flex items-center gap-2 cursor-pointer"
+            className="inline-flex h-10 items-center gap-2 rounded-md bg-brand-primary px-4 text-sm font-semibold text-white transition-colors hover:bg-teal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
           >
-            <Plus className="w-4 h-4" /> Plan New Activity
+            <Plus className="h-4 w-4" /> Plan activity
           </button>
         </div>
-      </div>
+      </header>
 
-      {/* Toolbar: Search & Category Filters */}
-      <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="relative w-full sm:w-80">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+      <div className="flex flex-col gap-3 border-b border-slate-200 pb-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="relative w-full sm:max-w-xs">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
             placeholder="Search by event title, location or mentor..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0C3440]"
+            aria-label="Search activities"
+            className="h-10 w-full rounded-md border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm text-slate-800 placeholder:text-slate-400 focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/15"
           />
         </div>
 
-        <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto no-scrollbar">
-          <Filter className="w-4 h-4 text-slate-400 shrink-0" />
-          {['All', 'Computer', 'Bible', 'Math & Science', 'Mentorship'].map((cat) => (
+        <div className="no-scrollbar flex w-full items-center gap-1.5 overflow-x-auto sm:w-auto">
+          <Filter className="mr-1 h-4 w-4 shrink-0 text-slate-400" />
+          {['All', ...categoryOptions].map((cat) => (
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-colors shrink-0 cursor-pointer ${
+              aria-pressed={selectedCategory === cat}
+              className={`shrink-0 rounded-md px-3 py-2 text-xs font-semibold transition-colors ${
                 selectedCategory === cat
-                  ? 'bg-[#0C3440] text-white shadow-2xs'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  ? 'bg-brand-primary text-white'
+                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
               }`}
             >
               {cat}
@@ -197,7 +148,7 @@ export default function ActivitiesView() {
       {/* Activities Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredActivities.length === 0 ? (
-          <div className="col-span-full bg-white p-12 rounded-3xl border border-slate-200/80 text-center space-y-3">
+          <div className="col-span-full rounded-lg border border-slate-200 bg-white px-6 py-12 text-center space-y-3">
             <Compass className="w-10 h-10 text-slate-300 mx-auto" />
             <h4 className="text-sm font-bold text-slate-800">No Activities Found</h4>
             <p className="text-xs text-slate-500 max-w-sm mx-auto">
@@ -212,12 +163,12 @@ export default function ActivitiesView() {
             return (
               <div
                 key={act.id}
-                className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs hover:border-[#0C3440]/40 hover:shadow-md transition-all flex flex-col justify-between space-y-5"
+                className="flex flex-col justify-between space-y-4 rounded-lg border border-slate-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md"
               >
                 <div className="space-y-3.5">
                   {/* Category Pill, Status Badge & Action Controls */}
                   <div className="flex items-center justify-between gap-2">
-                    <span className="px-3 py-1 text-xs font-bold rounded-full font-mono bg-[#E8F0F0] text-[#0C3440] border border-[#B8CED0] flex items-center gap-1.5">
+                    <span className="flex items-center gap-1.5 rounded-md border border-teal-200 bg-teal-50 px-2.5 py-1 text-xs font-semibold text-brand-primary">
                       <IconComp className="w-3.5 h-3.5 text-[#0C3440]" />
                       {act.category}
                     </span>
@@ -236,15 +187,17 @@ export default function ActivitiesView() {
                       {/* Edit & Delete Quick Action Icon Buttons */}
                       <button
                         onClick={() => openEditModal(act)}
-                        className="p-1.5 text-slate-400 hover:text-[#0C3440] rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
+                        className="rounded p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-brand-primary"
                         title="Edit Activity"
+                        aria-label={`Edit ${act.title}`}
                       >
                         <Edit3 className="w-3.5 h-3.5" />
                       </button>
                       <button
                         onClick={() => handleDeleteActivity(act.id)}
-                        className="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition-colors cursor-pointer"
+                        className="rounded p-1.5 text-slate-400 transition-colors hover:bg-rose-50 hover:text-rose-600"
                         title="Delete Activity"
+                        aria-label={`Delete ${act.title}`}
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -252,51 +205,51 @@ export default function ActivitiesView() {
                   </div>
 
                   {/* Title */}
-                  <h4 className="text-base font-bold text-slate-900 leading-snug tracking-tight">
+                  <h4 className="text-sm font-semibold leading-snug text-slate-900">
                     {act.title}
                   </h4>
 
                   {/* Description */}
                   {act.description && (
-                    <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
+                    <p className="line-clamp-2 text-xs leading-relaxed text-slate-500">
                       {act.description}
                     </p>
                   )}
 
                   {/* Event Details Info Grid */}
-                  <div className="space-y-2 text-xs text-slate-600 pt-2 border-t border-slate-100">
+                  <div className="space-y-2 border-t border-slate-100 pt-3 text-xs text-slate-600">
                     <div className="flex items-center gap-2.5">
-                      <Clock className="w-4 h-4 text-[#0C3440] shrink-0" />
-                      <span className="font-semibold text-slate-800">{act.displayDate}</span>
+                      <Clock className="h-4 w-4 shrink-0 text-brand-primary" />
+                      <span className="font-medium text-slate-800">{act.displayDate}</span>
                     </div>
 
                     <div className="flex items-center gap-2.5">
-                      <MapPin className="w-4 h-4 text-[#8A5F20] shrink-0" />
+                      <MapPin className="h-4 w-4 shrink-0 text-brand-accent" />
                       <span>{act.location}</span>
                     </div>
 
                     <div className="flex items-center gap-2.5">
-                      <Users className="w-4 h-4 text-slate-400 shrink-0" />
+                      <Users className="h-4 w-4 shrink-0 text-slate-400" />
                       <span>{act.cottages}</span>
                     </div>
 
                     <div className="flex items-center gap-2.5">
-                      <UserCheck className="w-4 h-4 text-slate-400 shrink-0" />
+                      <UserCheck className="h-4 w-4 shrink-0 text-slate-400" />
                       <span className="text-slate-500">Mentor: <strong className="text-slate-800 font-bold">{act.mentor}</strong></span>
                     </div>
                   </div>
                 </div>
 
                 {/* Attendance Footer Bar */}
-                <div className="pt-3 border-t border-slate-100 space-y-2">
+                <div className="space-y-2 border-t border-slate-100 pt-3">
                   <div className="flex items-center justify-between text-xs font-semibold">
                     <span className="text-slate-500 text-[11px]">Check-In Progress</span>
-                    <span className="font-mono text-[#0C3440] font-bold">{attendanceCount} Attended</span>
+                    <span className="font-semibold tabular-nums text-brand-primary">{attendanceCount} attended</span>
                   </div>
 
                   <button
                     onClick={() => openAttendanceModal(act)}
-                    className="w-full py-2.5 bg-[#0C3440] hover:bg-[#164957] text-white text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer"
+                    className="flex w-full items-center justify-center gap-2 rounded-md bg-brand-primary py-2.5 text-xs font-semibold text-white transition-colors hover:bg-teal-800"
                   >
                     <CheckCircle2 className="w-4 h-4" /> Manage Attendance
                   </button>
@@ -312,6 +265,7 @@ export default function ActivitiesView() {
         isOpen={isPlanModalOpen}
         onClose={() => setIsPlanModalOpen(false)}
         onAddActivity={handleAddActivity}
+        categoryOptions={categoryOptions}
       />
 
       {/* Edit Activity Modal */}
@@ -320,13 +274,14 @@ export default function ActivitiesView() {
         onClose={() => setIsEditModalOpen(false)}
         activity={editingActivity}
         onUpdateActivity={handleUpdateActivity}
+        categoryOptions={categoryOptions}
       />
 
       {/* Manage Attendance Modal */}
       <ManageAttendanceModal
         isOpen={isAttendanceModalOpen}
         onClose={() => setIsAttendanceModalOpen(false)}
-        activity={selectedActivity}
+        activity={activeActivity}
         childrenList={childrenList}
         onUpdateAttendance={handleUpdateAttendance}
       />

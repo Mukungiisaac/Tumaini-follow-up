@@ -1,6 +1,7 @@
 ﻿import React, { useRef, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { User, Settings, Save, Camera, CheckCircle2, Building } from 'lucide-react';
+import LinkedAdminsPanel from '../components/auth/LinkedAdminsPanel';
 
 export default function SettingsView() {
   const { currentUser, handleUpdateUser, houses = [], handleUpdateHouse } = useOutletContext();
@@ -235,7 +236,7 @@ export default function SettingsView() {
               <label className="block text-xs font-bold text-slate-700 uppercase font-mono mb-1">Organization Name</label>
               <input
                 type="text"
-                defaultValue="Tumaini Childrenâ€™s Village"
+                defaultValue="Tumaini Children's Village"
                 className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#0C3440]"
               />
             </div>
@@ -294,6 +295,7 @@ export default function SettingsView() {
           </button>
         </div>
       </form>
+      <LinkedAdminsPanel email={currentUser?.email} />
     </div>
   );
 }

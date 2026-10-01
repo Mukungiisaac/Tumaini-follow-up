@@ -46,7 +46,7 @@ export default function MathScienceView() {
                 <img src={c.image} alt={c.name} className="w-12 h-12 rounded-full object-cover ring-2 ring-slate-100" />
                 <div>
                   <h4 className="text-base font-bold text-slate-900">{c.name}</h4>
-                  <p className="text-xs text-slate-500">{c.grade} â€¢ {c.cottage}</p>
+                  <p className="text-xs text-slate-500">{c.grade} | {c.cottage}</p>
                 </div>
               </div>
 

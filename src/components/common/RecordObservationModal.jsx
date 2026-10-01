@@ -42,7 +42,7 @@ export default function RecordObservationModal({ isOpen, onClose, childrenList =
           >
             {childrenList.map((c) => (
               <option key={c.id} value={c.id}>
-                {c.name} ({c.grade} â€¢ {c.cottage})
+                {c.name} ({c.grade} | {c.cottage})
               </option>
             ))}
           </select>

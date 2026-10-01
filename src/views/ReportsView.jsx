@@ -61,7 +61,7 @@ export default function ReportsView() {
                 TUMAINI CHILDREN'S VILLAGE
               </h1>
               <p className="text-xs font-bold text-brand-primary uppercase font-mono tracking-widest">
-                CHILD DEVELOPMENT TRACKING SYSTEM â€¢ OFFICIAL REPORT
+                CHILD DEVELOPMENT TRACKING SYSTEM | OFFICIAL REPORT
               </p>
             </div>
           </div>
@@ -80,7 +80,7 @@ export default function ReportsView() {
           </div>
           <div>
             <span className="text-[10px] font-bold text-slate-400 uppercase font-mono block">AGE / GRADE</span>
-            <span className="text-sm font-bold text-slate-900">{child.age} yrs â€¢ {child.grade}</span>
+            <span className="text-sm font-bold text-slate-900">{child.age} yrs | {child.grade}</span>
           </div>
           <div>
             <span className="text-[10px] font-bold text-slate-400 uppercase font-mono block">COTTAGE</span>
@@ -140,7 +140,7 @@ export default function ReportsView() {
           <div className="space-y-2">
             <h4 className="text-xs font-bold text-slate-900 font-mono uppercase">Key Strengths Noticed</h4>
             <p className="text-xs text-slate-700 bg-slate-50 p-3 rounded-xl">
-              {child.keyStrength} â€¢ Demonstrates peer mentorship and eagerness to assist younger children in the IT lab.
+              {child.keyStrength} | Demonstrates peer mentorship and eagerness to assist younger children in the IT lab.
             </p>
           </div>
 

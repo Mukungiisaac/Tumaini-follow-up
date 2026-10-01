@@ -2,7 +2,7 @@
 import Modal from './Modal';
 import { MOCK_MENTORS } from '../../data/mockData';
 
-export default function PlanActivityModal({ isOpen, onClose, onAddActivity }) {
+export default function PlanActivityModal({ isOpen, onClose, onAddActivity, categoryOptions = [] }) {
   const [formData, setFormData] = useState({
     title: '',
     category: 'Computer',
@@ -20,7 +20,10 @@ export default function PlanActivityModal({ isOpen, onClose, onAddActivity }) {
 
     // Format display date
     const formattedDate = formData.date ? new Date(formData.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) : 'Upcoming';
-    const displayDate = `${formattedDate} â€¢ ${formData.time || '3:30 PM'}`;
+    const timeLabel = formData.time
+      ? new Date(`1970-01-01T${formData.time}`).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+      : '3:30 PM';
+    const displayDate = `${formattedDate}, ${timeLabel}`;
 
     onAddActivity({
       id: `act-${Date.now()}`,
@@ -73,19 +76,19 @@ export default function PlanActivityModal({ isOpen, onClose, onAddActivity }) {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
           <div>
             <label className="block text-xs font-bold text-slate-700 uppercase font-mono mb-1">
-              Curriculum Category *
+              Category *
             </label>
-            <select
+            <input
+              list="plan-activity-categories"
+              required
               value={formData.category}
               onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-[#0C3440]"
-            >
-              <option value="Computer">Computer & IT</option>
-              <option value="Bible & Discipleship">Bible & Discipleship</option>
-              <option value="Math & Science">Math & Science</option>
-              <option value="Arts & Creative">Arts & Creative</option>
-              <option value="Mentorship">Mentorship & Leadership</option>
-            </select>
+              placeholder="Enter or choose a category"
+              className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-800 focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/15"
+            />
+            <datalist id="plan-activity-categories">
+              {categoryOptions.map((category) => <option key={category} value={category} />)}
+            </datalist>
           </div>
 
           <div>

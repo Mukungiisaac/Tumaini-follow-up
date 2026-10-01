@@ -110,7 +110,7 @@ export default function BibleDiscipleshipView() {
                           : 'bg-slate-100 text-slate-600 border border-slate-200'
                       }`}
                     >
-                      {isDone ? 'âœ“ Recited' : 'Mark Recited'}
+                      {isDone ? 'Recited' : 'Mark Recited'}
                     </button>
                   </div>
 
@@ -206,7 +206,7 @@ export default function BibleDiscipleshipView() {
 
                       {/* Passage */}
                       <td className="px-6 py-4">
-                        <span className="text-xs text-slate-500 font-medium">â€”</span>
+                        <span className="text-xs text-slate-500 font-medium">-</span>
                       </td>
 
                       {/* Status Badge */}

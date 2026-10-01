@@ -1,16 +1,18 @@
 ﻿import React, { useState } from 'react';
 import { useOutletContext, useNavigate } from 'react-router-dom';
 import { GRADE_LEVELS, SKILL_LEVELS } from '../data/mockData';
-import { Star, Filter, CheckCircle2, ChevronDown } from 'lucide-react';
+import { Star, CheckCircle2, ChevronDown } from 'lucide-react';
 
 export default function ProgressTrackingView() {
   const { childrenList, handleUpdateChildSkill } = useOutletContext();
   const navigate = useNavigate();
 
   const [gradeFilter, setGradeFilter] = useState('ALL GRADES');
+  const [skillFilter, setSkillFilter] = useState('ALL LEVELS');
   const [activeCellPopover, setActiveCellPopover] = useState(null); // { childId, category }
 
   const gradesList = ['ALL GRADES', ...GRADE_LEVELS];
+  const skillFilters = ['ALL LEVELS', ...Object.keys(SKILL_LEVELS)];
 
   const categories = [
     { key: 'computer', label: 'COMPUTER' },
@@ -25,6 +27,8 @@ export default function ProgressTrackingView() {
 
   // Helper to map numeric level or metric to skill level key
   const getLevelForCategory = (child, catKey) => {
+    if (child.skillLevels?.[catKey]) return child.skillLevels[catKey];
+
     const metrics = child.overviewMetrics || {};
     let val = 50;
     if (catKey === 'computer') val = metrics.computer || 85;
@@ -44,97 +48,116 @@ export default function ProgressTrackingView() {
   };
 
   const filteredChildren = childrenList.filter((c) => {
-    if (gradeFilter === 'ALL GRADES') return true;
-    return c.grade.toLowerCase().includes(gradeFilter.toLowerCase().split(' ')[0] + ' ' + (gradeFilter.toLowerCase().split(' ')[1] || ''));
+    const matchesGrade = gradeFilter === 'ALL GRADES' || c.grade.toLowerCase().includes(
+      gradeFilter.toLowerCase().split(' ')[0] + ' ' + (gradeFilter.toLowerCase().split(' ')[1] || '')
+    );
+    const matchesSkill = skillFilter === 'ALL LEVELS' || categories.some(
+      (category) => getLevelForCategory(c, category.key) === skillFilter
+    );
+    return matchesGrade && matchesSkill;
   });
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-300">
-      {/* Top Banner Header (Page 4) */}
-      <div className="space-y-2">
-        <span className="text-[10px] font-bold tracking-widest text-slate-400 uppercase font-mono">
-          COHORT ASSESSMENT
-        </span>
-        <h2 className="text-2xl font-black text-slate-900 tracking-tight">
-          Progress Matrix
-        </h2>
-        <p className="text-xs text-slate-500 max-w-2xl">
-          Holistic development tracking across all core curriculum and character building areas for Term 3.
-        </p>
+    <div className="space-y-6 animate-in fade-in duration-300">
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div className="space-y-1.5">
+          <span className="text-[10px] font-bold tracking-[0.14em] text-brand-primary uppercase">
+            Cohort assessment <span className="mx-1 text-slate-300">/</span> Term 3
+          </span>
+          <h2 className="text-2xl font-bold text-slate-900 tracking-tight">
+            Progress matrix
+          </h2>
+          <p className="text-sm text-slate-500">
+            Skill development across curriculum and character areas.
+          </p>
+        </div>
+        <div className="text-right">
+          <p className="text-lg font-semibold tabular-nums text-slate-900">{filteredChildren.length}</p>
+          <p className="text-xs text-slate-500">{filteredChildren.length === 1 ? 'child shown' : 'children shown'}</p>
+        </div>
       </div>
 
-      {/* Grade Selector Pills Filter Bar (Page 4) */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex flex-wrap items-center bg-slate-200/60 p-1.5 rounded-2xl gap-1">
+      <div className="flex flex-col gap-3 border-y border-slate-200 py-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="no-scrollbar flex max-w-full items-center gap-1 overflow-x-auto rounded-md bg-slate-100 p-1">
           {gradesList.map((g) => (
             <button
               key={g}
               onClick={() => setGradeFilter(g)}
-              className={`px-4 py-2 rounded-xl text-xs font-bold font-mono transition-all ${
+              className={`shrink-0 rounded px-3 py-2 text-xs font-semibold transition-colors ${
                 gradeFilter === g
-                  ? 'bg-white text-slate-900 shadow-md'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/50'
+                  ? 'bg-white text-brand-primary shadow-sm'
+                  : 'text-slate-600 hover:bg-white/70 hover:text-slate-900'
               }`}
+              aria-pressed={gradeFilter === g}
             >
               {g}
             </button>
           ))}
         </div>
 
-        <button className="px-5 py-2.5 bg-[#0b172a] text-white text-xs font-bold font-mono rounded-xl hover:bg-slate-800 transition-colors inline-flex items-center gap-2">
-          <Filter className="w-4 h-4" /> FILTER
-        </button>
+        <label className="relative flex shrink-0 items-center">
+          <span className="sr-only">Filter by skill level</span>
+          <select
+            value={skillFilter}
+            onChange={(event) => setSkillFilter(event.target.value)}
+            className="h-10 min-w-44 appearance-none rounded-md border border-slate-200 bg-white py-2 pl-3 pr-9 text-sm font-medium text-slate-700 outline-none transition focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/15"
+          >
+            {skillFilters.map((level) => (
+              <option key={level} value={level}>
+                {level === 'ALL LEVELS' ? 'All skill levels' : SKILL_LEVELS[level].label}
+              </option>
+            ))}
+          </select>
+          <ChevronDown className="pointer-events-none absolute right-3 h-4 w-4 text-slate-500" />
+        </label>
       </div>
 
-      {/* Skill Levels Visual Legend (Page 4) */}
-      <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-xs space-y-3">
-        <span className="text-[10px] font-bold tracking-widest text-slate-400 uppercase font-mono block">
-          SKILL LEVELS
+      <div className="flex flex-wrap items-center gap-x-6 gap-y-3 rounded-md border border-slate-200 bg-white px-4 py-3">
+        <span className="text-[10px] font-bold tracking-[0.12em] text-slate-500 uppercase">
+          Skill levels
         </span>
-
-        <div className="flex flex-wrap items-center gap-6 text-xs font-semibold text-slate-700">
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-medium text-slate-700">
           <div className="flex items-center gap-2">
-            <span className="w-5 h-5 rounded-full border-2 border-slate-200 bg-slate-100" />
+            <span className="h-3.5 w-3.5 rounded-full border border-slate-300 bg-slate-100" />
             <span>Not Introduced</span>
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="w-5 h-5 rounded-full bg-brand-primary-light" />
+            <span className="h-3.5 w-3.5 rounded-full border border-brand-accent-light bg-brand-accent-light" />
             <span>Learning</span>
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="w-5 h-5 rounded-full bg-blue-300" />
+            <span className="h-3.5 w-3.5 rounded-full bg-blue-300" />
             <span>With Help</span>
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="w-5 h-5 rounded-full bg-[#0b172a]" />
+            <span className="h-3.5 w-3.5 rounded-full bg-brand-primary" />
             <span>Independent</span>
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="w-6 h-6 rounded-full bg-[#0b172a] text-white flex items-center justify-center">
-              <Star className="w-3.5 h-3.5 fill-white text-white" />
+            <span className="flex h-4 w-4 items-center justify-center rounded-full bg-brand-accent text-white">
+              <Star className="h-2.5 w-2.5 fill-current" />
             </span>
             <span>Mentors Others</span>
           </div>
         </div>
       </div>
 
-      {/* Progress Matrix Table (Page 4) */}
-      <div className="bg-white rounded-3xl border border-slate-100 shadow-xs overflow-hidden">
+      <div className="overflow-hidden rounded-md border border-slate-200 bg-white">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[800px]">
+          <table className="w-full min-w-[920px] border-collapse text-left">
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50/50">
-                <th className="py-5 px-6 text-xs font-bold text-slate-800 uppercase font-mono tracking-wider w-64">
-                  CHILD PROFILING
+                <th className="sticky left-0 z-10 w-72 border-r border-slate-100 bg-slate-50 px-5 py-3 text-[10px] font-bold tracking-[0.12em] text-slate-500 uppercase">
+                  Child
                 </th>
                 {categories.map((cat) => (
                   <th
                     key={cat.key}
-                    className="py-5 px-4 text-center text-xs font-bold text-slate-800 uppercase font-mono tracking-wider"
+                    className="px-3 py-3 text-center text-[10px] font-bold tracking-[0.08em] text-slate-500 uppercase"
                   >
                     {cat.label}
                   </th>
@@ -143,24 +166,23 @@ export default function ProgressTrackingView() {
             </thead>
             <tbody className="divide-y divide-slate-100">
               {filteredChildren.map((child) => (
-                <tr key={child.id} className="hover:bg-slate-50/60 transition-colors">
-                  {/* Child Profiling Info Cell */}
-                  <td className="py-4 px-6">
+                <tr key={child.id} className="group transition-colors hover:bg-slate-50/70">
+                  <td className="sticky left-0 z-[1] border-r border-slate-100 bg-white px-5 py-3 group-hover:bg-slate-50">
                     <div
                       onClick={() => navigate(`/children/${child.id}`)}
-                      className="flex items-center gap-3.5 cursor-pointer group"
+                      className="flex cursor-pointer items-center gap-3"
                     >
                       <img
                         src={child.image}
                         alt={child.name}
-                        className="w-11 h-11 rounded-full object-cover ring-2 ring-slate-100 group-hover:ring-purple-400 transition-all"
+                        className="h-9 w-9 rounded-full object-cover ring-1 ring-slate-200"
                       />
-                      <div>
-                        <h4 className="text-sm font-bold text-slate-900 group-hover:text-brand-primary transition-colors">
+                      <div className="min-w-0">
+                        <h4 className="truncate text-sm font-semibold text-slate-900 group-hover:text-brand-primary">
                           {child.name}
                         </h4>
-                        <p className="text-[11px] text-slate-500 font-medium">
-                          {child.grade} â€¢ Mentor: {child.mentor}
+                        <p className="mt-0.5 truncate text-xs text-slate-500">
+                          {child.grade} <span className="px-1 text-slate-300">/</span> {child.mentor}
                         </p>
                       </div>
                     </div>
@@ -175,34 +197,35 @@ export default function ProgressTrackingView() {
                       activeCellPopover.category === cat.key;
 
                     return (
-                      <td key={cat.key} className="py-4 px-4 text-center relative">
+                      <td key={cat.key} className="relative px-3 py-3 text-center">
                         <button
                           onClick={() =>
                             setActiveCellPopover(
                               isPopoverOpen ? null : { childId: child.id, category: cat.key }
                             )
                           }
-                          className="inline-flex items-center justify-center p-1 rounded-full hover:scale-110 transition-transform focus:outline-none"
+                          className="inline-flex items-center justify-center rounded-full p-1 transition-transform hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
                           title={`${cat.label}: ${SKILL_LEVELS[levelKey]?.label}`}
+                          aria-label={`${child.name}, ${cat.label}: ${SKILL_LEVELS[levelKey]?.label}. Update skill level`}
                         >
                           {levelKey === 'MASTERED' ? (
-                            <span className="w-8 h-8 rounded-full bg-[#0b172a] text-white flex items-center justify-center shadow-md">
-                              <Star className="w-4 h-4 fill-white text-white" />
+                            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-accent text-white">
+                              <Star className="h-3.5 w-3.5 fill-current" />
                             </span>
                           ) : levelKey === 'INDEPENDENT' ? (
-                            <span className="w-8 h-8 rounded-full bg-[#0b172a] shadow-xs" />
+                            <span className="h-6 w-6 rounded-full bg-brand-primary" />
                           ) : levelKey === 'WITH_HELP' ? (
-                            <span className="w-8 h-8 rounded-full bg-blue-300 shadow-xs" />
+                            <span className="h-6 w-6 rounded-full bg-blue-300" />
                           ) : levelKey === 'LEARNING' ? (
-                            <span className="w-8 h-8 rounded-full bg-brand-primary-light shadow-xs" />
+                            <span className="h-6 w-6 rounded-full border border-brand-accent-light bg-brand-accent-light" />
                           ) : (
-                            <span className="w-8 h-8 rounded-full border-2 border-slate-200 bg-slate-100 shadow-xs" />
+                            <span className="h-6 w-6 rounded-full border border-slate-300 bg-slate-100" />
                           )}
                         </button>
 
                         {/* Interactive Status Selector Popover */}
                         {isPopoverOpen && (
-                          <div className="absolute z-40 top-full left-1/2 -translate-x-1/2 mt-1 w-48 bg-white rounded-2xl shadow-2xl border border-slate-200 p-2 space-y-1 text-left animate-in fade-in zoom-in-95">
+                          <div className="absolute left-1/2 top-full z-40 mt-1 w-48 -translate-x-1/2 space-y-1 rounded-md border border-slate-200 bg-white p-2 text-left shadow-lg animate-in fade-in zoom-in-95">
                             <span className="text-[10px] font-bold text-slate-400 uppercase font-mono px-2 block">
                               Update {cat.label}
                             </span>
@@ -213,7 +236,7 @@ export default function ProgressTrackingView() {
                                   handleUpdateChildSkill(child.id, cat.key, lk);
                                   setActiveCellPopover(null);
                                 }}
-                                className="w-full px-2.5 py-1.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-brand-primary-light hover:text-brand-primary flex items-center justify-between"
+                                className="flex w-full items-center justify-between rounded px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 hover:text-brand-primary"
                               >
                                 <span>{SKILL_LEVELS[lk].label}</span>
                                 {levelKey === lk && (
@@ -228,6 +251,13 @@ export default function ProgressTrackingView() {
                   })}
                 </tr>
               ))}
+              {filteredChildren.length === 0 && (
+                <tr>
+                  <td colSpan={categories.length + 1} className="px-5 py-12 text-center text-sm text-slate-500">
+                    No children match these filters.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

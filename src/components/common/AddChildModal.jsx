@@ -66,7 +66,7 @@ export default function AddChildModal({ isOpen, onClose, onAddChild }) {
       healthStatus: formData.healthStatus,
       healthNotes: formData.healthNotes.trim(),
       studentInformation: formData.studentInformation,
-      image: formData.imageUrl || '',     // empty â†’ Avatar component shows initials
+      image: formData.imageUrl || '',     // empty -> Avatar component shows initials
       status: 'PROGRESSING',
       keyStrength: formData.keyStrength || 'Curiosity',
       personalStatement: formData.personalStatement || 'I want to learn and grow every day.',
@@ -94,7 +94,7 @@ export default function AddChildModal({ isOpen, onClose, onAddChild }) {
     <Modal isOpen={isOpen} onClose={onClose} title="Enroll New Child" maxWidth="max-w-3xl">
       <form onSubmit={handleSubmit} className="space-y-5">
 
-        {/* â”€â”€ Profile Photo Section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* Profile Photo Section */}
         <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200/80 flex items-center gap-5">
           {/* Live preview */}
           <div className="relative shrink-0">
@@ -151,7 +151,7 @@ export default function AddChildModal({ isOpen, onClose, onAddChild }) {
           </div>
         </div>
 
-        {/* â”€â”€ Core Fields â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+          {/* Core Fields */}
         <div>
           <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Full Name *</label>
           <input

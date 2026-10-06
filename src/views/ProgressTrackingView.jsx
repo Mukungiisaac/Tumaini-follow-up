@@ -1,8 +1,16 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { useOutletContext, useNavigate } from 'react-router-dom';
 import { GRADE_LEVELS, SKILL_LEVELS } from '../data/mockData';
-import { Star, CheckCircle2, ChevronDown } from 'lucide-react';
+import { Star, CheckCircle2, ChevronDown, X, Sparkles } from 'lucide-react';
 import ChildImage from '../components/common/ChildImage';
+
+const LEVEL_DESCRIPTIONS = {
+  NOT_INTRODUCED: 'Initial stage · Topic has not yet been introduced or assessed',
+  LEARNING: 'Introductory stage · Currently practicing fundamental concepts with guidance',
+  WITH_HELP: 'Developing stage · Able to complete tasks when guided by a mentor',
+  INDEPENDENT: 'Proficient stage · Demonstrates skill and performs tasks without assistance',
+  MASTERED: 'Advanced mastery · Excels consistently and can teach/mentor other children'
+};
 
 export default function ProgressTrackingView() {
   const { childrenList, handleUpdateChildSkill } = useOutletContext();
@@ -28,6 +36,7 @@ export default function ProgressTrackingView() {
 
   // Helper to map numeric level or metric to skill level key
   const getLevelForCategory = (child, catKey) => {
+    if (!child) return 'NOT_INTRODUCED';
     if (child.skillLevels?.[catKey]) return child.skillLevels[catKey];
 
     const metrics = child.overviewMetrics || {};
@@ -58,6 +67,36 @@ export default function ProgressTrackingView() {
     return matchesGrade && matchesSkill;
   });
 
+  const activeChild = activeCellPopover ? childrenList.find((c) => c.id === activeCellPopover.childId) : null;
+  const activeCategory = activeCellPopover ? categories.find((cat) => cat.key === activeCellPopover.category) : null;
+  const activeLevelKey = activeChild && activeCategory ? getLevelForCategory(activeChild, activeCategory.key) : null;
+
+  const renderLevelIcon = (levelKey, size = 'md') => {
+    const sizeClasses = {
+      sm: 'h-4 w-4',
+      md: 'h-5 w-5',
+      lg: 'h-6 w-6'
+    }[size] || 'h-5 w-5';
+
+    if (levelKey === 'MASTERED') {
+      return (
+        <span className={`flex ${sizeClasses} shrink-0 items-center justify-center rounded-full bg-[#D99B3C] text-white shadow-xs`}>
+          <Star className="h-3 w-3 fill-current" />
+        </span>
+      );
+    }
+    if (levelKey === 'INDEPENDENT') {
+      return <span className={`${sizeClasses} shrink-0 rounded-full bg-[#0C3440]`} />;
+    }
+    if (levelKey === 'WITH_HELP') {
+      return <span className={`${sizeClasses} shrink-0 rounded-full bg-[#38BDF8]`} />;
+    }
+    if (levelKey === 'LEARNING') {
+      return <span className={`${sizeClasses} shrink-0 rounded-full border-2 border-[#D99B3C] bg-[#FEF3C7]`} />;
+    }
+    return <span className={`${sizeClasses} shrink-0 rounded-full border border-slate-300 bg-slate-100`} />;
+  };
+
   return (
     <div className="min-w-0 space-y-4 sm:space-y-6">
       <div className="flex min-w-0 items-start justify-between gap-3 sm:items-end sm:gap-4">
@@ -69,7 +108,7 @@ export default function ProgressTrackingView() {
             Progress matrix
           </h2>
           <p className="text-sm leading-5 text-slate-500">
-            Skill development across curriculum and character areas.
+            Skill development across curriculum and character areas. Tap any subject badge to edit progress.
           </p>
         </div>
         <div className="shrink-0 text-right">
@@ -162,18 +201,19 @@ export default function ProgressTrackingView() {
         </div>
       </div>
 
+      {/* Mobile Card Grid View */}
       <div className="space-y-3 md:hidden">
         {filteredChildren.map((child) => (
-          <article key={child.id} className="min-w-0 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+          <article key={child.id} className="min-w-0 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xs">
             <button
               type="button"
               onClick={() => navigate(`/children/${child.id}`)}
-              className="flex w-full min-w-0 items-center gap-3 border-b border-slate-100 p-3 text-left"
+              className="flex w-full min-w-0 items-center gap-3 border-b border-slate-100 p-3 text-left hover:bg-slate-50 transition-colors"
             >
               <ChildImage
                 src={child.image}
                 alt={child.name}
-                className="h-11 w-11 shrink-0 rounded-full object-cover ring-1 ring-slate-200"
+                className="h-10 w-10 shrink-0 rounded-full object-cover ring-1 ring-slate-200"
               />
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-sm font-semibold text-slate-900">{child.name}</span>
@@ -183,67 +223,39 @@ export default function ProgressTrackingView() {
               </span>
               <span className="shrink-0 text-xs font-semibold text-brand-primary">Profile</span>
             </button>
-            <div className="grid grid-cols-2 gap-2 p-3">
-              {categories.map((cat, index) => {
+
+            <div className="grid grid-cols-2 gap-2 p-2.5">
+              {categories.map((cat) => {
                 const levelKey = getLevelForCategory(child, cat.key);
-                const isPopoverOpen =
+                const isSelected =
                   activeCellPopover &&
                   activeCellPopover.childId === child.id &&
                   activeCellPopover.category === cat.key;
 
                 return (
-                  <div key={cat.key} className="relative min-w-0">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setActiveCellPopover(
-                          isPopoverOpen ? null : { childId: child.id, category: cat.key }
-                        )
-                      }
-                      className="flex min-h-11 w-full min-w-0 items-center gap-2 rounded-lg border border-slate-100 bg-slate-50 px-2.5 py-2 text-left"
-                      aria-label={`${child.name}, ${cat.label}: ${SKILL_LEVELS[levelKey]?.label}. Update skill level`}
-                      aria-expanded={Boolean(isPopoverOpen)}
-                    >
-                      {levelKey === 'MASTERED' ? (
-                        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-accent text-white">
-                          <Star className="h-3 w-3 fill-current" />
-                        </span>
-                      ) : levelKey === 'INDEPENDENT' ? (
-                        <span className="h-4 w-4 shrink-0 rounded-full bg-brand-primary" />
-                      ) : levelKey === 'WITH_HELP' ? (
-                        <span className="h-4 w-4 shrink-0 rounded-full bg-blue-300" />
-                      ) : levelKey === 'LEARNING' ? (
-                        <span className="h-4 w-4 shrink-0 rounded-full border border-brand-accent-light bg-brand-accent-light" />
-                      ) : (
-                        <span className="h-4 w-4 shrink-0 rounded-full border border-slate-300 bg-slate-100" />
-                      )}
-                      <span className="min-w-0 flex-1">
-                        <span className="block truncate text-[10px] font-semibold uppercase tracking-wide text-slate-500">{cat.label}</span>
-                        <span className="block truncate text-xs text-slate-700">{SKILL_LEVELS[levelKey]?.label}</span>
+                  <button
+                    key={cat.key}
+                    type="button"
+                    onClick={() =>
+                      setActiveCellPopover({ childId: child.id, category: cat.key })
+                    }
+                    className={`flex min-h-11 w-full min-w-0 items-center gap-2 rounded-lg border px-2.5 py-2 text-left transition-all active:scale-[0.98] ${
+                      isSelected
+                        ? 'border-brand-primary bg-brand-primary/5 ring-1 ring-brand-primary'
+                        : 'border-slate-100 bg-slate-50 hover:bg-slate-100 hover:border-slate-200'
+                    }`}
+                    aria-label={`${child.name}, ${cat.label}: ${SKILL_LEVELS[levelKey]?.label}. Tap to edit progress`}
+                  >
+                    {renderLevelIcon(levelKey, 'sm')}
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-[10px] font-bold uppercase tracking-wider text-slate-500 font-mono">
+                        {cat.label}
                       </span>
-                    </button>
-                    {isPopoverOpen && (
-                      <div className={`absolute ${index % 2 === 0 ? 'left-0' : 'right-0'} top-full z-40 mt-1 w-52 max-w-[calc(100vw-2rem)] space-y-1 rounded-lg border border-slate-200 bg-white p-2 text-left shadow-lg`}>
-                        <span className="block px-2 text-[10px] font-bold uppercase text-slate-400">
-                          Update {cat.label}
-                        </span>
-                        {Object.keys(SKILL_LEVELS).map((key) => (
-                          <button
-                            key={key}
-                            type="button"
-                            onClick={() => {
-                              handleUpdateChildSkill(child.id, cat.key, key);
-                              setActiveCellPopover(null);
-                            }}
-                            className="flex min-h-10 w-full items-center justify-between rounded px-2.5 py-1.5 text-left text-xs font-medium text-slate-700 hover:bg-slate-100 hover:text-brand-primary"
-                          >
-                            <span>{SKILL_LEVELS[key].label}</span>
-                            {levelKey === key && <CheckCircle2 className="h-3.5 w-3.5 text-brand-primary" />}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+                      <span className="block truncate text-xs font-semibold text-slate-800">
+                        {SKILL_LEVELS[levelKey]?.label}
+                      </span>
+                    </span>
+                  </button>
                 );
               })}
             </div>
@@ -256,7 +268,8 @@ export default function ProgressTrackingView() {
         )}
       </div>
 
-      <div className="hidden overflow-hidden rounded-md border border-slate-200 bg-white md:block">
+      {/* Desktop Table View */}
+      <div className="hidden overflow-hidden rounded-md border border-slate-200 bg-white md:block shadow-xs">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[920px] border-collapse text-left">
             <thead>
@@ -315,11 +328,11 @@ export default function ProgressTrackingView() {
                             )
                           }
                           className="inline-flex items-center justify-center rounded-full p-1 transition-transform hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
-                          title={`${cat.label}: ${SKILL_LEVELS[levelKey]?.label}`}
+                          title={`${cat.label}: ${SKILL_LEVELS[levelKey]?.label} (Click to edit)`}
                           aria-label={`${child.name}, ${cat.label}: ${SKILL_LEVELS[levelKey]?.label}. Update skill level`}
                         >
                           {levelKey === 'MASTERED' ? (
-                            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-accent text-white">
+                            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-accent text-white shadow-xs">
                               <Star className="h-3.5 w-3.5 fill-current" />
                             </span>
                           ) : levelKey === 'INDEPENDENT' ? (
@@ -332,30 +345,6 @@ export default function ProgressTrackingView() {
                             <span className="h-6 w-6 rounded-full border border-slate-300 bg-slate-100" />
                           )}
                         </button>
-
-                        {/* Interactive Status Selector Popover */}
-                        {isPopoverOpen && (
-                          <div className="absolute left-1/2 top-full z-40 mt-1 w-48 -translate-x-1/2 space-y-1 rounded-md border border-slate-200 bg-white p-2 text-left shadow-lg animate-in fade-in zoom-in-95">
-                            <span className="text-[10px] font-bold text-slate-400 uppercase font-mono px-2 block">
-                              Update {cat.label}
-                            </span>
-                            {Object.keys(SKILL_LEVELS).map((lk) => (
-                              <button
-                                key={lk}
-                                onClick={() => {
-                                  handleUpdateChildSkill(child.id, cat.key, lk);
-                                  setActiveCellPopover(null);
-                                }}
-                                className="flex w-full items-center justify-between rounded px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 hover:text-brand-primary"
-                              >
-                                <span>{SKILL_LEVELS[lk].label}</span>
-                                {levelKey === lk && (
-                                  <CheckCircle2 className="w-3.5 h-3.5 text-brand-primary" />
-                                )}
-                              </button>
-                            ))}
-                          </div>
-                        )}
                       </td>
                     );
                   })}
@@ -372,6 +361,113 @@ export default function ProgressTrackingView() {
           </table>
         </div>
       </div>
+
+      {/* Interactive Scrollable Progress Editor Modal / Bottom Sheet */}
+      {activeCellPopover && activeChild && activeCategory && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/50 backdrop-blur-xs p-0 sm:items-center sm:p-4 animate-in fade-in duration-200">
+          {/* Backdrop Click */}
+          <div
+            className="fixed inset-0"
+            onClick={() => setActiveCellPopover(null)}
+          />
+
+          {/* Sheet Container */}
+          <div className="relative z-10 w-full max-w-lg overflow-hidden rounded-t-2xl sm:rounded-2xl border border-slate-200 bg-white shadow-2xl animate-in slide-in-from-bottom-4 sm:zoom-in-95 duration-200">
+            {/* Drag Handle on Mobile */}
+            <div className="flex justify-center pt-2.5 pb-1 sm:hidden">
+              <div className="h-1 w-10 rounded-full bg-slate-300" />
+            </div>
+
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3 sm:px-5 sm:py-4">
+              <div className="flex items-center gap-3 min-w-0">
+                <ChildImage
+                  src={activeChild.image}
+                  alt={activeChild.name}
+                  className="h-10 w-10 shrink-0 rounded-full object-cover ring-1 ring-slate-200"
+                />
+                <div className="min-w-0">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-brand-primary font-mono block">
+                    UPDATE {activeCategory.label} PROGRESS
+                  </span>
+                  <h3 className="truncate text-base font-bold text-slate-900">
+                    {activeChild.name}
+                  </h3>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setActiveCellPopover(null)}
+                className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors"
+                aria-label="Close"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Scrollable Progress Levels List */}
+            <div className="max-h-[60vh] overflow-y-auto p-4 space-y-2.5">
+              <p className="text-xs text-slate-500 font-medium px-1 pb-1">
+                Scroll and select the current progress level for <strong className="text-slate-700">{activeCategory.label}</strong>:
+              </p>
+
+              {Object.keys(SKILL_LEVELS).map((levelKey) => {
+                const isSelected = activeLevelKey === levelKey;
+                const levelData = SKILL_LEVELS[levelKey];
+
+                return (
+                  <button
+                    key={levelKey}
+                    type="button"
+                    onClick={() => {
+                      handleUpdateChildSkill(activeChild.id, activeCategory.key, levelKey);
+                      setActiveCellPopover(null);
+                    }}
+                    className={`flex w-full items-start gap-3.5 rounded-xl border p-3.5 text-left transition-all active:scale-[0.99] ${
+                      isSelected
+                        ? 'border-[#0C3440] bg-[#0C3440]/5 ring-1 ring-[#0C3440]'
+                        : 'border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300'
+                    }`}
+                  >
+                    <div className="mt-0.5 shrink-0">
+                      {renderLevelIcon(levelKey, 'md')}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className={`text-sm font-bold ${isSelected ? 'text-[#0C3440]' : 'text-slate-800'}`}>
+                          {levelData.label}
+                        </span>
+                        {isSelected && (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-[#0C3440] px-2 py-0.5 text-[10px] font-bold text-white">
+                            <CheckCircle2 className="h-3 w-3" /> Current
+                          </span>
+                        )}
+                      </div>
+                      <p className="mt-0.5 text-xs text-slate-500 leading-snug">
+                        {LEVEL_DESCRIPTIONS[levelKey]}
+                      </p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Footer */}
+            <div className="border-t border-slate-100 bg-slate-50/80 px-4 py-3 sm:px-5 flex items-center justify-between">
+              <span className="text-[11px] text-slate-400">
+                Tap any level to update immediately
+              </span>
+              <button
+                type="button"
+                onClick={() => setActiveCellPopover(null)}
+                className="rounded-lg border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition-colors shadow-2xs"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

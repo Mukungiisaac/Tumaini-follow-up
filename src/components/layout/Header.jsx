@@ -116,15 +116,15 @@ export default function Header({
   const handleSidebarToggle = onToggleSidebar || onOpenSidebar;
 
   return (
-    <header className="sticky top-0 z-30 flex min-h-16 items-center justify-between gap-2 border-b border-slate-200/80 bg-white/95 px-3 py-2.5 shadow-sm backdrop-blur-md sm:gap-4 sm:px-4 sm:py-3.5 lg:px-8">
+    <header className="sticky top-0 z-30 flex min-h-16 items-center justify-between gap-2 border-b border-[#D5E2E4] bg-[#F2F6F7]/95 px-3 py-2.5 shadow-2xs backdrop-blur-xl sm:gap-4 sm:px-4 sm:py-3.5 lg:px-8">
       {/* Left section: Hamburger + Page Title */}
-      <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+      <div className="flex min-w-0 items-center gap-2.5 sm:gap-3">
         <button
           onClick={handleSidebarToggle}
-          className={`shrink-0 rounded-lg border border-slate-200 p-2 transition-colors ${
+          className={`shrink-0 rounded-xl border p-2 transition-all shadow-2xs cursor-pointer ${
             isSidebarOpen
               ? 'text-[#0C3440] bg-[#E8F0F0] border-[#B8CED0]'
-              : 'text-slate-600 bg-white hover:bg-slate-100'
+              : 'text-[#0C3440] bg-white hover:bg-[#E8F0F0] border-[#D5E2E4]'
           }`}
           title={isSidebarOpen ? 'Close navigation' : 'Open navigation'}
           aria-label={isSidebarOpen ? 'Close navigation' : 'Open navigation'}
@@ -139,7 +139,7 @@ export default function Header({
         </button>
 
         <div className="min-w-0">
-          <h2 className="truncate text-base font-bold leading-snug tracking-tight text-slate-900 sm:text-lg lg:text-xl">
+          <h2 className="truncate text-base font-bold leading-snug tracking-tight text-[#0C3440] sm:text-lg lg:text-xl">
             {title}
           </h2>
           <p className="text-xs text-slate-500 font-medium hidden sm:block truncate">
@@ -151,21 +151,21 @@ export default function Header({
       {/* Center Search Input */}
       <div className="flex-1 max-w-md mx-2 hidden md:block">
         <div className="relative">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-[#0C3440]/50 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             placeholder="Search children or activities..."
             onChange={(e) => onSearchChange && onSearchChange(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-slate-100/80 hover:bg-slate-100 focus:bg-white border border-transparent focus:border-[#0C3440] rounded-full text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0C3440]/20 transition-all"
+            className="w-full pl-10 pr-4 py-2 bg-white border border-[#CBDDDF] focus:border-[#0C3440] rounded-full text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0C3440]/15 shadow-2xs transition-all"
           />
         </div>
       </div>
 
       {/* Right controls */}
-      <div className="flex shrink-0 items-center gap-1 sm:gap-3 lg:gap-5">
+      <div className="flex shrink-0 items-center gap-1.5 sm:gap-3 lg:gap-5">
         {/* Date & Term pill */}
         <div className="hidden xl:flex flex-col items-end text-right">
-          <time dateTime={today.toISOString().slice(0, 10)} className="text-xs font-bold text-slate-800">{formattedDate}</time>
+          <time dateTime={today.toISOString().slice(0, 10)} className="text-xs font-bold text-[#0C3440]">{formattedDate}</time>
           <span className="mt-0.5 text-[10px] font-semibold text-slate-500">
             SCHOOL TERM 3
           </span>
@@ -175,14 +175,14 @@ export default function Header({
         <div ref={notificationsRef} className="relative">
           <button
             onClick={() => setShowNotifications((open) => !open)}
-            className={`relative p-2 rounded-full transition-colors cursor-pointer ${
-              showNotifications ? 'bg-slate-100 text-[#0C3440]' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+            className={`relative p-2 rounded-full border transition-all shadow-2xs cursor-pointer ${
+              showNotifications ? 'bg-[#E8F0F0] text-[#0C3440] border-[#B8CED0]' : 'bg-white text-[#0C3440] hover:bg-[#E8F0F0] border-[#D5E2E4]'
             }`}
             aria-label={`Notifications, ${notifications.length} recent updates`}
             aria-expanded={showNotifications}
             aria-controls="notifications-panel"
           >
-            <Bell className="w-5 h-5" />
+            <Bell className="w-4.5 h-4.5" />
             {notifications.length > 0 && (
               <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-[#0C3440] rounded-full ring-2 ring-white" />
             )}

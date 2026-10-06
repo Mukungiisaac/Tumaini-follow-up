@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { useOutletContext, useNavigate } from 'react-router-dom';
 import Avatar from '../components/common/Avatar';
 import {
@@ -172,10 +172,10 @@ export default function ChildrenDirectoryView() {
             return (
               <div
                 key={child.id}
-                className="flex min-h-[280px] flex-col rounded-xl border border-slate-200 bg-white p-4 shadow-xs transition-shadow hover:border-[#0C3440]/30 hover:shadow-md sm:min-h-[300px] sm:p-6"
+                className="flex h-full flex-col rounded-xl border border-slate-200 bg-white p-3.5 shadow-xs transition-shadow hover:border-[#0C3440]/30 hover:shadow-md sm:p-5"
               >
                 <div className="flex-1">
-                  <div className="flex items-start gap-4">
+                  <div className="flex items-start gap-3 sm:gap-4">
                     <Avatar
                       src={child.image}
                       name={child.name}
@@ -184,63 +184,63 @@ export default function ChildrenDirectoryView() {
                     />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-start justify-between gap-2">
-                        <h3 className="text-base font-semibold text-slate-900 leading-snug break-words">
+                        <h3 className="text-sm sm:text-base font-semibold text-slate-900 leading-snug break-words">
                           {child.name}
                         </h3>
-                        <span className={`inline-flex items-center gap-1.5 px-2 py-1 text-[10px] font-semibold rounded-full border whitespace-nowrap ${badge.bg}`}>
+                        <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 text-[9px] sm:text-[10px] font-semibold rounded-full border whitespace-nowrap ${badge.bg}`}>
                           <span className={`w-1.5 h-1.5 rounded-full ${badge.dot}`} />
                           {child.status}
                         </span>
                       </div>
-                      <p className="mt-1 text-sm text-slate-500">
+                      <p className="mt-0.5 sm:mt-1 text-xs sm:text-sm text-slate-500">
                         {child.age} years old
                       </p>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3 mt-5 py-4 border-y border-slate-100">
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3 mt-3 sm:mt-4 py-2.5 sm:py-3 border-y border-slate-100">
                     <div>
                       <span className="block text-[10px] font-semibold uppercase tracking-wide text-slate-400">Grade</span>
-                      <span className="mt-1 block text-sm font-medium text-slate-800">{child.grade}</span>
+                      <span className="mt-0.5 block text-xs sm:text-sm font-medium text-slate-800">{child.grade}</span>
                     </div>
                     <div>
                       <span className="block text-[10px] font-semibold uppercase tracking-wide text-slate-400">House</span>
-                      <span className="mt-1 block text-sm font-medium text-slate-800">{child.houseId ? `House ${child.houseId}` : 'Unassigned'}</span>
+                      <span className="mt-0.5 block text-xs sm:text-sm font-medium text-slate-800">{child.houseId ? `House ${child.houseId}` : 'Unassigned'}</span>
                     </div>
                   </div>
 
-                  <dl className="mt-4 space-y-3">
-                    <div>
-                      <dt className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Key strength</dt>
-                      <dd className="mt-0.5 text-sm font-medium text-[#0C3440] break-words">{child.keyStrength || 'Not recorded'}</dd>
+                  <dl className="grid grid-cols-2 gap-2 sm:gap-3 mt-3">
+                    <div className="bg-slate-50/80 rounded-lg p-2 sm:p-2.5 border border-slate-100">
+                      <dt className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Key strength</dt>
+                      <dd className="mt-0.5 text-xs font-semibold text-[#0C3440] break-words">{child.keyStrength || 'Not recorded'}</dd>
                     </div>
-                    <div>
-                      <dt className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Date joined</dt>
-                      <dd className="mt-0.5 text-sm text-slate-700 break-words">{child.joinedDate || 'Not recorded'}</dd>
+                    <div className="bg-slate-50/80 rounded-lg p-2 sm:p-2.5 border border-slate-100">
+                      <dt className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Date joined</dt>
+                      <dd className="mt-0.5 text-xs font-medium text-slate-700 break-words">{child.joinedDate || 'Not recorded'}</dd>
                     </div>
                   </dl>
                 </div>
 
-                <div className="flex items-center gap-2 mt-5 pt-4 border-t border-slate-100">
+                <div className="flex items-center gap-2 mt-3 sm:mt-4 pt-3 border-t border-slate-100">
                   <button
                     onClick={() => navigate(`/children/${child.id}`)}
-                    className="flex-1 py-2 text-sm font-semibold text-white bg-[#0C3440] hover:bg-[#164957] rounded-lg transition-colors text-center"
+                    className="flex-1 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-white bg-[#0C3440] hover:bg-[#164957] rounded-lg transition-colors text-center"
                   >
                     Open profile
                   </button>
                   <button
                     onClick={() => openEditChildModal(child)}
                     title="Edit Child Profile"
-                    className="p-2 text-slate-600 hover:text-[#0C3440] hover:bg-[#E8F0F0] rounded-lg border border-slate-200 transition-colors"
+                    className="p-1.5 sm:p-2 text-slate-600 hover:text-[#0C3440] hover:bg-[#E8F0F0] rounded-lg border border-slate-200 transition-colors"
                   >
-                    <Edit3 className="w-4 h-4" />
+                    <Edit3 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   </button>
                   <button
                     onClick={openRecordObsModal}
                     title="Log Observation"
-                    className="p-2 text-[#0C3440] hover:bg-[#E8F0F0] rounded-lg border border-slate-200 transition-colors"
+                    className="p-1.5 sm:p-2 text-[#0C3440] hover:bg-[#E8F0F0] rounded-lg border border-slate-200 transition-colors"
                   >
-                    <FileEdit className="w-4 h-4" />
+                    <FileEdit className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   </button>
                 </div>
               </div>

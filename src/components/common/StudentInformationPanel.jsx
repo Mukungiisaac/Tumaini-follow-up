@@ -3,12 +3,12 @@ import React from 'react';
 function DetailGrid({ title, fields }) {
   return (
     <section className="rounded-xl border border-slate-200 bg-white overflow-hidden">
-      <h3 className="px-5 py-3 bg-slate-50 border-b border-slate-200 text-xs font-bold uppercase tracking-wide text-slate-700">{title}</h3>
-      <dl className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4 p-5">
+      <h3 className="px-3.5 py-2.5 sm:px-5 sm:py-3 bg-slate-50 border-b border-slate-200 text-xs font-bold uppercase tracking-wide text-slate-700">{title}</h3>
+      <dl className="grid grid-cols-2 lg:grid-cols-3 gap-x-3.5 gap-y-3 p-3.5 sm:p-5 sm:gap-x-6 sm:gap-y-4">
         {fields.map(([label, value]) => (
           <div key={label} className="min-w-0">
             <dt className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">{label}</dt>
-            <dd className="mt-1 text-sm text-slate-800 break-words">{value || 'Not recorded'}</dd>
+            <dd className="mt-0.5 text-xs sm:text-sm text-slate-800 break-words">{value || 'Not recorded'}</dd>
           </div>
         ))}
       </dl>

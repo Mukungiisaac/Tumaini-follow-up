@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { useParams, useOutletContext, useNavigate } from 'react-router-dom';
 import StudentInformationPanel from '../components/common/StudentInformationPanel';
 import ChildImage from '../components/common/ChildImage';
@@ -97,9 +97,9 @@ export default function ChildProfileView() {
       </button>
 
       {/* Top Split Hero Layout (Page 1) */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="grid grid-cols-1 sm:grid-cols-[190px_minmax(0,1fr)] min-h-[320px] bg-white rounded-xl overflow-hidden border border-slate-200 shadow-xs">
-          <div className="relative min-h-[240px] sm:min-h-full bg-[#E8F0F0]">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-[190px_minmax(0,1fr)] bg-white rounded-xl overflow-hidden border border-slate-200 shadow-xs">
+          <div className="relative min-h-[160px] sm:min-h-full bg-[#E8F0F0]">
             <ChildImage
               src={child.image}
               alt={child.name}
@@ -110,40 +110,40 @@ export default function ChildProfileView() {
             />
           </div>
 
-          <div className="min-w-0 p-5 sm:p-6 flex flex-col justify-between gap-6">
-            <div className="space-y-5">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="px-2.5 py-1 bg-[#E8F0F0] text-[#0C3440] text-xs font-semibold rounded-md">{child.grade}</span>
-                <span className="px-2.5 py-1 bg-slate-100 text-slate-700 text-xs font-medium rounded-md">Age {child.age}</span>
-                <span className="px-2.5 py-1 bg-amber-50 text-amber-800 text-xs font-medium rounded-md">{child.houseId ? `House ${child.houseId}` : 'House unassigned'}</span>
+          <div className="min-w-0 p-4 sm:p-6 flex flex-col justify-between gap-4 sm:gap-6">
+            <div className="space-y-3 sm:space-y-4">
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                <span className="px-2 sm:px-2.5 py-0.5 sm:py-1 bg-[#E8F0F0] text-[#0C3440] text-xs font-semibold rounded-md">{child.grade}</span>
+                <span className="px-2 sm:px-2.5 py-0.5 sm:py-1 bg-slate-100 text-slate-700 text-xs font-medium rounded-md">Age {child.age}</span>
+                <span className="px-2 sm:px-2.5 py-0.5 sm:py-1 bg-amber-50 text-amber-800 text-xs font-medium rounded-md">{child.houseId ? `House ${child.houseId}` : 'House unassigned'}</span>
               </div>
 
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Student profile</p>
-                <h2 className="mt-1 text-2xl font-bold text-slate-900 break-words">{child.fullName || child.name}</h2>
-                <p className="mt-1 text-sm text-slate-600">Assigned mentor: {child.mentor || 'Not assigned'}</p>
+                <h2 className="mt-0.5 text-xl sm:text-2xl font-bold text-slate-900 break-words">{child.fullName || child.name}</h2>
+                <p className="mt-0.5 text-xs sm:text-sm text-slate-600">Assigned mentor: {child.mentor || 'Not assigned'}</p>
               </div>
 
               {child.personalStatement && (
-                <blockquote className="border-l-2 border-[#D99B3C] pl-3">
+                <blockquote className="border-l-2 border-[#D99B3C] pl-2.5 sm:pl-3">
                   <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500">
-                    <Quote className="w-3.5 h-3.5 text-[#8A5F20]" /> Personal statement
+                    <Quote className="w-3 h-3 text-[#8A5F20]" /> Personal statement
                   </div>
-                  <p className="mt-1 text-sm text-slate-700 leading-relaxed">{child.personalStatement}</p>
+                  <p className="mt-0.5 text-xs sm:text-sm text-slate-700 leading-relaxed line-clamp-3 sm:line-clamp-none">{child.personalStatement}</p>
                 </blockquote>
               )}
             </div>
 
-            <div className="flex flex-wrap items-center gap-2 pt-4 border-t border-slate-100">
+            <div className="flex flex-wrap items-center gap-2 pt-3 sm:pt-4 border-t border-slate-100">
               <button
                 onClick={() => openEditChildModal && openEditChildModal(child)}
-                className="px-3 py-2 border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-semibold rounded-lg transition-colors inline-flex items-center gap-1.5"
+                className="flex-1 sm:flex-initial px-3 py-1.5 sm:py-2 border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-semibold rounded-lg transition-colors inline-flex items-center justify-center gap-1.5"
               >
                 <Edit3 className="w-3.5 h-3.5" /> Edit Profile
               </button>
               <button
                 onClick={() => openScheduleModal && openScheduleModal(child.id)}
-                className="px-3 py-2 bg-[#0C3440] hover:bg-[#164957] text-white text-xs font-semibold rounded-lg transition-colors inline-flex items-center gap-1.5"
+                className="flex-1 sm:flex-initial px-3 py-1.5 sm:py-2 bg-[#0C3440] hover:bg-[#164957] text-white text-xs font-semibold rounded-lg transition-colors inline-flex items-center justify-center gap-1.5"
               >
                 <UserCheck className="w-3.5 h-3.5" /> Schedule 1-on-1
               </button>
@@ -151,73 +151,73 @@ export default function ChildProfileView() {
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs space-y-5">
+        <div className="bg-white rounded-2xl p-4 sm:p-6 border border-slate-200 shadow-xs space-y-3 sm:space-y-4">
           <div>
-            <h3 className="text-lg font-bold text-slate-900">Student at a glance</h3>
-            <p className="mt-1 text-sm text-slate-500">Admission and learner details</p>
+            <h3 className="text-base sm:text-lg font-bold text-slate-900">Student at a glance</h3>
+            <p className="mt-0.5 text-xs sm:text-sm text-slate-500">Admission and learner details</p>
           </div>
-          <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
+          <dl className="grid grid-cols-2 gap-2.5 sm:gap-4">
+            <div className="bg-slate-50/70 p-2.5 rounded-lg border border-slate-100 sm:border-0 sm:p-0 sm:bg-transparent">
               <dt className="text-[10px] font-semibold uppercase text-slate-400">Admission Number</dt>
-              <dd className="mt-1 text-sm font-medium text-slate-800">{child.studentInformation?.admissionNumber || 'Not recorded'}</dd>
+              <dd className="mt-0.5 text-xs sm:text-sm font-medium text-slate-800 break-words">{child.studentInformation?.admissionNumber || 'Not recorded'}</dd>
             </div>
-            <div>
+            <div className="bg-slate-50/70 p-2.5 rounded-lg border border-slate-100 sm:border-0 sm:p-0 sm:bg-transparent">
               <dt className="text-[10px] font-semibold uppercase text-slate-400">Date Joined</dt>
-              <dd className="mt-1 text-sm font-medium text-slate-800">{child.joinedDate || 'Not recorded'}</dd>
+              <dd className="mt-0.5 text-xs sm:text-sm font-medium text-slate-800 break-words">{child.joinedDate || 'Not recorded'}</dd>
             </div>
-            <div>
+            <div className="bg-slate-50/70 p-2.5 rounded-lg border border-slate-100 sm:border-0 sm:p-0 sm:bg-transparent">
               <dt className="text-[10px] font-semibold uppercase text-slate-400">Date of Birth</dt>
-              <dd className="mt-1 text-sm font-medium text-slate-800">{child.studentInformation?.dateOfBirth || 'Not recorded'}</dd>
+              <dd className="mt-0.5 text-xs sm:text-sm font-medium text-slate-800 break-words">{child.studentInformation?.dateOfBirth || 'Not recorded'}</dd>
             </div>
-            <div>
+            <div className="bg-slate-50/70 p-2.5 rounded-lg border border-slate-100 sm:border-0 sm:p-0 sm:bg-transparent">
               <dt className="text-[10px] font-semibold uppercase text-slate-400">Stream</dt>
-              <dd className="mt-1 text-sm font-medium text-slate-800">{child.studentInformation?.stream || 'Not recorded'}</dd>
+              <dd className="mt-0.5 text-xs sm:text-sm font-medium text-slate-800 break-words">{child.studentInformation?.stream || 'Not recorded'}</dd>
             </div>
           </dl>
-          <section className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
+          <section className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 sm:px-4 sm:py-3">
             <h4 className="text-xs font-semibold text-slate-700">{child.fullName || child.name} Sponsor</h4>
-            <dl className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <dl className="mt-1.5 grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
               <div className="min-w-0">
                 <dt className="text-[10px] font-medium uppercase text-slate-400">Sponsor name</dt>
-                <dd className="mt-1 truncate text-sm font-medium text-slate-800">{child.studentInformation?.sponsorName || 'Not recorded'}</dd>
+                <dd className="mt-0.5 truncate text-xs sm:text-sm font-medium text-slate-800">{child.studentInformation?.sponsorName || 'Not recorded'}</dd>
               </div>
               <div className="min-w-0">
                 <dt className="text-[10px] font-medium uppercase text-slate-400">Sponsor email</dt>
-                <dd className="mt-1 break-all text-sm font-medium text-slate-800">{child.studentInformation?.sponsorEmail || 'Not recorded'}</dd>
+                <dd className="mt-0.5 break-all text-xs sm:text-sm font-medium text-slate-800">{child.studentInformation?.sponsorEmail || 'Not recorded'}</dd>
               </div>
             </dl>
           </section>
           <button
             type="button"
             onClick={() => setActiveTab('student-info')}
-            className="w-full px-4 py-2.5 bg-[#E8F0F0] hover:bg-[#D4E4E4] text-[#0C3440] text-sm font-semibold rounded-lg transition-colors"
+            className="w-full px-4 py-2 sm:py-2.5 bg-[#E8F0F0] hover:bg-[#D4E4E4] text-[#0C3440] text-xs sm:text-sm font-semibold rounded-lg transition-colors"
           >
             View student information
           </button>
         </div>
       </div>
 
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-slate-200 border border-slate-200 rounded-xl overflow-hidden" aria-label="Placement and care details">
-        <div className="bg-white p-4">
+      <section className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-slate-200 border border-slate-200 rounded-xl overflow-hidden" aria-label="Placement and care details">
+        <div className="bg-white p-3 sm:p-4">
           <span className="text-[10px] font-bold text-slate-400 uppercase font-mono">HOUSE & PARENTS</span>
-          <p className="mt-1 text-sm font-bold text-slate-900">{child.houseId ? `House ${child.houseId}` : 'Unassigned'}</p>
-          <p className="mt-1 text-xs text-slate-600">
+          <p className="mt-1 text-xs sm:text-sm font-bold text-slate-900">{child.houseId ? `House ${child.houseId}` : 'Unassigned'}</p>
+          <p className="mt-0.5 text-[11px] sm:text-xs text-slate-600 line-clamp-2">
             {assignedHouse?.parentOne || assignedHouse?.parentTwo
               ? [assignedHouse.parentOne, assignedHouse.parentTwo].filter(Boolean).join(' & ')
               : 'Parent couple not recorded'}
           </p>
         </div>
-        <div className="bg-white p-4">
+        <div className="bg-white p-3 sm:p-4">
           <span className="text-[10px] font-bold text-slate-400 uppercase font-mono">DATE JOINED</span>
-          <p className="mt-1 text-sm font-bold text-slate-900">{child.joinedDate || 'Not recorded'}</p>
+          <p className="mt-1 text-xs sm:text-sm font-bold text-slate-900">{child.joinedDate || 'Not recorded'}</p>
         </div>
-        <div className="bg-white p-4">
+        <div className="bg-white p-3 sm:p-4">
           <span className="text-[10px] font-bold text-slate-400 uppercase font-mono">HEALTH STATUS</span>
-          <p className="mt-1 text-sm font-bold text-slate-900">{child.healthStatus || 'Not recorded'}</p>
+          <p className="mt-1 text-xs sm:text-sm font-bold text-slate-900">{child.healthStatus || 'Not recorded'}</p>
         </div>
-        <div className="bg-white p-4">
+        <div className="bg-white p-3 sm:p-4">
           <span className="text-[10px] font-bold text-slate-400 uppercase font-mono">HEALTH NOTES</span>
-          <p className="mt-1 text-xs text-slate-600">{child.healthNotes || 'No notes recorded'}</p>
+          <p className="mt-1 text-[11px] sm:text-xs text-slate-600 line-clamp-2">{child.healthNotes || 'No notes recorded'}</p>
         </div>
       </section>
 
@@ -396,9 +396,9 @@ export default function ChildProfileView() {
           ) : (
             <div className="space-y-4">
               {child.observations.map((obs) => (
-                <div key={obs.id} className="bg-white rounded-3xl p-6 border border-slate-100 shadow-xs space-y-3">
+                <div key={obs.id} className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-slate-100 shadow-xs space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="px-3 py-1 bg-brand-primary-light text-brand-primary text-xs font-bold rounded-full">
+                    <span className="px-2.5 sm:px-3 py-0.5 sm:py-1 bg-brand-primary-light text-brand-primary text-xs font-bold rounded-full">
                       {obs.area}
                     </span>
                     <span className="text-xs font-bold text-slate-400 font-mono">
@@ -406,22 +406,22 @@ export default function ChildProfileView() {
                     </span>
                   </div>
 
-                  <p className="text-sm font-medium text-slate-800 leading-relaxed">
+                  <p className="text-xs sm:text-sm font-medium text-slate-800 leading-relaxed">
                     "{obs.text}"
                   </p>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 border-t border-slate-100 text-xs">
-                    <div>
-                      <span className="text-[10px] font-bold uppercase text-slate-400 font-mono block">STRENGTH</span>
-                      <span className="font-semibold text-emerald-700">{obs.strength}</span>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3 pt-2.5 sm:pt-3 border-t border-slate-100 text-xs">
+                    <div className="bg-emerald-50/50 p-2 sm:p-2.5 rounded-lg border border-emerald-100/60">
+                      <span className="text-[10px] font-bold uppercase text-emerald-800 font-mono block">STRENGTH</span>
+                      <span className="mt-0.5 font-semibold text-emerald-700 text-xs sm:text-sm block">{obs.strength}</span>
                     </div>
-                    <div>
-                      <span className="text-[10px] font-bold uppercase text-slate-400 font-mono block">CHALLENGE</span>
-                      <span className="font-semibold text-rose-700">{obs.challenge}</span>
+                    <div className="bg-rose-50/50 p-2 sm:p-2.5 rounded-lg border border-rose-100/60">
+                      <span className="text-[10px] font-bold uppercase text-rose-800 font-mono block">CHALLENGE</span>
+                      <span className="mt-0.5 font-semibold text-rose-700 text-xs sm:text-sm block">{obs.challenge}</span>
                     </div>
-                    <div>
-                      <span className="text-[10px] font-bold uppercase text-slate-400 font-mono block">NEXT STEP</span>
-                      <span className="font-semibold text-slate-800">{obs.nextStep}</span>
+                    <div className="bg-slate-50/80 p-2 sm:p-2.5 rounded-lg border border-slate-100">
+                      <span className="text-[10px] font-bold uppercase text-slate-500 font-mono block">NEXT STEP</span>
+                      <span className="mt-0.5 font-semibold text-slate-800 text-xs sm:text-sm block">{obs.nextStep}</span>
                     </div>
                   </div>
                 </div>

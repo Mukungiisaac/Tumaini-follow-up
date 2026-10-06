@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { useOutletContext, useNavigate } from 'react-router-dom';
 import { Eye, Plus, Search, Filter, Sparkles, AlertCircle, Target, Edit3, Trash2 } from 'lucide-react';
 import ChildImage from '../components/common/ChildImage';
@@ -154,30 +154,30 @@ export default function ObservationsView() {
                 </div>
               </div>
 
-              <p className="text-sm font-medium text-slate-800 leading-relaxed bg-slate-50 p-4 rounded-2xl border border-slate-100">
+              <p className="text-xs sm:text-sm font-medium text-slate-800 leading-relaxed bg-slate-50 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-slate-100">
                 "{obs.text}"
               </p>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 text-xs">
-                <div className="bg-emerald-50/60 p-3 rounded-xl border border-emerald-100">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-4 pt-2 text-xs">
+                <div className="bg-emerald-50/60 p-2.5 sm:p-3 rounded-xl border border-emerald-100">
                   <span className="flex items-center gap-1 text-[10px] font-bold uppercase text-emerald-800 font-mono mb-0.5">
                     <Sparkles className="w-3 h-3 text-emerald-600" /> STRENGTH NOTICED
                   </span>
-                  <p className="font-bold text-emerald-900">{obs.strength}</p>
+                  <p className="font-bold text-xs sm:text-sm text-emerald-900">{obs.strength}</p>
                 </div>
 
-                <div className="bg-rose-50/60 p-3 rounded-xl border border-rose-100">
+                <div className="bg-rose-50/60 p-2.5 sm:p-3 rounded-xl border border-rose-100">
                   <span className="flex items-center gap-1 text-[10px] font-bold uppercase text-rose-800 font-mono mb-0.5">
                     <AlertCircle className="w-3 h-3 text-rose-600" /> CHALLENGE / FRICTION
                   </span>
-                  <p className="font-bold text-rose-900">{obs.challenge}</p>
+                  <p className="font-bold text-xs sm:text-sm text-rose-900">{obs.challenge}</p>
                 </div>
 
-                <div className="bg-[#E8F0F0] p-3 rounded-xl border border-[#B8CED0]">
+                <div className="bg-[#E8F0F0] p-2.5 sm:p-3 rounded-xl border border-[#B8CED0]">
                   <span className="flex items-center gap-1 text-[10px] font-bold uppercase text-[#0C3440] font-mono mb-0.5">
                     <Target className="w-3 h-3 text-[#0C3440]" /> RECOMMENDED NEXT STEP
                   </span>
-                  <p className="font-bold text-[#0C3440]">{obs.nextStep}</p>
+                  <p className="font-bold text-xs sm:text-sm text-[#0C3440]">{obs.nextStep}</p>
                 </div>
               </div>
             </div>

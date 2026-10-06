@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useOutletContext, useNavigate } from 'react-router-dom';
 import { GRADE_LEVELS, SKILL_LEVELS } from '../data/mockData';
-import { Star, CheckCircle2, ChevronDown, X, Sparkles } from 'lucide-react';
+import { Star, CheckCircle2, ChevronDown, X, Users, Sparkles, Layers } from 'lucide-react';
 import ChildImage from '../components/common/ChildImage';
 
 const LEVEL_DESCRIPTIONS = {
@@ -99,21 +99,40 @@ export default function ProgressTrackingView() {
 
   return (
     <div className="min-w-0 space-y-4 sm:space-y-6">
-      <div className="flex min-w-0 items-start justify-between gap-3 sm:items-end sm:gap-4">
-        <div className="min-w-0 space-y-1.5">
-          <span className="text-[10px] font-bold tracking-[0.14em] text-brand-primary uppercase">
-            Cohort assessment <span className="mx-1 text-slate-300">/</span> Term 3
-          </span>
-          <h2 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
-            Progress matrix
+      {/* Header Banner */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 sm:p-6 rounded-2xl border border-slate-200/80 shadow-xs">
+        <div className="space-y-1.5 min-w-0">
+          <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-[#E8F0F0] text-[#0C3440] text-[11px] font-bold uppercase tracking-wider font-mono">
+            <span>Cohort Assessment</span>
+            <span className="text-[#0C3440]/30">•</span>
+            <span>Term 3</span>
+          </div>
+          <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
+            Progress Matrix
           </h2>
-          <p className="text-sm leading-5 text-slate-500">
+          <p className="text-xs sm:text-sm text-slate-500 leading-relaxed max-w-2xl">
             Skill development across curriculum and character areas. Tap any subject badge to edit progress.
           </p>
         </div>
-        <div className="shrink-0 text-right">
-          <p className="text-lg font-semibold tabular-nums text-slate-900">{filteredChildren.length}</p>
-          <p className="text-xs text-slate-500">{filteredChildren.length === 1 ? 'child shown' : 'children shown'}</p>
+
+        {/* Metric Counter Card */}
+        <div className="flex items-center gap-3 bg-slate-50 border border-slate-200/80 rounded-xl px-3.5 py-2.5 shrink-0 self-start sm:self-center">
+          <div className="h-9 w-9 rounded-lg bg-[#0C3440] text-white flex items-center justify-center shrink-0 shadow-2xs">
+            <Users className="w-4 h-4" />
+          </div>
+          <div>
+            <div className="flex items-baseline gap-1">
+              <span className="text-lg font-bold text-slate-900 tabular-nums leading-none">
+                {filteredChildren.length}
+              </span>
+              <span className="text-xs font-semibold text-slate-400">
+                / {childrenList.length}
+              </span>
+            </div>
+            <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block mt-0.5">
+              {filteredChildren.length === 1 ? 'Child Listed' : 'Children Listed'}
+            </span>
+          </div>
         </div>
       </div>
 

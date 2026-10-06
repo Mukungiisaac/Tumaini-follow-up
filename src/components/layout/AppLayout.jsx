@@ -561,7 +561,7 @@ export default function AppLayout() {
         />
 
         {/* Dynamic Page View Outlet */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">
+        <main className="mx-auto w-full max-w-7xl flex-1 p-3 sm:p-6 lg:p-8">
           {localImportCount > 0 && (
             <section className="mb-4 flex flex-col gap-3 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-sm leading-5 text-amber-950">

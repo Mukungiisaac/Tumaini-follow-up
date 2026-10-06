@@ -59,9 +59,9 @@ export default function ChildrenDirectoryView() {
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-300 relative pb-16 max-w-7xl mx-auto">
+    <div className="relative mx-auto max-w-7xl space-y-5 pb-24 sm:space-y-6 sm:pb-16">
       {/* Header Filter Bar */}
-      <div className="bg-white rounded-xl p-5 sm:p-6 border border-slate-200 shadow-xs space-y-4">
+      <div className="space-y-4 rounded-xl border border-slate-200 bg-white p-4 shadow-xs sm:p-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {/* Search Bar */}
           <div className="md:col-span-2 space-y-1">
@@ -114,17 +114,17 @@ export default function ChildrenDirectoryView() {
       </div>
 
       {/* Directory Controls Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 px-1">
+      <div className="flex flex-col gap-3 px-1 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
         <p className="text-sm text-slate-600">
           <span className="font-semibold text-slate-900">{filteredChildren.length}</span> children
         </p>
 
-        <div className="flex items-center gap-2">
+        <div className="flex w-full items-center gap-2 sm:w-auto">
           {/* Status Quick Filter */}
           <select
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
-            className="px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#0C3440]"
+            className="min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#0C3440] sm:flex-none"
           >
             <option value="All">All Statuses</option>
             <option value="ON TRACK">ON TRACK</option>
@@ -172,7 +172,7 @@ export default function ChildrenDirectoryView() {
             return (
               <div
                 key={child.id}
-                className="bg-white rounded-xl p-5 sm:p-6 border border-slate-200 shadow-xs hover:shadow-md hover:border-[#0C3440]/30 transition-all flex flex-col min-h-[300px]"
+                className="flex min-h-[280px] flex-col rounded-xl border border-slate-200 bg-white p-4 shadow-xs transition-shadow hover:border-[#0C3440]/30 hover:shadow-md sm:min-h-[300px] sm:p-6"
               >
                 <div className="flex-1">
                   <div className="flex items-start gap-4">
@@ -253,22 +253,22 @@ export default function ChildrenDirectoryView() {
           {filteredChildren.map((child) => {
             const badge = getStatusBadge(child.status);
             return (
-              <div key={child.id} className="p-3.5 sm:p-4 flex items-center justify-between gap-4 hover:bg-slate-50/80 transition-colors">
-                <div className="flex items-center gap-3">
+              <div key={child.id} className="flex items-start justify-between gap-3 p-3.5 transition-colors hover:bg-slate-50/80 sm:items-center sm:gap-4 sm:p-4">
+                <div className="flex min-w-0 items-center gap-3">
                   <Avatar
                     src={child.image}
                     name={child.name}
                     size="md"
                     className="ring-2 ring-slate-100"
                   />
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h4 className="text-xs font-bold text-slate-800">{child.name}</h4>
-                      <span className={`px-2 py-0.5 text-[9px] font-bold rounded-full border ${badge.bg}`}>
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                      <h4 className="truncate text-xs font-bold text-slate-800">{child.name}</h4>
+                      <span className={`whitespace-nowrap rounded-full border px-2 py-0.5 text-[9px] font-bold ${badge.bg}`}>
                         {child.status}
                       </span>
                     </div>
-                    <p className="text-[11px] text-slate-500">
+                    <p className="mt-1 line-clamp-2 text-[11px] leading-4 text-slate-500 sm:line-clamp-none">
                       {child.age} years old | {child.grade} | {child.houseId ? `House ${child.houseId}` : 'Unassigned'} | Mentor: {child.mentor}
                     </p>
                   </div>
@@ -285,7 +285,7 @@ export default function ChildrenDirectoryView() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-1.5">
+                <div className="flex shrink-0 items-center gap-1.5">
                   <button
                     onClick={() => openEditChildModal(child)}
                     className="px-2.5 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-[#E8F0F0] hover:text-[#0C3440] rounded-lg transition-colors flex items-center gap-1"
@@ -332,12 +332,12 @@ export default function ChildrenDirectoryView() {
       <button
         onClick={openAddChildModal}
         title="Add New Child"
-        className="fixed bottom-6 right-8 z-30 p-3.5 bg-[#0C3440] hover:bg-[#164957] text-white rounded-full shadow-2xl shadow-[#0C3440]/50 flex items-center gap-2 text-xs font-bold font-mono tracking-wider transition-transform hover:scale-105"
+        className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] left-4 right-4 z-30 flex items-center justify-center gap-2 rounded-xl bg-[#0C3440] px-4 py-3.5 text-sm font-semibold text-white shadow-xl shadow-[#0C3440]/25 transition-colors hover:bg-[#164957] sm:bottom-6 sm:left-auto sm:right-8 sm:w-auto sm:rounded-full sm:px-5 sm:py-3.5 sm:text-xs sm:font-bold sm:font-mono sm:tracking-wider"
       >
         <UserPlus className="w-4 h-4" />
+        <span className="sm:hidden">Add child</span>
         <span className="hidden sm:inline">ADD CHILD</span>
       </button>
     </div>
   );
 }
-

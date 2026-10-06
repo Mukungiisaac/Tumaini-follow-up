@@ -97,12 +97,12 @@ export default function Header({
   const handleSidebarToggle = onToggleSidebar || onOpenSidebar;
 
   return (
-    <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-4 lg:px-8 py-3.5 flex items-center justify-between gap-4 shadow-sm">
+    <header className="sticky top-0 z-30 flex min-h-16 items-center justify-between gap-2 border-b border-slate-200/80 bg-white/95 px-3 py-2.5 shadow-sm backdrop-blur-md sm:gap-4 sm:px-4 sm:py-3.5 lg:px-8">
       {/* Left section: Hamburger + Page Title */}
-      <div className="flex items-center gap-3 min-w-0">
+      <div className="flex min-w-0 items-center gap-2 sm:gap-3">
         <button
           onClick={handleSidebarToggle}
-          className={`p-2 rounded-lg border border-slate-200 transition-colors ${
+          className={`shrink-0 rounded-lg border border-slate-200 p-2 transition-colors ${
             isSidebarOpen
               ? 'text-[#0C3440] bg-[#E8F0F0] border-[#B8CED0]'
               : 'text-slate-600 bg-white hover:bg-slate-100'
@@ -120,7 +120,7 @@ export default function Header({
         </button>
 
         <div className="min-w-0">
-          <h2 className="text-lg lg:text-xl font-bold text-slate-900 tracking-tight leading-snug truncate">
+          <h2 className="truncate text-base font-bold leading-snug tracking-tight text-slate-900 sm:text-lg lg:text-xl">
             {title}
           </h2>
           <p className="text-xs text-slate-500 font-medium hidden sm:block truncate">
@@ -143,7 +143,7 @@ export default function Header({
       </div>
 
       {/* Right controls */}
-      <div className="flex items-center gap-3 lg:gap-5">
+      <div className="flex shrink-0 items-center gap-1 sm:gap-3 lg:gap-5">
         {/* Date & Term pill */}
         <div className="hidden xl:flex flex-col items-end text-right">
           <time dateTime={today.toISOString().slice(0, 10)} className="text-xs font-bold text-slate-800">{formattedDate}</time>
@@ -196,7 +196,7 @@ export default function Header({
         </div>
 
         {/* Account menu */}
-        <div ref={profileMenuRef} className="relative border-l border-slate-200 pl-3">
+        <div ref={profileMenuRef} className="relative border-l border-slate-200 pl-2 sm:pl-3">
           <button
             type="button"
             onClick={() => setShowProfileMenu((open) => !open)}
@@ -247,4 +247,3 @@ export default function Header({
     </header>
   );
 }
-

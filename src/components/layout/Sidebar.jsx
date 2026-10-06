@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React, { useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -22,6 +22,16 @@ export default function Sidebar({ isCollapsed, isMobileOpen, onCloseMobile, isOp
   const collapsed = isCollapsed ?? false;
   const mobileOpen = isMobileOpen ?? isOpen ?? false;
   const handleCloseMobile = onCloseMobile || onClose;
+
+  useEffect(() => {
+    if (!mobileOpen) return undefined;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [mobileOpen]);
 
   const mainNav = [
     { name: 'Dashboard', path: '/', icon: LayoutDashboard },
@@ -98,15 +108,15 @@ export default function Sidebar({ isCollapsed, isMobileOpen, onCloseMobile, isOp
       {mobileOpen && (
         <div
           onClick={handleCloseMobile}
-          className="fixed inset-0 z-40 bg-slate-950/30 backdrop-blur-[2px] lg:hidden animate-in fade-in duration-200"
+          className="fixed inset-0 z-40 bg-slate-950/35 backdrop-blur-[2px] lg:hidden"
         />
       )}
 
-      {/* Sidebar Panel - Smooth slide animation */}
+      {/* Sidebar Panel */}
       <aside
         id="primary-sidebar"
-        className={`fixed top-0 bottom-0 left-0 z-50 bg-[#0c3440]/95 backdrop-blur-xl border-r border-white/10 text-slate-100 flex flex-col transition-all duration-300 ease-in-out sidebar-shadow ${
-          mobileOpen ? 'translate-x-0 w-64 animate-in slide-in-from-left duration-300' : '-translate-x-full lg:translate-x-0'
+        className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-white/10 bg-[#0c3440] text-slate-100 transition-[transform,width] duration-300 ease-out sidebar-shadow ${
+          mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         } ${collapsed ? 'lg:w-20' : 'lg:w-64'}`}
       >
         {/* Header Branding */}
@@ -163,4 +173,3 @@ export default function Sidebar({ isCollapsed, isMobileOpen, onCloseMobile, isOp
     </>
   );
 }
-

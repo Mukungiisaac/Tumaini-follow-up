@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Eye, EyeOff } from 'lucide-react';
+import { CheckCircle2, Eye, EyeOff, X } from 'lucide-react';
 import { isSupabaseConfigured, supabase, supabaseUrl } from '../../lib/supabase';
 import { AdminAuthContext } from '../../lib/adminAuthContext';
 
@@ -31,7 +31,14 @@ export default function AdminAuthGate({ children }) {
   const [isPasswordRecovery, setIsPasswordRecovery] = useState(false);
   const [recoveryMessage, setRecoveryMessage] = useState('');
   const [hasPasswordRecoverySession, setHasPasswordRecoverySession] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
   const passwordRecoverySessionRef = useRef(false);
+
+  useEffect(() => {
+    if (!successMessage) return undefined;
+    const timeoutId = window.setTimeout(() => setSuccessMessage(''), 6000);
+    return () => window.clearTimeout(timeoutId);
+  }, [successMessage]);
 
   useEffect(() => {
     if (!isSupabaseConfigured) return undefined;
@@ -229,7 +236,7 @@ export default function AdminAuthGate({ children }) {
         setHasPasswordRecoverySession(false);
         setRequiresPasswordSetup(false);
         setStatus('signed-out');
-        setMessage('Your password was updated successfully. Sign in with your new password.');
+        setSuccessMessage('Your password was updated successfully. Sign in with your new password.');
         return;
       }
 
@@ -378,6 +385,24 @@ export default function AdminAuthGate({ children }) {
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-slate-50 p-6">
+      {successMessage && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="fixed left-1/2 top-[calc(1rem+env(safe-area-inset-top))] z-[100] flex w-[calc(100%-2rem)] max-w-md -translate-x-1/2 items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-900 shadow-lg shadow-emerald-950/10"
+        >
+          <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" aria-hidden="true" />
+          <p className="min-w-0 flex-1 text-sm font-medium leading-5">{successMessage}</p>
+          <button
+            type="button"
+            onClick={() => setSuccessMessage('')}
+            className="-mr-1 -mt-1 rounded-md p-1.5 text-emerald-700 hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-emerald-600"
+            aria-label="Dismiss success message"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
       <section className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-7 shadow-lg shadow-slate-900/5">
         <div className="mb-6 flex items-center gap-3">
           <img src="/tumaini-logo.svg" alt="Tumaini Children's Village" className="h-12 w-12 shrink-0" />

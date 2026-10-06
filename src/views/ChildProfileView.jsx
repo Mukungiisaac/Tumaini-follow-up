@@ -1,6 +1,7 @@
 ﻿import React, { useState } from 'react';
 import { useParams, useOutletContext, useNavigate } from 'react-router-dom';
 import StudentInformationPanel from '../components/common/StudentInformationPanel';
+import ChildImage from '../components/common/ChildImage';
 import {
   Quote,
   Award,
@@ -99,7 +100,7 @@ export default function ChildProfileView() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="grid grid-cols-1 sm:grid-cols-[190px_minmax(0,1fr)] min-h-[320px] bg-white rounded-xl overflow-hidden border border-slate-200 shadow-xs">
           <div className="relative min-h-[240px] sm:min-h-full bg-[#E8F0F0]">
-            <img
+            <ChildImage
               src={child.image}
               alt={child.name}
               onError={(event) => {
@@ -173,6 +174,19 @@ export default function ChildProfileView() {
               <dd className="mt-1 text-sm font-medium text-slate-800">{child.studentInformation?.stream || 'Not recorded'}</dd>
             </div>
           </dl>
+          <section className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
+            <h4 className="text-xs font-semibold text-slate-700">{child.fullName || child.name} Sponsor</h4>
+            <dl className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="min-w-0">
+                <dt className="text-[10px] font-medium uppercase text-slate-400">Sponsor name</dt>
+                <dd className="mt-1 truncate text-sm font-medium text-slate-800">{child.studentInformation?.sponsorName || 'Not recorded'}</dd>
+              </div>
+              <div className="min-w-0">
+                <dt className="text-[10px] font-medium uppercase text-slate-400">Sponsor email</dt>
+                <dd className="mt-1 break-all text-sm font-medium text-slate-800">{child.studentInformation?.sponsorEmail || 'Not recorded'}</dd>
+              </div>
+            </dl>
+          </section>
           <button
             type="button"
             onClick={() => setActiveTab('student-info')}

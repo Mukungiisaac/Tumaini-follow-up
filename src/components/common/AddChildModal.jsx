@@ -1,9 +1,11 @@
-﻿import React, { useState, useRef } from 'react';
+﻿import React, { useEffect, useState, useRef } from 'react';
 import Modal from './Modal';
-import { Camera, Upload, X } from 'lucide-react';
+import { Upload, X } from 'lucide-react';
 import { GRADE_LEVELS, HOUSE_IDS } from '../../data/mockData';
 import StudentInformationFields from './StudentInformationFields';
 import { EMPTY_STUDENT_INFORMATION } from '../../data/studentInformation';
+import ChildImage from './ChildImage';
+import { isChildImageStoragePath } from '../../lib/childImages';
 
 /* Inline letter-avatar shown when no photo is provided */
 function InitialAvatar({ name, size = 80 }) {
@@ -31,29 +33,43 @@ export default function AddChildModal({ isOpen, onClose, onAddChild }) {
     keyStrength: '',
     studentInformation: { ...EMPTY_STUDENT_INFORMATION },
     personalStatement: '',
-    imageUrl: ''       // optional URL or base64
+    imageUrl: ''
   });
 
   const fileInputRef = useRef(null);
+  const [imageFile, setImageFile] = useState(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
+
+  useEffect(() => {
+    if (!formData.imageUrl.startsWith('blob:')) return undefined;
+    return () => URL.revokeObjectURL(formData.imageUrl);
+  }, [formData.imageUrl]);
 
   const handleFileChange = (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => setFormData(f => ({ ...f, imageUrl: ev.target.result }));
-    reader.readAsDataURL(file);
+    setImageFile(file);
+    setSaveError('');
+    setFormData((previous) => ({ ...previous, imageUrl: URL.createObjectURL(file) }));
   };
 
   const clearPhoto = () => {
+    setImageFile(null);
     setFormData(f => ({ ...f, imageUrl: '' }));
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.name.trim()) return;
 
-    onAddChild({
+    setIsSaving(true);
+    setSaveError('');
+    let saved;
+    let failureMessage = '';
+    try {
+      saved = await onAddChild({
       id: `c_${Date.now()}`,
       name: formData.name.trim(),
       fullName: formData.name.trim(),
@@ -76,7 +92,17 @@ export default function AddChildModal({ isOpen, onClose, onAddChild }) {
       observations: [],
       goals: [],
       milestones: []
-    });
+      }, imageFile);
+    } catch (error) {
+      saved = false;
+      failureMessage = error?.message || 'Could not upload the child photo. Please try again.';
+    } finally {
+      setIsSaving(false);
+    }
+    if (saved === false) {
+      setSaveError(failureMessage || 'Could not save the child or upload the photo. Please try again.');
+      return;
+    }
 
     // Reset
     setFormData({
@@ -85,6 +111,8 @@ export default function AddChildModal({ isOpen, onClose, onAddChild }) {
       studentInformation: { ...EMPTY_STUDENT_INFORMATION },
       personalStatement: '', imageUrl: ''
     });
+    setImageFile(null);
+    setSaveError('');
     onClose();
   };
 
@@ -99,7 +127,7 @@ export default function AddChildModal({ isOpen, onClose, onAddChild }) {
           {/* Live preview */}
           <div className="relative shrink-0">
             {hasPhoto ? (
-              <img
+              <ChildImage
                 src={formData.imageUrl}
                 alt="Preview"
                 className="w-20 h-20 rounded-full object-cover ring-4 ring-[#E8F0F0] shadow-md"
@@ -126,8 +154,11 @@ export default function AddChildModal({ isOpen, onClose, onAddChild }) {
             <input
               type="url"
               placeholder="Paste image URL..."
-              value={formData.imageUrl.startsWith('data:') ? '' : formData.imageUrl}
-              onChange={(e) => setFormData(f => ({ ...f, imageUrl: e.target.value }))}
+              value={formData.imageUrl.startsWith('data:') || isChildImageStoragePath(formData.imageUrl) ? '' : formData.imageUrl.startsWith('blob:') ? '' : formData.imageUrl}
+              onChange={(e) => {
+                setImageFile(null);
+                setFormData(f => ({ ...f, imageUrl: e.target.value }));
+              }}
               className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#0C3440]"
             />
 
@@ -255,6 +286,7 @@ export default function AddChildModal({ isOpen, onClose, onAddChild }) {
         <StudentInformationFields
           value={formData.studentInformation}
           onChange={(studentInformation) => setFormData({ ...formData, studentInformation })}
+          sponsorTitle={`${formData.name.trim() || "Child's"} Sponsor`}
         />
 
         <div>
@@ -279,6 +311,8 @@ export default function AddChildModal({ isOpen, onClose, onAddChild }) {
           />
         </div>
 
+        {saveError && <p role="alert" className="text-sm text-rose-700">{saveError}</p>}
+
         <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
           <button
             type="button"
@@ -289,9 +323,10 @@ export default function AddChildModal({ isOpen, onClose, onAddChild }) {
           </button>
           <button
             type="submit"
+            disabled={isSaving}
             className="px-6 py-2.5 text-xs font-bold text-white bg-[#0C3440] hover:bg-[#164957] rounded-xl transition-colors shadow-md shadow-[#0C3440]/20"
           >
-            Enroll Child
+            {isSaving ? 'Saving...' : 'Enroll Child'}
           </button>
         </div>
       </form>

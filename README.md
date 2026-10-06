@@ -1,5 +1,18 @@
 # React + Vite
 
+## Troubleshooting Storage Issues
+
+Child photos are stored in the private `child-images` bucket. The app uses the signed-in Supabase Auth session and signed URLs to upload and display photos.
+
+To configure or repair Storage, apply the migrations with `supabase db push` or run [`20261006000100_configure_child_image_storage.sql`](./supabase/migrations/20261006000100_configure_child_image_storage.sql) in the Supabase SQL Editor. This creates/configures the bucket (5 MB maximum, JPEG/PNG/WebP only) and grants Storage access only to active authenticated admins.
+
+Open **Settings → Storage Diagnostic** to check bucket access, upload a small test image, read it back, and delete it. Enter an existing `children/...` object path there to test downloading that exact photo. In browser DevTools, `await window.logStorageHealth()` prints the same diagnostic details in development.
+
+Common fixes:
+- **Bucket missing or misconfigured**: Apply the migration above.
+- **Permission denied**: Confirm the user has an active row in `public.admin_users` and is signed in.
+- **Invalid MIME type or file too large**: Use a JPEG, PNG, or WebP image no larger than 5 MB.
+
 ## Host-Managed Admin Access
 
 The configured host email can authorize staff accounts from **Settings → Linked Admin Emails**. New addresses receive a Supabase invitation link and create their own password; passwords are never created or sent by the host.

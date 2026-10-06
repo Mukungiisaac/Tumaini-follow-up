@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Eye, EyeOff, LogOut } from 'lucide-react';
-import { isSupabaseConfigured, supabase } from '../../lib/supabase';
+import { Eye, EyeOff } from 'lucide-react';
+import { isSupabaseConfigured, supabase, supabaseUrl } from '../../lib/supabase';
 import { AdminAuthContext } from '../../lib/adminAuthContext';
 
 function SetupRequired() {
@@ -28,12 +28,16 @@ export default function AdminAuthGate({ children }) {
   const [requiresPasswordSetup, setRequiresPasswordSetup] = useState(() => new URLSearchParams(window.location.search).get('set-password') === '1');
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isPasswordRecovery, setIsPasswordRecovery] = useState(false);
+  const [recoveryMessage, setRecoveryMessage] = useState('');
 
   useEffect(() => {
     if (!isSupabaseConfigured) return undefined;
 
     let isMounted = true;
+    let verificationRun = 0;
     const checkAdmin = async (nextSession) => {
+      const currentRun = ++verificationRun;
       if (!nextSession) {
         if (isMounted) {
           setSession(null);
@@ -43,9 +47,28 @@ export default function AdminAuthGate({ children }) {
         return;
       }
 
+      if (!nextSession.access_token || !nextSession.user?.id) {
+        if (isMounted) {
+          setSession(null);
+          setAdmin(null);
+          setStatus('access-error');
+          setMessage('Could not verify admin access. The authenticated session is incomplete; please sign in again.');
+        }
+        return;
+      }
+
       if (isMounted) {
         setSession(nextSession);
         setStatus('checking-admin');
+      }
+
+      const adminQueryUrl = `${supabaseUrl}/rest/v1/admin_users?select=user_id%2Cemail%2Cdisplay_name%2Cactive&user_id=eq.${encodeURIComponent(nextSession.user.id)}`;
+      if (import.meta.env.DEV) {
+        console.info('[AdminAuthGate] Starting admin verification query.', {
+          url: adminQueryUrl,
+          userId: nextSession.user.id,
+          hasAccessToken: Boolean(nextSession.access_token)
+        });
       }
 
       const { data, error } = await supabase
@@ -54,11 +77,38 @@ export default function AdminAuthGate({ children }) {
         .eq('user_id', nextSession.user.id)
         .maybeSingle();
 
-      if (!isMounted) return;
+      if (!isMounted || currentRun !== verificationRun) return;
+      if (import.meta.env.DEV) {
+        console.info('[AdminAuthGate] Admin verification query result.', {
+          userId: nextSession.user.id,
+          hasAccessToken: Boolean(nextSession.access_token),
+          data,
+          error: error ? {
+            name: error.name,
+            message: error.message,
+            code: error.code,
+            details: error.details,
+            hint: error.hint,
+            status: error.status
+          } : null
+        });
+      }
       if (error) {
+        if (import.meta.env.DEV) {
+          console.error('[AdminAuthGate] Admin verification query failed.', {
+            userId: nextSession.user.id,
+            code: error.code,
+            message: error.message,
+            details: error.details,
+            hint: error.hint,
+            status: error.status
+          });
+        }
         setAdmin(null);
         setStatus('access-error');
-        setMessage('Could not verify admin access. Check the database migration and connection, then try again.');
+        setMessage(import.meta.env.DEV
+          ? `Could not verify admin access. Admin query failed: ${error.message}${error.code ? ` (code ${error.code})` : ''}`
+          : 'Could not verify admin access. Check the database migration and connection, then try again.');
       } else if (!data?.active) {
         setAdmin(null);
         setStatus('denied');
@@ -100,6 +150,29 @@ export default function AdminAuthGate({ children }) {
     }
 
     setSession(data.session);
+  };
+
+  const handlePasswordRecovery = async (event) => {
+    event.preventDefault();
+    setIsSubmitting(true);
+    setRecoveryMessage('');
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/?set-password=1`
+      });
+
+      if (error) {
+        setRecoveryMessage(`Could not send the password reset email: ${error.message}`);
+        return;
+      }
+
+      setRecoveryMessage('If an account exists for this email, a password reset link has been sent. Please check your email.');
+    } catch (error) {
+      setRecoveryMessage(`Could not send the password reset email: ${error?.message || 'Please try again.'}`);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleSignOut = async () => {
@@ -213,19 +286,8 @@ export default function AdminAuthGate({ children }) {
     }
 
     return (
-      <AdminAuthContext.Provider value={{ user: session.user, admin, updateAdminProfile }}>
-        <div>
-          <div className="flex items-center justify-end gap-3 border-b border-slate-200 bg-white px-4 py-2 text-xs text-slate-600">
-            <span>{session.user.user_metadata?.display_name || admin.display_name || admin.email}</span>
-            <button
-              onClick={handleSignOut}
-              className="inline-flex items-center gap-1.5 rounded px-2 py-1 font-semibold text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-            >
-              <LogOut className="h-3.5 w-3.5" /> Sign out
-            </button>
-          </div>
-          {children}
-        </div>
+      <AdminAuthContext.Provider value={{ user: session.user, admin, updateAdminProfile, signOut: handleSignOut }}>
+        {children}
       </AdminAuthContext.Provider>
     );
   }
@@ -247,6 +309,49 @@ export default function AdminAuthGate({ children }) {
             This account is not an active admin. Ask the project owner to grant access.
           </p>
         ) : (
+          isPasswordRecovery ? (
+            <form onSubmit={handlePasswordRecovery} className="space-y-4">
+              <p className="text-sm text-slate-600">
+                Enter your admin account email and we’ll send you a password reset link.
+              </p>
+              <label className="block space-y-1.5 text-sm font-medium text-slate-700">
+                Email
+                <input
+                  type="email"
+                  autoComplete="email"
+                  required
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  className="h-11 w-full rounded-lg border border-slate-300 px-3 font-normal outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/15"
+                />
+              </label>
+              {recoveryMessage && (
+                <p
+                  role={recoveryMessage.startsWith('If an account exists') ? 'status' : 'alert'}
+                  className={`text-sm ${recoveryMessage.startsWith('If an account exists') ? 'text-emerald-700' : 'text-rose-700'}`}
+                >
+                  {recoveryMessage}
+                </p>
+              )}
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="h-11 w-full rounded-lg bg-brand-primary px-4 text-sm font-semibold text-white hover:bg-teal-800 disabled:opacity-60"
+              >
+                {isSubmitting ? 'Sending reset link...' : 'Send password reset link'}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsPasswordRecovery(false);
+                  setRecoveryMessage('');
+                }}
+                className="w-full text-sm font-semibold text-slate-600 hover:text-slate-900"
+              >
+                Back to sign in
+              </button>
+            </form>
+          ) : (
           <form onSubmit={handleSignIn} className="space-y-4">
             <label className="block space-y-1.5 text-sm font-medium text-slate-700">
               Email
@@ -275,6 +380,18 @@ export default function AdminAuthGate({ children }) {
                 </button>
               </span>
             </label>
+            <div className="-mt-2 text-right">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsPasswordRecovery(true);
+                  setRecoveryMessage('');
+                }}
+                className="text-sm font-semibold text-brand-primary hover:text-teal-800"
+              >
+                Forgot password?
+              </button>
+            </div>
             {message && <p role="alert" className="text-sm text-rose-700">{message}</p>}
             <button
               type="submit"
@@ -284,6 +401,7 @@ export default function AdminAuthGate({ children }) {
               {isSubmitting ? 'Signing in...' : 'Sign in'}
             </button>
           </form>
+          )
         )}
 
         {status === 'access-error' && !message && (

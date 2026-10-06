@@ -1,6 +1,7 @@
 ﻿import React from 'react';
 import { useOutletContext, useNavigate } from 'react-router-dom';
 import { Calculator, AlertCircle, Users, Sparkles, BookOpen, UserCheck } from 'lucide-react';
+import ChildImage from '../components/common/ChildImage';
 
 export default function MathScienceView() {
   const { childrenList } = useOutletContext();
@@ -43,7 +44,7 @@ export default function MathScienceView() {
           {supportChildren.map((c) => (
             <div key={c.id} className="bg-white rounded-3xl p-6 border border-slate-100 shadow-xs space-y-4">
               <div className="flex items-center gap-3">
-                <img src={c.image} alt={c.name} className="w-12 h-12 rounded-full object-cover ring-2 ring-slate-100" />
+                <ChildImage src={c.image} alt={c.name} className="w-12 h-12 rounded-full object-cover ring-2 ring-slate-100" />
                 <div>
                   <h4 className="text-base font-bold text-slate-900">{c.name}</h4>
                   <p className="text-xs text-slate-500">{c.grade} | {c.cottage}</p>

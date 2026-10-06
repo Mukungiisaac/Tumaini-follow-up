@@ -15,6 +15,7 @@ import { MOCK_ACTIVITIES } from '../../data/mockActivities';
 import { AdminAuthContext } from '../../lib/adminAuthContext';
 import { insertAppRecords, listAppRecords, removeAppRecord, saveAppRecord } from '../../lib/appRecords';
 import { isSupabaseConfigured, supabase } from '../../lib/supabase';
+import { deleteChildImage, isChildImageStoragePath, uploadChildImage } from '../../lib/childImages';
 
 function readStoredValue(key, fallback) {
   try {
@@ -218,11 +219,13 @@ export default function AppLayout() {
 
   const mutateChild = async (childId, update) => {
     const child = childrenList.find((item) => item.id === childId);
-    if (!child) return;
+    if (!child) return false;
     const updatedChild = update(child);
     if (await persistRecord('children', updatedChild)) {
       setChildrenList((prev) => prev.map((item) => item.id === childId ? updatedChild : item));
+      return true;
     }
+    return false;
   };
 
   const handleUpdateHouse = (updatedHouse) => {
@@ -237,7 +240,8 @@ export default function AppLayout() {
         await auth.updateAdminProfile({
           display_name: updatedUserData.name || updatedUserData.display_name || currentUser.name,
           phone: updatedUserData.phone || currentUser.phone || '',
-          department: updatedUserData.department || currentUser.department || ''
+          department: updatedUserData.department || currentUser.department || '',
+          avatar_url: updatedUserData.avatar ?? currentUser.avatar ?? ''
         });
       } catch {
         setDataError('Could not update the admin profile. Please try again.');
@@ -282,14 +286,71 @@ export default function AppLayout() {
   };
 
   // Handlers for state updates
-  const handleAddChild = (newChild) => {
-    persistRecord('children', newChild).then((saved) => {
-      if (saved) setChildrenList((prev) => [newChild, ...prev]);
-    });
+  const handleAddChild = async (newChild, imageFile) => {
+    let childToSave = newChild;
+    let uploadedImagePath = '';
+    if (imageFile) {
+      try {
+        uploadedImagePath = await uploadChildImage(imageFile, newChild.id);
+        childToSave = { ...newChild, image: uploadedImagePath };
+      } catch (error) {
+        setDataError(`Could not upload the child photo to Supabase Storage: ${error?.message || 'Unknown Storage error'}`);
+        throw error;
+      }
+    }
+
+    if (!(await persistRecord('children', childToSave))) {
+      if (uploadedImagePath) {
+        try {
+          await deleteChildImage(uploadedImagePath);
+        } catch (error) {
+          setDataError(`Could not save the child record or clean up its uploaded photo: ${error?.message || 'Unknown Storage error'}`);
+        }
+      }
+      return false;
+    }
+    setChildrenList((prev) => [childToSave, ...prev]);
+    return true;
   };
 
-  const handleUpdateChild = (updatedChild) => {
-    mutateChild(updatedChild.id, (child) => ({ ...child, ...updatedChild }));
+  const handleUpdateChild = async (updatedChild, imageFile) => {
+    const existingChild = childrenList.find((item) => item.id === updatedChild.id);
+    if (!existingChild) return false;
+
+    const oldImagePath = isChildImageStoragePath(existingChild.image) ? existingChild.image : '';
+    let childToSave = updatedChild;
+    let uploadedImagePath = '';
+    if (imageFile) {
+      try {
+        uploadedImagePath = await uploadChildImage(imageFile, updatedChild.id);
+        childToSave = { ...updatedChild, image: uploadedImagePath };
+      } catch (error) {
+        setDataError(`Could not upload the child photo to Supabase Storage: ${error?.message || 'Unknown Storage error'}`);
+        throw error;
+      }
+    }
+
+    const saved = await mutateChild(childToSave.id, () => childToSave);
+    if (!saved) {
+      if (uploadedImagePath) {
+        try {
+          await deleteChildImage(uploadedImagePath);
+        } catch (error) {
+          setDataError(`Could not clean up the new child photo from Supabase Storage: ${error?.message || 'Unknown Storage error'}`);
+        }
+      }
+      return false;
+    }
+
+    if (oldImagePath && oldImagePath !== childToSave.image) {
+      try {
+        await deleteChildImage(oldImagePath);
+      } catch (error) {
+        setDataError(`Child photo was saved, but the old Storage file could not be deleted: ${error?.message || 'Unknown Storage error'}`);
+      }
+    }
+
+    return true;
   };
 
   const openEditChildModal = (childToEdit) => {
@@ -440,6 +501,7 @@ export default function AppLayout() {
     activities,
     searchQuery,
     currentUser,
+    handleSignOut: auth?.signOut,
     handleUpdateUser,
     openAddChildModal: () => setIsAddChildOpen(true),
     openEditChildModal,
@@ -491,6 +553,10 @@ export default function AppLayout() {
           onToggleSidebar={handleToggleSidebar}
           onSearchChange={(q) => setSearchQuery(q)}
           currentUser={currentUser}
+          onSignOut={auth?.signOut}
+          childrenList={childrenList}
+          activities={activities}
+          scheduledSessions={scheduledSessions}
           isSidebarOpen={isMobileViewport ? sidebarOpen : !isCollapsed}
         />
 
@@ -572,4 +638,3 @@ export default function AppLayout() {
     </div>
   );
 }
-

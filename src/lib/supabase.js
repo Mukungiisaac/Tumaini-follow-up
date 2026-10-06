@@ -1,9 +1,19 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+function normalizeEnvironmentValue(value) {
+  const trimmedValue = String(value || '').trim();
+  const quote = trimmedValue[0];
+  if ((quote === '"' || quote === "'") && trimmedValue.endsWith(quote)) {
+    return trimmedValue.slice(1, -1).trim();
+  }
+  return trimmedValue;
+}
 
-export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseKey);
+export const supabaseUrl = normalizeEnvironmentValue(import.meta.env.VITE_SUPABASE_URL);
+export const supabaseAnonKey = normalizeEnvironmentValue(import.meta.env.VITE_SUPABASE_ANON_KEY);
+
+export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey);
+
 export const supabase = isSupabaseConfigured
-  ? createClient(supabaseUrl, supabaseKey)
+  ? createClient(supabaseUrl, supabaseAnonKey)
   : null;

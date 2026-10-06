@@ -2,6 +2,7 @@
 import { useOutletContext, useNavigate } from 'react-router-dom';
 import { GRADE_LEVELS, SKILL_LEVELS } from '../data/mockData';
 import { Star, CheckCircle2, ChevronDown } from 'lucide-react';
+import ChildImage from '../components/common/ChildImage';
 
 export default function ProgressTrackingView() {
   const { childrenList, handleUpdateChildSkill } = useOutletContext();
@@ -172,7 +173,7 @@ export default function ProgressTrackingView() {
                       onClick={() => navigate(`/children/${child.id}`)}
                       className="flex cursor-pointer items-center gap-3"
                     >
-                      <img
+                      <ChildImage
                         src={child.image}
                         alt={child.name}
                         className="h-9 w-9 rounded-full object-cover ring-1 ring-slate-200"

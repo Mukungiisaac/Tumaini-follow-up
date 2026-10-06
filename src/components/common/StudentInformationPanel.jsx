@@ -72,6 +72,13 @@ export default function StudentInformationPanel({ child }) {
           ['Educational Support Needs', information.educationalNeeds]
         ]}
       />
+      <DetailGrid
+        title={`${child.fullName || child.name} Sponsor`}
+        fields={[
+          ['Sponsor Name', information.sponsorName],
+          ['Sponsor Email', information.sponsorEmail]
+        ]}
+      />
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
         <FamilySection title="Mother's Details" details={information.mother || {}} />
         <FamilySection title="Father's Details" details={information.father || {}} />

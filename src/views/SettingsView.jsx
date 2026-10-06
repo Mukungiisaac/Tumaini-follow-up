@@ -1,13 +1,19 @@
 ﻿import React, { useRef, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { User, Settings, Save, Camera, CheckCircle2, Building } from 'lucide-react';
+import { User, Settings, Save, Camera, CheckCircle2, Building, AlertCircle, Loader2 } from 'lucide-react';
 import LinkedAdminsPanel from '../components/auth/LinkedAdminsPanel';
+import { checkStorageHealth, runSigningRequestComparison, SIGNING_DIAGNOSTIC_PATH } from '../lib/storageHealthCheck';
 
 export default function SettingsView() {
   const { currentUser, handleUpdateUser, houses = [], handleUpdateHouse } = useOutletContext();
   const [saved, setSaved] = useState(false);
   const [avatarError, setAvatarError] = useState('');
   const avatarInputRef = useRef(null);
+  const [diagnosticResult, setDiagnosticResult] = useState(null);
+  const [isDiagnosticRunning, setIsDiagnosticRunning] = useState(false);
+  const [existingObjectPath, setExistingObjectPath] = useState('');
+  const [isComparisonRunning, setIsComparisonRunning] = useState(false);
+  const [signingComparisonResult, setSigningComparisonResult] = useState(null);
 
   const [profileData, setProfileData] = useState({
     name: currentUser?.name || 'Sarah Johnson',
@@ -65,6 +71,60 @@ export default function SettingsView() {
     }
     setSaved(true);
     setTimeout(() => setSaved(false), 3500);
+  };
+
+  const diagnosticPassed = Boolean(
+    diagnosticResult?.authenticated
+    && diagnosticResult?.adminRecord?.active
+    && diagnosticResult?.bucketExists
+    && diagnosticResult?.canUpload
+    && diagnosticResult?.canRead
+    && diagnosticResult?.canDelete
+    && (!diagnosticResult?.existingPathDownload || diagnosticResult.existingPathDownload.passed)
+  );
+
+  const runDiagnostic = async () => {
+    setIsDiagnosticRunning(true);
+    setDiagnosticResult(null);
+    try {
+      const result = await checkStorageHealth(existingObjectPath);
+      setDiagnosticResult(result);
+    } catch (err) {
+      const statusCode = err?.statusCode || err?.status;
+      const errorDetail = err?.error ? ` (${err.error})` : '';
+      setDiagnosticResult({
+        authenticated: false,
+        bucketExists: false,
+        canUpload: false,
+        canRead: false,
+        canDelete: false,
+        bucketConfiguration: null,
+        adminRecord: null,
+        errors: [`Diagnostic failed: ${err?.message || String(err)}${statusCode ? ` (status ${statusCode})` : ''}${errorDetail}`]
+      });
+    } finally {
+      setIsDiagnosticRunning(false);
+    }
+  };
+
+  const runSigningComparison = async () => {
+    setIsComparisonRunning(true);
+    setSigningComparisonResult(null);
+    try {
+      setSigningComparisonResult(await runSigningRequestComparison());
+    } catch (error) {
+      setSigningComparisonResult({
+        bucket: 'child-images',
+        path: SIGNING_DIAGNOSTIC_PATH,
+        comparisonError: {
+          name: error?.name || 'Error',
+          message: error?.message || String(error),
+          ...error
+        }
+      });
+    } finally {
+      setIsComparisonRunning(false);
+    }
   };
 
   return (
@@ -295,8 +355,228 @@ export default function SettingsView() {
           </button>
         </div>
       </form>
+
+      {/* Storage Diagnostic Section */}
+      <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/80 shadow-xs space-y-4">
+        <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
+          <AlertCircle className="w-5 h-5 text-[#0C3440]" />
+          <div>
+            <h3 className="text-base font-bold text-slate-900">Storage Diagnostic</h3>
+            <p className="text-xs text-slate-500">Check if photo uploads are working correctly</p>
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <p className="text-xs text-slate-600">
+            If you're experiencing issues uploading child photos (HTTP 400 errors), run this diagnostic to identify the problem.
+            Optionally enter an existing child image path to test downloading that exact object.
+          </p>
+
+          <label className="block space-y-1 text-xs">
+            <span className="font-semibold text-slate-700">Existing object path (optional)</span>
+            <input
+              type="text"
+              value={existingObjectPath}
+              onChange={(event) => setExistingObjectPath(event.target.value)}
+              placeholder="children/<child-id>/<file-name>"
+              className="w-full px-3 py-2 rounded-lg border border-slate-200 text-slate-800"
+            />
+          </label>
+
+          <button
+            type="button"
+            onClick={runDiagnostic}
+            disabled={isDiagnosticRunning}
+            className="px-4 py-2 bg-[#E8F0F0] text-[#0C3440] rounded-lg text-xs font-semibold hover:bg-[#D4E4E4] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            {isDiagnosticRunning ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Running Diagnostic...
+              </>
+            ) : (
+              <>
+                <AlertCircle className="w-4 h-4" />
+                Run Storage Health Check
+              </>
+            )}
+          </button>
+
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-3">
+            <div>
+              <h4 className="text-xs font-bold text-slate-900">Temporary signing request comparison</h4>
+              <p className="mt-1 text-[11px] text-slate-600 break-all">
+                Tests the existing private object: {SIGNING_DIAGNOSTIC_PATH}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={runSigningComparison}
+              disabled={isComparisonRunning}
+              className="px-4 py-2 bg-[#0C3440] text-white rounded-lg text-xs font-semibold hover:bg-[#164957] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              {isComparisonRunning ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Running three tests...
+                </>
+              ) : (
+                'Run signing comparison'
+              )}
+            </button>
+
+            {signingComparisonResult && (
+              <div className="space-y-3 text-xs">
+                <div>
+                  <span className="font-semibold">Bucket:</span> {signingComparisonResult.bucket}
+                  <br />
+                  <span className="font-semibold">Path:</span>{' '}
+                  <span className="break-all">{signingComparisonResult.path}</span>
+                </div>
+                {[
+                  ['Client createSignedUrl', signingComparisonResult.clientCreateSignedUrl],
+                  ['Client download', signingComparisonResult.clientDownload],
+                  ['Bare fetch createSignedUrl', signingComparisonResult.bareFetchCreateSignedUrl]
+                ].map(([label, result]) => result && (
+                  <section key={label} className="rounded-lg border border-slate-200 bg-white p-3 space-y-1">
+                    <h5 className="font-bold">
+                      {result.passed ? '✓' : '✗'} {label}
+                    </h5>
+                    {result.data !== undefined && (
+                      <div>
+                        <span className="font-semibold">Data:</span>
+                        <pre className="mt-1 max-h-64 overflow-auto whitespace-pre-wrap break-all rounded bg-slate-50 p-2 text-[10px]">
+                          {JSON.stringify(result.data, null, 2)}
+                        </pre>
+                      </div>
+                    )}
+                    <div>
+                      <span className="font-semibold">Full error object:</span>
+                      <pre className="mt-1 max-h-64 overflow-auto whitespace-pre-wrap break-all rounded bg-slate-50 p-2 text-[10px]">
+                        {JSON.stringify(result.error, null, 2) ?? 'null'}
+                      </pre>
+                    </div>
+                  </section>
+                ))}
+                {signingComparisonResult.comparisonError && (
+                  <pre className="max-h-64 overflow-auto whitespace-pre-wrap break-all rounded bg-rose-50 p-2 text-[10px]">
+                    {JSON.stringify(signingComparisonResult.comparisonError, null, 2)}
+                  </pre>
+                )}
+              </div>
+            )}
+          </div>
+
+          {diagnosticResult && (
+            <div className={`p-4 rounded-xl border text-xs space-y-2 ${
+              diagnosticPassed
+                ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
+                : 'bg-amber-50 border-amber-200 text-amber-900'
+            }`}>
+              <div className="font-bold font-mono uppercase tracking-wide text-[10px]">
+                {diagnosticPassed ? '✅ All Systems Operational' : '⚠️ Issues Detected'}
+              </div>
+
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className={diagnosticResult.authenticated ? 'text-emerald-600' : 'text-rose-600'}>
+                    {diagnosticResult.authenticated ? '✓' : '✗'}
+                  </span>
+                  <span className="font-semibold">Authentication:</span>
+                  <span>{diagnosticResult.authenticated ? 'Signed In' : 'Not Authenticated'}</span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className={diagnosticResult.adminRecord?.active ? 'text-emerald-600' : 'text-rose-600'}>
+                    {diagnosticResult.adminRecord?.active ? '✓' : '✗'}
+                  </span>
+                  <span className="font-semibold">Admin Record:</span>
+                  <span>
+                    {diagnosticResult.adminRecord
+                      ? (diagnosticResult.adminRecord.active ? 'Active' : 'Inactive')
+                      : 'Not Found'}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className={diagnosticResult.bucketExists ? 'text-emerald-600' : 'text-rose-600'}>
+                    {diagnosticResult.bucketExists ? '✓' : '✗'}
+                  </span>
+                  <span className="font-semibold">Storage Bucket:</span>
+                  <span>{diagnosticResult.bucketExists ? 'Exists' : 'Not Found'}</span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className={diagnosticResult.canUpload ? 'text-emerald-600' : 'text-rose-600'}>
+                    {diagnosticResult.canUpload ? '✓' : '✗'}
+                  </span>
+                  <span className="font-semibold">Test Upload:</span>
+                  <span>{diagnosticResult.canUpload ? 'Passed' : 'Failed or skipped'}</span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className={diagnosticResult.canRead ? 'text-emerald-600' : 'text-rose-600'}>
+                    {diagnosticResult.canRead ? '✓' : '✗'}
+                  </span>
+                  <span className="font-semibold">Read Back:</span>
+                  <span>{diagnosticResult.canRead ? 'Passed' : 'Failed or skipped'}</span>
+                </div>
+
+                {diagnosticResult.existingPathDownload && (
+                  <div className="flex items-center gap-2 break-all">
+                    <span className={diagnosticResult.existingPathDownload.passed ? 'text-emerald-600' : 'text-rose-600'}>
+                      {diagnosticResult.existingPathDownload.passed ? '✓' : '✗'}
+                    </span>
+                    <span className="font-semibold">Existing object download:</span>
+                    <span>
+                      {diagnosticResult.existingPathDownload.passed
+                        ? 'Passed'
+                        : diagnosticResult.existingPathDownload.error || 'Failed'}
+                    </span>
+                  </div>
+                )}
+
+                <div className="flex items-center gap-2">
+                  <span className={diagnosticResult.canDelete ? 'text-emerald-600' : 'text-rose-600'}>
+                    {diagnosticResult.canDelete ? '✓' : '✗'}
+                  </span>
+                  <span className="font-semibold">Test File Cleanup:</span>
+                  <span>{diagnosticResult.canDelete ? 'Passed' : 'Failed or skipped'}</span>
+                </div>
+              </div>
+
+              {diagnosticResult.bucketConfiguration && (
+                <div className="pt-2 text-[11px]">
+                  Bucket configuration: {Math.round(diagnosticResult.bucketConfiguration.fileSizeLimit / (1024 * 1024))} MB maximum;{' '}
+                  {diagnosticResult.bucketConfiguration.allowedMimeTypes?.join(', ') || 'no MIME restrictions reported'};{' '}
+                  {diagnosticResult.bucketConfiguration.public ? 'public' : 'private'} read.
+                </div>
+              )}
+
+              {diagnosticResult.errors.length > 0 && (
+                <div className="mt-3 pt-3 border-t border-amber-200 space-y-1">
+                  <div className="font-bold">Diagnostic details:</div>
+                  {diagnosticResult.errors.map((error, idx) => (
+                    <div key={idx} role="alert" className="text-[11px] break-words">• {error}</div>
+                  ))}
+                  {!diagnosticResult.bucketExists && (
+                    <div className="mt-2 p-2 bg-amber-100 rounded text-[11px]">
+                      <strong>Fix:</strong> Run <code className="bg-white px-1 py-0.5 rounded">supabase db push</code> to create the storage bucket
+                    </div>
+                  )}
+                  {diagnosticResult.adminRecord && !diagnosticResult.adminRecord.active && (
+                    <div className="mt-2 p-2 bg-amber-100 rounded text-[11px]">
+                      <strong>Fix:</strong> Contact system administrator to activate your account
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
       <LinkedAdminsPanel email={currentUser?.email} />
     </div>
   );
 }
-

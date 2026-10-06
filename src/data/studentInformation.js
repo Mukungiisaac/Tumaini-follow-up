@@ -17,6 +17,8 @@ export const EMPTY_STUDENT_INFORMATION = {
   educationalNeeds: '',
   caseHistory: '',
   howJoined: '',
+  sponsorName: '',
+  sponsorEmail: '',
   mother: {},
   father: {},
   guardian: {}

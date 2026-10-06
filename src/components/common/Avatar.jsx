@@ -1,7 +1,9 @@
 ﻿import React, { useState } from 'react';
+import { useChildImageUrl } from '../../lib/childImages';
 
 export default function Avatar({ src, name = '', size = 'md', className = '' }) {
   const [imageError, setImageError] = useState(false);
+  const imageUrl = useChildImageUrl(src);
 
   const getInitials = (n) => {
     if (!n) return '?';
@@ -20,7 +22,7 @@ export default function Avatar({ src, name = '', size = 'md', className = '' }) 
     xl: 'w-14 h-14 text-base'
   }[size] || 'w-10 h-10 text-xs';
 
-  if (!src || imageError) {
+  if (!imageUrl || imageError) {
     return (
       <div
         className={`${sizeClasses} rounded-full bg-gradient-to-br from-[#0C3440] to-[#0C3440] text-white font-bold flex items-center justify-center shrink-0 shadow-xs border border-white/20 ${className}`}
@@ -33,7 +35,7 @@ export default function Avatar({ src, name = '', size = 'md', className = '' }) 
 
   return (
     <img
-      src={src}
+      src={imageUrl}
       alt={name}
       onError={() => setImageError(true)}
       className={`${sizeClasses} rounded-full object-cover shrink-0 ${className}`}

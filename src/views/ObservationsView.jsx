@@ -1,6 +1,7 @@
 ﻿import React, { useState } from 'react';
 import { useOutletContext, useNavigate } from 'react-router-dom';
 import { Eye, Plus, Search, Filter, Sparkles, AlertCircle, Target, Edit3, Trash2 } from 'lucide-react';
+import ChildImage from '../components/common/ChildImage';
 
 export default function ObservationsView() {
   const { childrenList, openRecordObsModal, openEditObsModal, handleDeleteObservation } = useOutletContext();
@@ -106,7 +107,7 @@ export default function ObservationsView() {
                   onClick={() => navigate(`/children/${obs.childId}`)}
                   className="flex items-center gap-3 cursor-pointer group"
                 >
-                  <img
+                  <ChildImage
                     src={obs.childImage}
                     alt={obs.childName}
                     className="w-10 h-10 rounded-full object-cover ring-2 ring-slate-100"

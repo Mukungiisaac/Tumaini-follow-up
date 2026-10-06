@@ -1,5 +1,6 @@
 ﻿import React, { useState, useEffect } from 'react';
 import Modal from './Modal';
+import ChildImage from './ChildImage';
 import { MOCK_MENTORS, MEETING_LOCATIONS } from '../../data/mockData';
 import { Calendar, Clock, MapPin, UserCheck, MessageSquare } from 'lucide-react';
 
@@ -103,7 +104,7 @@ export default function ScheduleOneOnOneModal({
           {/* Target Child Selector */}
           <div className="flex items-center gap-3 min-w-0">
             {selectedChild && (
-              <img
+              <ChildImage
                 src={selectedChild.image}
                 alt={selectedChild.name}
                 className="w-11 h-11 rounded-full object-cover ring-1 ring-slate-200 shrink-0"

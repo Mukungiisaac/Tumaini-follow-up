@@ -1,6 +1,6 @@
-﻿import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Bell, Menu, CheckCircle2, X } from 'lucide-react';
+import { Search, Bell, Menu, CheckCircle2, X, Settings, LogOut } from 'lucide-react';
 import { MOCK_MENTORS } from '../../data/mockData';
 
 export default function Header({
@@ -9,11 +9,17 @@ export default function Header({
   title = 'TUMAINI Dashboard',
   subtitle = "Children's Home Portal",
   onSearchChange,
+  onSignOut,
   currentUser,
+  childrenList = [],
+  activities = [],
+  scheduledSessions = [],
   isSidebarOpen = false
 }) {
   const navigate = useNavigate();
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const profileMenuRef = useRef(null);
   const [today, setToday] = useState(() => new Date());
   const user = currentUser || MOCK_MENTORS[0];
 
@@ -22,6 +28,24 @@ export default function Header({
     return () => clearInterval(intervalId);
   }, []);
 
+  useEffect(() => {
+    if (!showProfileMenu) return undefined;
+
+    const closeOnOutsideClick = (event) => {
+      if (!profileMenuRef.current?.contains(event.target)) setShowProfileMenu(false);
+    };
+    const closeOnEscape = (event) => {
+      if (event.key === 'Escape') setShowProfileMenu(false);
+    };
+
+    document.addEventListener('pointerdown', closeOnOutsideClick);
+    document.addEventListener('keydown', closeOnEscape);
+    return () => {
+      document.removeEventListener('pointerdown', closeOnOutsideClick);
+      document.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [showProfileMenu]);
+
   const formattedDate = new Intl.DateTimeFormat(undefined, {
     weekday: 'long',
     month: 'short',
@@ -29,10 +53,46 @@ export default function Header({
   }).format(today);
 
   const notifications = [
-    { id: 1, title: 'Samuel O. completed Level 1 Typing', time: '10m ago' },
-    { id: 2, title: 'Math Support needed for Sarah M.', time: '1h ago' },
-    { id: 3, title: 'Discipleship milestone added by John D.', time: '3h ago' }
-  ];
+    ...childrenList.flatMap((child) => [
+      ...(child.milestones || []).map((milestone) => ({
+        id: `milestone-${child.id}-${milestone.id}`,
+        title: `Milestone recorded: ${milestone.title}`,
+        detail: child.name,
+        date: milestone.date
+      })),
+      ...(child.observations || []).map((observation) => ({
+        id: `observation-${child.id}-${observation.id}`,
+        title: `Observation added: ${observation.area}`,
+        detail: child.name,
+        date: observation.date
+      }))
+    ]),
+    ...scheduledSessions
+      .filter((session) => (session.status || '').toLowerCase() === 'completed')
+      .map((session) => ({
+        id: `session-${session.id}`,
+        title: `Session completed: ${session.topic}`,
+        detail: session.childName,
+        date: session.date
+      })),
+    ...activities
+      .filter((activity) => (activity.status || '').toLowerCase() === 'completed')
+      .map((activity) => ({
+        id: `activity-${activity.id}`,
+        title: `Activity completed: ${activity.title}`,
+        detail: activity.category,
+        date: activity.date
+      }))
+  ]
+    .filter((notification) => notification.date && !Number.isNaN(Date.parse(notification.date)))
+    .sort((left, right) => Date.parse(right.date) - Date.parse(left.date))
+    .slice(0, 5);
+
+  const formatNotificationDate = (dateString) => new Intl.DateTimeFormat(undefined, {
+    month: 'short',
+    day: 'numeric',
+    year: new Date(dateString).getFullYear() === today.getFullYear() ? undefined : 'numeric'
+  }).format(new Date(`${dateString}T00:00:00`));
 
   const handleSidebarToggle = onToggleSidebar || onOpenSidebar;
 
@@ -87,7 +147,7 @@ export default function Header({
         {/* Date & Term pill */}
         <div className="hidden xl:flex flex-col items-end text-right">
           <time dateTime={today.toISOString().slice(0, 10)} className="text-xs font-bold text-slate-800">{formattedDate}</time>
-          <span className="text-[10px] font-bold text-[#8A5F20] uppercase font-mono tracking-wider">
+          <span className="mt-0.5 text-[10px] font-semibold text-slate-500">
             SCHOOL TERM 3
           </span>
         </div>
@@ -97,57 +157,91 @@ export default function Header({
           <button
             onClick={() => setShowNotifications(!showNotifications)}
             className="relative p-2 text-slate-600 hover:text-slate-900 rounded-full hover:bg-slate-100 transition-colors cursor-pointer"
+            aria-label={`Notifications, ${notifications.length} recent updates`}
+            aria-expanded={showNotifications}
+            aria-controls="notifications-panel"
           >
             <Bell className="w-5 h-5" />
             <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-[#0C3440] rounded-full ring-2 ring-white" />
           </button>
 
           {showNotifications && (
-            <div className="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-xl border border-slate-100 p-4 z-50 animate-in fade-in zoom-in-95 duration-150">
+            <div id="notifications-panel" className="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-xl border border-slate-100 p-4 z-50 animate-in fade-in zoom-in-95 duration-150">
               <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                <h4 className="text-xs font-bold uppercase text-slate-800 font-mono">Notifications</h4>
-                <span className="text-[10px] font-bold text-[#8A5F20] bg-[#FBF3E4] border border-[#E6C98F] px-2 py-0.5 rounded-full">3 New</span>
+                <h4 className="text-xs font-semibold text-slate-800">Notifications</h4>
+                <span className="text-[10px] font-semibold text-teal-800 bg-teal-50 border border-teal-200 px-2 py-0.5 rounded-full">
+                  {notifications.length} Updates
+                </span>
               </div>
-              <div className="divide-y divide-slate-100 max-h-60 overflow-y-auto">
-                {notifications.map((n) => (
-                  <div key={n.id} className="py-2.5 flex items-start gap-2.5">
-                    <CheckCircle2 className="w-4 h-4 text-[#0C3440] shrink-0 mt-0.5" />
-                    <div>
-                      <p className="text-xs font-medium text-slate-800">{n.title}</p>
-                      <span className="text-[10px] text-slate-400">{n.time}</span>
-                    </div>
+              <div className="max-h-60 overflow-y-auto">
+                {notifications.length === 0 ? (
+                  <p className="py-6 text-center text-xs text-slate-500">No recent updates</p>
+                ) : (
+                  <div className="divide-y divide-slate-100">
+                    {notifications.map((notification) => (
+                      <div key={notification.id} className="py-2.5 flex items-start gap-2.5">
+                        <CheckCircle2 className="w-4 h-4 text-[#0C3440] shrink-0 mt-0.5" />
+                        <div className="min-w-0">
+                          <p className="text-xs font-medium text-slate-800">{notification.title}</p>
+                          <p className="mt-1 truncate text-[10px] text-slate-500">{notification.detail}</p>
+                          <span className="text-[10px] text-slate-400">{formatNotificationDate(notification.date)}</span>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                )}
               </div>
             </div>
           )}
         </div>
 
-        {/* Logged in Mentor User pill */}
-        <div
-          onClick={() => navigate('/settings')}
-          className="flex items-center gap-3 pl-3 border-l border-slate-200 cursor-pointer group"
-          title="Click to edit user profile in Settings"
-        >
-          <div className="text-right hidden sm:block">
-            <h4 className="text-xs font-bold text-slate-900 group-hover:text-[#0C3440] leading-tight transition-colors">
-              {user.name}
-            </h4>
-            <p className="text-[10px] font-bold text-[#8A5F20] uppercase font-mono tracking-wider">
-              {user.role}
-            </p>
-          </div>
-          <div className="relative">
+        {/* Account menu */}
+        <div ref={profileMenuRef} className="relative border-l border-slate-200 pl-3">
+          <button
+            type="button"
+            onClick={() => setShowProfileMenu((open) => !open)}
+            className="relative block rounded-full focus:outline-none focus:ring-2 focus:ring-[#0C3440] focus:ring-offset-2"
+            title="Open profile menu"
+            aria-label={`Open profile menu for ${user.name}`}
+            aria-expanded={showProfileMenu}
+            aria-controls="profile-menu"
+          >
             <img
               src={user.avatar}
               alt={user.name}
               onError={(e) => {
                 e.currentTarget.src = 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80';
               }}
-              className="w-9 h-9 rounded-full object-cover ring-2 ring-[#D99B3C] group-hover:ring-[#0C3440] shadow-xs transition-all"
+              className="w-9 h-9 rounded-full object-cover ring-2 ring-slate-200 shadow-xs transition-all"
             />
             <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full ring-2 ring-white" />
-          </div>
+          </button>
+          {showProfileMenu && (
+            <div id="profile-menu" className="absolute right-0 top-full z-50 mt-3 w-60 rounded-lg border border-slate-200 bg-white p-2 shadow-lg">
+              <div className="border-b border-slate-100 px-3 py-2.5">
+                <p className="truncate text-sm font-semibold text-slate-900">{user.name}</p>
+                {user.role && <p className="mt-0.5 text-xs text-slate-500">{user.role}</p>}
+                {user.email && <p className="mt-1 truncate text-xs text-slate-500">{user.email}</p>}
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowProfileMenu(false);
+                  navigate('/settings');
+                }}
+                className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm font-medium text-slate-700 hover:bg-slate-50"
+              >
+                <Settings className="h-4 w-4 text-slate-500" /> Profile settings
+              </button>
+              <button
+                type="button"
+                onClick={onSignOut}
+                className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm font-medium text-slate-700 hover:bg-slate-50"
+              >
+                <LogOut className="h-4 w-4 text-slate-500" /> Sign out
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </header>

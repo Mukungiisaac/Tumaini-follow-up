@@ -1,5 +1,6 @@
 ﻿import React, { useState } from 'react';
 import Modal from './Modal';
+import ChildImage from './ChildImage';
 import { CheckCircle2, Search } from 'lucide-react';
 
 export default function ManageAttendanceModal({ isOpen, onClose, activity, childrenList, onUpdateAttendance }) {
@@ -68,7 +69,7 @@ export default function ManageAttendanceModal({ isOpen, onClose, activity, child
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <img src={c.image} alt={c.name} className="w-9 h-9 rounded-full object-cover ring-2 ring-slate-100" />
+                  <ChildImage src={c.image} alt={c.name} className="w-9 h-9 rounded-full object-cover ring-2 ring-slate-100" />
                   <div>
                     <h5 className="text-xs font-bold text-slate-900">{c.name}</h5>
                     <span className="text-[10px] text-slate-500 font-medium">{c.grade} | {c.cottage}</span>

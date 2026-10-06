@@ -2,6 +2,7 @@
 import { useOutletContext, useNavigate } from 'react-router-dom';
 import { MOCK_MENTORS } from '../data/mockData';
 import { UserCheck, MessageSquare, Shield, Users, Calendar, Clock, MapPin, Plus, CheckCircle, XCircle } from 'lucide-react';
+import ChildImage from '../components/common/ChildImage';
 
 export default function MentorshipView() {
   const { scheduledSessions = [], openScheduleModal, handleUpdateSessionStatus } = useOutletContext();
@@ -109,7 +110,7 @@ export default function MentorshipView() {
                       onClick={() => navigate(`/children/${s.childId}`)}
                       className="flex items-center gap-3 cursor-pointer group"
                     >
-                      <img
+                      <ChildImage
                         src={s.childImage}
                         alt={s.childName}
                         className="w-10 h-10 rounded-full object-cover ring-2 ring-[#E8F0F0]"

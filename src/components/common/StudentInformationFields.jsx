@@ -45,7 +45,7 @@ function ParentFields({ title, name, details, onChange }) {
   );
 }
 
-export default function StudentInformationFields({ value = {}, onChange }) {
+export default function StudentInformationFields({ value = {}, onChange, sponsorTitle = "Child's Sponsor" }) {
   const details = {
     ...EMPTY_STUDENT_INFORMATION,
     ...value,
@@ -76,6 +76,14 @@ export default function StudentInformationFields({ value = {}, onChange }) {
           <TextField label="School" value={details.schoolName} onChange={(next) => updateField('schoolName', next)} />
           <TextField label="KCPE / KCSE Index Number" value={details.examIndexNumber} onChange={(next) => updateField('examIndexNumber', next)} />
           <TextField label="KCPE / KCSE Year" value={details.examYear} onChange={(next) => updateField('examYear', next)} />
+        </div>
+      </div>
+
+      <div className="rounded-lg border border-slate-200 p-4 space-y-3">
+        <h4 className="text-xs font-bold uppercase tracking-wide text-slate-700">{sponsorTitle}</h4>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <TextField label="Sponsor Name" value={details.sponsorName} onChange={(next) => updateField('sponsorName', next)} />
+          <TextField label="Sponsor Email" type="email" value={details.sponsorEmail} onChange={(next) => updateField('sponsorEmail', next)} />
         </div>
       </div>
 

@@ -56,12 +56,12 @@ export default function Sidebar({ isCollapsed, isMobileOpen, onCloseMobile, isOp
   ];
 
   const renderNavGroup = (items, title) => (
-    <div className="space-y-1.5 mb-6">
+    <div className="space-y-1 mb-4 sm:mb-5">
       {title ? (
         collapsed ? (
-          <div className="my-3 border-t border-white/15 mx-2" />
+          <div className="my-2.5 border-t border-white/15 mx-2" />
         ) : (
-          <h4 className="px-4 text-[10px] font-bold tracking-widest text-slate-400 uppercase font-mono mb-2 transition-all">
+          <h4 className="px-3 sm:px-4 text-[9px] font-bold tracking-widest text-slate-400 uppercase font-mono mb-1.5 transition-all">
             {title}
           </h4>
         )
@@ -75,18 +75,18 @@ export default function Sidebar({ isCollapsed, isMobileOpen, onCloseMobile, isOp
             onClick={handleCloseMobile}
             end={item.path === '/'}
             className={({ isActive }) =>
-              `group relative flex items-center transition-all duration-200 ${
+              `group relative flex items-center transition-all duration-150 ${
                 collapsed
-                  ? 'justify-center w-11 h-11 mx-auto rounded-lg'
-                  : 'gap-3 px-4 py-2.5 rounded-lg text-sm font-semibold'
+                  ? 'justify-center w-10 h-10 mx-auto rounded-lg'
+                  : 'gap-2.5 px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl text-xs sm:text-sm font-medium'
               } ${
                 isActive
-                  ? 'bg-white/12 text-white font-semibold border-l-2 border-[#D99B3C]'
-                  : 'text-slate-300 hover:text-white hover:bg-white/8'
+                  ? 'bg-white/15 text-white font-semibold shadow-2xs border-l-2 border-[#D99B3C]'
+                  : 'text-slate-300 hover:text-white hover:bg-white/10'
               }`
             }
           >
-            <Icon className={`shrink-0 ${collapsed ? 'w-5 h-5' : 'w-4 h-4'}`} />
+            <Icon className={`shrink-0 ${collapsed ? 'w-4 h-4' : 'w-4 h-4'}`} />
             
             {!collapsed && <span className="truncate">{item.name}</span>}
 
@@ -108,33 +108,35 @@ export default function Sidebar({ isCollapsed, isMobileOpen, onCloseMobile, isOp
       {mobileOpen && (
         <div
           onClick={handleCloseMobile}
-          className="fixed inset-0 z-40 bg-slate-950/35 backdrop-blur-[2px] lg:hidden"
+          className="fixed inset-0 z-40 bg-slate-950/60 backdrop-blur-xs lg:hidden animate-in fade-in duration-200"
         />
       )}
 
-      {/* Sidebar Panel */}
+      {/* Sidebar Panel - Compact floating screen drawer on mobile */}
       <aside
         id="primary-sidebar"
-        className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-white/10 bg-[#0c3440] text-slate-100 transition-[transform,width] duration-300 ease-out sidebar-shadow ${
-          mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-        } ${collapsed ? 'lg:w-20' : 'lg:w-64'}`}
+        className={`fixed z-50 flex flex-col text-slate-100 transition-[transform,width] duration-300 ease-out 
+          top-2 bottom-2 left-2 w-[255px] max-w-[calc(100vw-3.5rem)] rounded-2xl border border-white/15 bg-[#0C3440]/98 backdrop-blur-xl shadow-2xl
+          lg:top-0 lg:bottom-0 lg:left-0 lg:rounded-none lg:border-t-0 lg:border-b-0 lg:border-l-0 lg:border-r lg:border-white/10 lg:bg-[#0C3440] lg:shadow-none
+          ${mobileOpen ? 'translate-x-0' : '-translate-x-[115%] lg:translate-x-0'} 
+          ${collapsed ? 'lg:w-20' : 'lg:w-64'}`}
       >
         {/* Header Branding */}
-        <div className={`flex items-center border-b border-[#0C3440]/60 transition-all ${
-          collapsed ? 'justify-center px-3 py-5' : 'justify-between px-5 py-5'
+        <div className={`flex items-center border-b border-white/10 transition-all ${
+          collapsed ? 'justify-center px-3 py-3.5' : 'justify-between px-4 py-3.5 sm:px-5 sm:py-4'
         }`}>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
             <img
               src="/tumaini-logo.svg"
               alt="Tumaini Children's Village"
-              className="w-10 h-10 object-contain shrink-0"
+              className="w-8 h-8 sm:w-9 sm:h-9 object-contain shrink-0"
             />
             {!collapsed && (
               <div className="overflow-hidden transition-all">
-                <h1 className="text-sm font-black tracking-wider uppercase text-white font-mono leading-tight">
+                <h1 className="text-xs sm:text-sm font-black tracking-wider uppercase text-white font-mono leading-tight">
                   TUMAINI
                 </h1>
-                <p className="text-[10px] font-medium text-slate-400 tracking-wider uppercase font-mono truncate">
+                <p className="text-[9px] font-medium text-slate-300 tracking-wider uppercase font-mono truncate">
                   CHILDREN'S VILLAGE
                 </p>
               </div>
@@ -142,17 +144,17 @@ export default function Sidebar({ isCollapsed, isMobileOpen, onCloseMobile, isOp
           </div>
           <button
             onClick={handleCloseMobile}
-            className="lg:hidden p-2 text-slate-300 hover:text-white rounded-lg hover:bg-white/10 transition-colors"
+            className="lg:hidden p-1.5 text-slate-300 hover:text-white rounded-lg hover:bg-white/10 transition-colors"
             title="Close navigation"
             aria-label="Close navigation"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Scrollable Nav Items */}
-        <nav className={`flex-1 overflow-y-auto py-6 no-scrollbar transition-all ${
-          collapsed ? 'px-2' : 'px-3'
+        <nav className={`flex-1 overflow-y-auto py-3.5 sm:py-5 no-scrollbar transition-all ${
+          collapsed ? 'px-2' : 'px-2.5 sm:px-3'
         }`}>
           {renderNavGroup(mainNav)}
           {renderNavGroup(curriculumNav, 'CURRICULUM & ARTS')}
@@ -160,11 +162,11 @@ export default function Sidebar({ isCollapsed, isMobileOpen, onCloseMobile, isOp
         </nav>
 
         {/* Footer Tagline */}
-        <div className="p-3 border-t border-white/10 bg-slate-950/20 text-center">
+        <div className="p-2.5 sm:p-3 border-t border-white/10 bg-black/20 text-center rounded-b-2xl lg:rounded-none">
           {collapsed ? (
             <span className="text-[9px] font-bold text-slate-400 font-mono">v2.4</span>
           ) : (
-            <p className="text-[10px] text-slate-400 uppercase tracking-widest font-mono">
+            <p className="text-[9px] sm:text-[10px] text-slate-400 uppercase tracking-widest font-mono">
               Tracking System v2.4
             </p>
           )}

@@ -59,27 +59,42 @@ export default function ProgressTrackingView() {
   });
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-300">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div className="space-y-1.5">
+    <div className="min-w-0 space-y-4 sm:space-y-6">
+      <div className="flex min-w-0 items-start justify-between gap-3 sm:items-end sm:gap-4">
+        <div className="min-w-0 space-y-1.5">
           <span className="text-[10px] font-bold tracking-[0.14em] text-brand-primary uppercase">
             Cohort assessment <span className="mx-1 text-slate-300">/</span> Term 3
           </span>
-          <h2 className="text-2xl font-bold text-slate-900 tracking-tight">
+          <h2 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
             Progress matrix
           </h2>
-          <p className="text-sm text-slate-500">
+          <p className="text-sm leading-5 text-slate-500">
             Skill development across curriculum and character areas.
           </p>
         </div>
-        <div className="text-right">
+        <div className="shrink-0 text-right">
           <p className="text-lg font-semibold tabular-nums text-slate-900">{filteredChildren.length}</p>
           <p className="text-xs text-slate-500">{filteredChildren.length === 1 ? 'child shown' : 'children shown'}</p>
         </div>
       </div>
 
-      <div className="flex flex-col gap-3 border-y border-slate-200 py-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="no-scrollbar flex max-w-full items-center gap-1 overflow-x-auto rounded-md bg-slate-100 p-1">
+      <div className="flex min-w-0 flex-col gap-3 border-y border-slate-200 py-3 sm:flex-row sm:items-center sm:justify-between">
+        <label className="relative block sm:hidden">
+          <span className="sr-only">Filter by grade</span>
+          <select
+            value={gradeFilter}
+            onChange={(event) => setGradeFilter(event.target.value)}
+            className="h-11 w-full appearance-none rounded-lg border border-slate-200 bg-white px-3 pr-9 text-sm font-medium text-slate-700 outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/15"
+          >
+            {gradesList.map((grade) => (
+              <option key={grade} value={grade}>
+                {grade === 'ALL GRADES' ? 'All grades' : grade}
+              </option>
+            ))}
+          </select>
+          <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+        </label>
+        <div className="hidden max-w-full flex-wrap items-center gap-1 rounded-md bg-slate-100 p-1 sm:flex">
           {gradesList.map((g) => (
             <button
               key={g}
@@ -101,7 +116,7 @@ export default function ProgressTrackingView() {
           <select
             value={skillFilter}
             onChange={(event) => setSkillFilter(event.target.value)}
-            className="h-10 min-w-44 appearance-none rounded-md border border-slate-200 bg-white py-2 pl-3 pr-9 text-sm font-medium text-slate-700 outline-none transition focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/15"
+            className="h-11 w-full min-w-0 appearance-none rounded-lg border border-slate-200 bg-white py-2 pl-3 pr-9 text-sm font-medium text-slate-700 outline-none transition focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/15 sm:w-auto sm:min-w-44 sm:rounded-md"
           >
             {skillFilters.map((level) => (
               <option key={level} value={level}>
@@ -113,11 +128,11 @@ export default function ProgressTrackingView() {
         </label>
       </div>
 
-      <div className="flex flex-wrap items-center gap-x-6 gap-y-3 rounded-md border border-slate-200 bg-white px-4 py-3">
-        <span className="text-[10px] font-bold tracking-[0.12em] text-slate-500 uppercase">
+      <div className="flex min-w-0 flex-col gap-2 rounded-lg border border-slate-200 bg-white px-3 py-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-6 sm:gap-y-3 sm:px-4">
+        <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">
           Skill levels
         </span>
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-medium text-slate-700">
+        <div className="grid grid-cols-2 gap-x-2 gap-y-2 text-xs font-medium text-slate-700 sm:flex sm:flex-wrap sm:items-center sm:gap-x-5">
           <div className="flex items-center gap-2">
             <span className="h-3.5 w-3.5 rounded-full border border-slate-300 bg-slate-100" />
             <span>Not Introduced</span>
@@ -147,7 +162,101 @@ export default function ProgressTrackingView() {
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-md border border-slate-200 bg-white">
+      <div className="space-y-3 md:hidden">
+        {filteredChildren.map((child) => (
+          <article key={child.id} className="min-w-0 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+            <button
+              type="button"
+              onClick={() => navigate(`/children/${child.id}`)}
+              className="flex w-full min-w-0 items-center gap-3 border-b border-slate-100 p-3 text-left"
+            >
+              <ChildImage
+                src={child.image}
+                alt={child.name}
+                className="h-11 w-11 shrink-0 rounded-full object-cover ring-1 ring-slate-200"
+              />
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-sm font-semibold text-slate-900">{child.name}</span>
+                <span className="mt-0.5 block truncate text-xs text-slate-500">
+                  {child.grade}{child.mentor ? ` · ${child.mentor}` : ''}
+                </span>
+              </span>
+              <span className="shrink-0 text-xs font-semibold text-brand-primary">Profile</span>
+            </button>
+            <div className="grid grid-cols-2 gap-2 p-3">
+              {categories.map((cat, index) => {
+                const levelKey = getLevelForCategory(child, cat.key);
+                const isPopoverOpen =
+                  activeCellPopover &&
+                  activeCellPopover.childId === child.id &&
+                  activeCellPopover.category === cat.key;
+
+                return (
+                  <div key={cat.key} className="relative min-w-0">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setActiveCellPopover(
+                          isPopoverOpen ? null : { childId: child.id, category: cat.key }
+                        )
+                      }
+                      className="flex min-h-11 w-full min-w-0 items-center gap-2 rounded-lg border border-slate-100 bg-slate-50 px-2.5 py-2 text-left"
+                      aria-label={`${child.name}, ${cat.label}: ${SKILL_LEVELS[levelKey]?.label}. Update skill level`}
+                      aria-expanded={Boolean(isPopoverOpen)}
+                    >
+                      {levelKey === 'MASTERED' ? (
+                        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-accent text-white">
+                          <Star className="h-3 w-3 fill-current" />
+                        </span>
+                      ) : levelKey === 'INDEPENDENT' ? (
+                        <span className="h-4 w-4 shrink-0 rounded-full bg-brand-primary" />
+                      ) : levelKey === 'WITH_HELP' ? (
+                        <span className="h-4 w-4 shrink-0 rounded-full bg-blue-300" />
+                      ) : levelKey === 'LEARNING' ? (
+                        <span className="h-4 w-4 shrink-0 rounded-full border border-brand-accent-light bg-brand-accent-light" />
+                      ) : (
+                        <span className="h-4 w-4 shrink-0 rounded-full border border-slate-300 bg-slate-100" />
+                      )}
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-[10px] font-semibold uppercase tracking-wide text-slate-500">{cat.label}</span>
+                        <span className="block truncate text-xs text-slate-700">{SKILL_LEVELS[levelKey]?.label}</span>
+                      </span>
+                    </button>
+                    {isPopoverOpen && (
+                      <div className={`absolute ${index % 2 === 0 ? 'left-0' : 'right-0'} top-full z-40 mt-1 w-52 max-w-[calc(100vw-2rem)] space-y-1 rounded-lg border border-slate-200 bg-white p-2 text-left shadow-lg`}>
+                        <span className="block px-2 text-[10px] font-bold uppercase text-slate-400">
+                          Update {cat.label}
+                        </span>
+                        {Object.keys(SKILL_LEVELS).map((key) => (
+                          <button
+                            key={key}
+                            type="button"
+                            onClick={() => {
+                              handleUpdateChildSkill(child.id, cat.key, key);
+                              setActiveCellPopover(null);
+                            }}
+                            className="flex min-h-10 w-full items-center justify-between rounded px-2.5 py-1.5 text-left text-xs font-medium text-slate-700 hover:bg-slate-100 hover:text-brand-primary"
+                          >
+                            <span>{SKILL_LEVELS[key].label}</span>
+                            {levelKey === key && <CheckCircle2 className="h-3.5 w-3.5 text-brand-primary" />}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </article>
+        ))}
+        {filteredChildren.length === 0 && (
+          <div className="rounded-xl border border-slate-200 bg-white px-4 py-10 text-center text-sm text-slate-500">
+            No children match these filters.
+          </div>
+        )}
+      </div>
+
+      <div className="hidden overflow-hidden rounded-md border border-slate-200 bg-white md:block">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[920px] border-collapse text-left">
             <thead>
@@ -266,4 +375,3 @@ export default function ProgressTrackingView() {
     </div>
   );
 }
-

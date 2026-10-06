@@ -381,35 +381,35 @@ export default function ProgressTrackingView() {
         </div>
       </div>
 
-      {/* Interactive Scrollable Progress Editor Modal / Bottom Sheet */}
+      {/* Interactive Scrollable Progress Editor Modal / Compact Floating Card */}
       {activeCellPopover && activeChild && activeCategory && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/50 backdrop-blur-xs p-0 sm:items-center sm:p-4 animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/60 backdrop-blur-sm px-3 pb-4 sm:items-center sm:p-4 animate-in fade-in duration-200">
           {/* Backdrop Click */}
           <div
             className="fixed inset-0"
             onClick={() => setActiveCellPopover(null)}
           />
 
-          {/* Sheet Container */}
-          <div className="relative z-10 w-full max-w-lg overflow-hidden rounded-t-2xl sm:rounded-2xl border border-slate-200 bg-white shadow-2xl animate-in slide-in-from-bottom-4 sm:zoom-in-95 duration-200">
-            {/* Drag Handle on Mobile */}
-            <div className="flex justify-center pt-2.5 pb-1 sm:hidden">
-              <div className="h-1 w-10 rounded-full bg-slate-300" />
+          {/* Compact Floating Card — NOT full-screen */}
+          <div className="relative z-10 w-full max-w-sm sm:max-w-lg overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl animate-in slide-in-from-bottom-3 sm:zoom-in-95 duration-200">
+            {/* Drag Handle hint on Mobile */}
+            <div className="flex justify-center pt-2.5 pb-0.5 sm:hidden">
+              <div className="h-1 w-8 rounded-full bg-slate-200" />
             </div>
 
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3 sm:px-5 sm:py-4">
-              <div className="flex items-center gap-3 min-w-0">
+            <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3 sm:px-5 sm:py-3.5">
+              <div className="flex items-center gap-2.5 min-w-0">
                 <ChildImage
                   src={activeChild.image}
                   alt={activeChild.name}
-                  className="h-10 w-10 shrink-0 rounded-full object-cover ring-1 ring-slate-200"
+                  className="h-8 w-8 shrink-0 rounded-full object-cover ring-1 ring-slate-200"
                 />
                 <div className="min-w-0">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-brand-primary font-mono block">
-                    UPDATE {activeCategory.label} PROGRESS
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-brand-primary font-mono block leading-tight">
+                    {activeCategory.label} Progress
                   </span>
-                  <h3 className="truncate text-base font-bold text-slate-900">
+                  <h3 className="truncate text-sm font-bold text-slate-900 leading-snug">
                     {activeChild.name}
                   </h3>
                 </div>
@@ -417,17 +417,17 @@ export default function ProgressTrackingView() {
               <button
                 type="button"
                 onClick={() => setActiveCellPopover(null)}
-                className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 shadow-xs border border-slate-200/80 transition-all active:scale-95 cursor-pointer"
+                className="flex items-center justify-center w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 shadow-xs border border-slate-200/80 transition-all active:scale-95 cursor-pointer shrink-0"
                 aria-label="Close"
               >
-                <X className="h-4 w-4" />
+                <X className="h-3.5 w-3.5" />
               </button>
             </div>
 
-            {/* Scrollable Progress Levels List */}
-            <div className="max-h-[60vh] overflow-y-auto p-4 space-y-2.5">
-              <p className="text-xs text-slate-500 font-medium px-1 pb-1">
-                Scroll and select the current progress level for <strong className="text-slate-700">{activeCategory.label}</strong>:
+            {/* Scrollable Progress Levels List — capped at 58vh */}
+            <div className="max-h-[58vh] overflow-y-auto p-3.5 space-y-2">
+              <p className="text-[11px] text-slate-500 font-medium px-0.5 pb-0.5">
+                Select the current level for <strong className="text-slate-700">{activeCategory.label}</strong>:
               </p>
 
               {Object.keys(SKILL_LEVELS).map((levelKey) => {
@@ -442,27 +442,27 @@ export default function ProgressTrackingView() {
                       handleUpdateChildSkill(activeChild.id, activeCategory.key, levelKey);
                       setActiveCellPopover(null);
                     }}
-                    className={`flex w-full items-start gap-3.5 rounded-xl border p-3.5 text-left transition-all active:scale-[0.99] ${
+                    className={`flex w-full items-center gap-3 rounded-xl border p-3 text-left transition-all active:scale-[0.99] ${
                       isSelected
                         ? 'border-[#0C3440] bg-[#0C3440]/5 ring-1 ring-[#0C3440]'
                         : 'border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300'
                     }`}
                   >
-                    <div className="mt-0.5 shrink-0">
-                      {renderLevelIcon(levelKey, 'md')}
+                    <div className="shrink-0">
+                      {renderLevelIcon(levelKey, 'sm')}
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-2">
-                        <span className={`text-sm font-bold ${isSelected ? 'text-[#0C3440]' : 'text-slate-800'}`}>
+                        <span className={`text-xs font-bold ${isSelected ? 'text-[#0C3440]' : 'text-slate-800'}`}>
                           {levelData.label}
                         </span>
                         {isSelected && (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-[#0C3440] px-2 py-0.5 text-[10px] font-bold text-white">
-                            <CheckCircle2 className="h-3 w-3" /> Current
+                          <span className="inline-flex items-center gap-1 rounded-full bg-[#0C3440] px-2 py-0.5 text-[10px] font-bold text-white shrink-0">
+                            <CheckCircle2 className="h-2.5 w-2.5" /> Current
                           </span>
                         )}
                       </div>
-                      <p className="mt-0.5 text-xs text-slate-500 leading-snug">
+                      <p className="mt-0.5 text-[11px] text-slate-400 leading-snug hidden sm:block">
                         {LEVEL_DESCRIPTIONS[levelKey]}
                       </p>
                     </div>
@@ -472,16 +472,16 @@ export default function ProgressTrackingView() {
             </div>
 
             {/* Footer */}
-            <div className="border-t border-slate-100 bg-slate-50/80 px-4 py-3 sm:px-5 flex items-center justify-between">
+            <div className="border-t border-slate-100 bg-slate-50/80 px-4 py-2.5 sm:px-5 flex items-center justify-between">
               <span className="text-[11px] text-slate-400">
-                Tap any level to update immediately
+                Tap a level to update
               </span>
               <button
                 type="button"
                 onClick={() => setActiveCellPopover(null)}
-                className="rounded-lg border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition-colors shadow-2xs"
+                className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition-colors shadow-2xs"
               >
-                Close
+                Cancel
               </button>
             </div>
           </div>

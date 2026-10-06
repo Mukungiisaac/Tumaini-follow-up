@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { isSupabaseConfigured, supabase, supabaseUrl } from '../../lib/supabase';
 import { AdminAuthContext } from '../../lib/adminAuthContext';
@@ -30,6 +30,8 @@ export default function AdminAuthGate({ children }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isPasswordRecovery, setIsPasswordRecovery] = useState(false);
   const [recoveryMessage, setRecoveryMessage] = useState('');
+  const [hasPasswordRecoverySession, setHasPasswordRecoverySession] = useState(false);
+  const passwordRecoverySessionRef = useRef(false);
 
   useEffect(() => {
     if (!isSupabaseConfigured) return undefined;
@@ -37,6 +39,7 @@ export default function AdminAuthGate({ children }) {
     let isMounted = true;
     let verificationRun = 0;
     const checkAdmin = async (nextSession) => {
+      if (passwordRecoverySessionRef.current) return;
       const currentRun = ++verificationRun;
       if (!nextSession) {
         if (isMounted) {
@@ -127,7 +130,16 @@ export default function AdminAuthGate({ children }) {
       }
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, nextSession) => {
+      if (event === 'PASSWORD_RECOVERY' && nextSession) {
+        passwordRecoverySessionRef.current = true;
+        verificationRun += 1;
+        setHasPasswordRecoverySession(true);
+        setSession(nextSession);
+        setStatus('password-recovery');
+        setMessage('');
+        return;
+      }
       window.setTimeout(() => checkAdmin(nextSession), 0);
     });
 
@@ -195,17 +207,38 @@ export default function AdminAuthGate({ children }) {
     }
 
     setIsSubmitting(true);
-    const { error } = await supabase.auth.updateUser({ password });
-    setIsSubmitting(false);
-    if (error) {
-      setMessage('Could not set your password. Reopen the invitation link and try again.');
-      return;
-    }
+    try {
+      const { error } = await supabase.auth.updateUser({ password });
+      if (error) {
+        setMessage(`Could not update your password: ${error.message}`);
+        return;
+      }
 
-    window.history.replaceState({}, document.title, window.location.pathname);
-    setPassword('');
-    setPasswordConfirmation('');
-    setRequiresPasswordSetup(false);
+      window.history.replaceState({}, document.title, window.location.pathname);
+      setPassword('');
+      setPasswordConfirmation('');
+
+      if (passwordRecoverySessionRef.current) {
+        const { error: signOutError } = await supabase.auth.signOut();
+        if (signOutError) {
+          setMessage(`Your password was updated, but signing out failed: ${signOutError.message}`);
+          return;
+        }
+
+        passwordRecoverySessionRef.current = false;
+        setHasPasswordRecoverySession(false);
+        setRequiresPasswordSetup(false);
+        setStatus('signed-out');
+        setMessage('Your password was updated successfully. Sign in with your new password.');
+        return;
+      }
+
+      setRequiresPasswordSetup(false);
+    } catch (error) {
+      setMessage(`Could not update your password: ${error?.message || 'Please reopen the password link and try again.'}`);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const updateAdminProfile = async (profile) => {
@@ -214,6 +247,57 @@ export default function AdminAuthGate({ children }) {
   };
 
   if (!isSupabaseConfigured) return <SetupRequired />;
+
+  if (hasPasswordRecoverySession) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-[#f4f8f7] p-6">
+        <section className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-7 shadow-lg shadow-slate-900/5">
+          <div className="mb-6 flex items-center gap-3">
+            <img src="/tumaini-logo.svg" alt="Tumaini Children's Village" className="h-12 w-12 shrink-0" />
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-[#0C3440]">Children's Home Portal</p>
+              <h1 className="mt-0.5 text-lg font-semibold text-slate-900">Set new password</h1>
+              <p className="text-sm text-slate-500">Choose a new password for your Tumaini account.</p>
+            </div>
+          </div>
+          <form onSubmit={handleSetPassword} className="space-y-4">
+            <label className="block space-y-1.5 text-sm font-medium text-slate-700">
+              New password
+              <input
+                type="password"
+                autoComplete="new-password"
+                minLength={12}
+                required
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                className="h-11 w-full rounded-lg border border-slate-300 px-3 font-normal outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/15"
+              />
+            </label>
+            <label className="block space-y-1.5 text-sm font-medium text-slate-700">
+              Confirm new password
+              <input
+                type="password"
+                autoComplete="new-password"
+                minLength={12}
+                required
+                value={passwordConfirmation}
+                onChange={(event) => setPasswordConfirmation(event.target.value)}
+                className="h-11 w-full rounded-lg border border-slate-300 px-3 font-normal outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/15"
+              />
+            </label>
+            {message && <p role="alert" className="text-sm text-rose-700">{message}</p>}
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="h-11 w-full rounded-lg bg-brand-primary px-4 text-sm font-semibold text-white hover:bg-teal-800 disabled:opacity-60"
+            >
+              {isSubmitting ? 'Updating password...' : 'Update password'}
+            </button>
+          </form>
+        </section>
+      </main>
+    );
+  }
 
   if (status === 'loading' || status === 'checking-admin') {
     return (

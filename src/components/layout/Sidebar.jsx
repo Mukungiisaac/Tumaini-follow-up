@@ -56,12 +56,12 @@ export default function Sidebar({ isCollapsed, isMobileOpen, onCloseMobile, isOp
   ];
 
   const renderNavGroup = (items, title) => (
-    <div className="space-y-1 mb-4 sm:mb-5">
+    <div className="space-y-1 mb-5">
       {title ? (
         collapsed ? (
           <div className="my-2.5 border-t border-white/15 mx-2" />
         ) : (
-          <h4 className="px-3 sm:px-4 text-[9px] font-bold tracking-widest text-slate-400 uppercase font-mono mb-1.5 transition-all">
+          <h4 className="px-3.5 sm:px-4 text-[10px] sm:text-[11px] font-bold tracking-widest text-slate-300 uppercase font-mono mb-2 transition-all">
             {title}
           </h4>
         )
@@ -77,16 +77,16 @@ export default function Sidebar({ isCollapsed, isMobileOpen, onCloseMobile, isOp
             className={({ isActive }) =>
               `group relative flex items-center transition-all duration-150 ${
                 collapsed
-                  ? 'justify-center w-10 h-10 mx-auto rounded-lg'
-                  : 'gap-2.5 px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl text-xs sm:text-sm font-medium'
+                  ? 'justify-center w-11 h-11 mx-auto rounded-lg'
+                  : 'gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold'
               } ${
                 isActive
-                  ? 'bg-white/15 text-white font-semibold shadow-2xs border-l-2 border-[#D99B3C]'
-                  : 'text-slate-300 hover:text-white hover:bg-white/10'
+                  ? 'bg-white/15 text-white font-bold shadow-2xs border-l-2 border-[#D99B3C]'
+                  : 'text-slate-200 hover:text-white hover:bg-white/10'
               }`
             }
           >
-            <Icon className={`shrink-0 ${collapsed ? 'w-4 h-4' : 'w-4 h-4'}`} />
+            <Icon className={`shrink-0 ${collapsed ? 'w-5 h-5' : 'w-4.5 h-4.5'}`} />
             
             {!collapsed && <span className="truncate">{item.name}</span>}
 
@@ -116,27 +116,27 @@ export default function Sidebar({ isCollapsed, isMobileOpen, onCloseMobile, isOp
       <aside
         id="primary-sidebar"
         className={`fixed z-50 flex flex-col text-slate-100 transition-[transform,width] duration-300 ease-out 
-          top-2 bottom-2 left-2 w-[255px] max-w-[calc(100vw-3.5rem)] rounded-2xl border border-white/15 bg-[#0C3440]/98 backdrop-blur-xl shadow-2xl
+          top-2 bottom-2 left-2 w-[275px] max-w-[calc(100vw-2.5rem)] rounded-2xl border border-white/15 bg-[#0C3440]/98 backdrop-blur-xl shadow-2xl
           lg:top-0 lg:bottom-0 lg:left-0 lg:rounded-none lg:border-t-0 lg:border-b-0 lg:border-l-0 lg:border-r lg:border-white/10 lg:bg-[#0C3440] lg:shadow-none
           ${mobileOpen ? 'translate-x-0' : '-translate-x-[115%] lg:translate-x-0'} 
           ${collapsed ? 'lg:w-20' : 'lg:w-64'}`}
       >
         {/* Header Branding */}
         <div className={`flex items-center border-b border-white/10 transition-all ${
-          collapsed ? 'justify-center px-3 py-3.5' : 'justify-between px-4 py-3.5 sm:px-5 sm:py-4'
+          collapsed ? 'justify-center px-3 py-4' : 'justify-between px-4 py-4 sm:px-5 sm:py-4.5'
         }`}>
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-3">
             <img
               src="/tumaini-logo.svg"
               alt="Tumaini Children's Village"
-              className="w-8 h-8 sm:w-9 sm:h-9 object-contain shrink-0"
+              className="w-9 h-9 object-contain shrink-0"
             />
             {!collapsed && (
               <div className="overflow-hidden transition-all">
-                <h1 className="text-xs sm:text-sm font-black tracking-wider uppercase text-white font-mono leading-tight">
+                <h1 className="text-sm sm:text-base font-black tracking-wider uppercase text-white font-mono leading-tight">
                   TUMAINI
                 </h1>
-                <p className="text-[9px] font-medium text-slate-300 tracking-wider uppercase font-mono truncate">
+                <p className="text-[10px] font-semibold text-slate-300 tracking-wider uppercase font-mono truncate">
                   CHILDREN'S VILLAGE
                 </p>
               </div>
@@ -144,7 +144,7 @@ export default function Sidebar({ isCollapsed, isMobileOpen, onCloseMobile, isOp
           </div>
           <button
             onClick={handleCloseMobile}
-            className="lg:hidden p-1.5 text-slate-300 hover:text-white rounded-lg hover:bg-white/10 transition-colors"
+            className="lg:hidden flex items-center justify-center w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white shadow-md border border-white/15 backdrop-blur-xs transition-all active:scale-95 cursor-pointer"
             title="Close navigation"
             aria-label="Close navigation"
           >
@@ -153,8 +153,8 @@ export default function Sidebar({ isCollapsed, isMobileOpen, onCloseMobile, isOp
         </div>
 
         {/* Scrollable Nav Items */}
-        <nav className={`flex-1 overflow-y-auto py-3.5 sm:py-5 no-scrollbar transition-all ${
-          collapsed ? 'px-2' : 'px-2.5 sm:px-3'
+        <nav className={`flex-1 overflow-y-auto py-4 sm:py-5 no-scrollbar transition-all ${
+          collapsed ? 'px-2' : 'px-3'
         }`}>
           {renderNavGroup(mainNav)}
           {renderNavGroup(curriculumNav, 'CURRICULUM & ARTS')}
@@ -162,11 +162,11 @@ export default function Sidebar({ isCollapsed, isMobileOpen, onCloseMobile, isOp
         </nav>
 
         {/* Footer Tagline */}
-        <div className="p-2.5 sm:p-3 border-t border-white/10 bg-black/20 text-center rounded-b-2xl lg:rounded-none">
+        <div className="p-3 border-t border-white/10 bg-black/20 text-center rounded-b-2xl lg:rounded-none">
           {collapsed ? (
-            <span className="text-[9px] font-bold text-slate-400 font-mono">v2.4</span>
+            <span className="text-[10px] font-bold text-slate-400 font-mono">v2.4</span>
           ) : (
-            <p className="text-[9px] sm:text-[10px] text-slate-400 uppercase tracking-widest font-mono">
+            <p className="text-[10px] sm:text-[11px] text-slate-400 uppercase tracking-widest font-mono font-medium">
               Tracking System v2.4
             </p>
           )}

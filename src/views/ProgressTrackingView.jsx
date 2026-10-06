@@ -417,10 +417,10 @@ export default function ProgressTrackingView() {
               <button
                 type="button"
                 onClick={() => setActiveCellPopover(null)}
-                className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors"
+                className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 shadow-xs border border-slate-200/80 transition-all active:scale-95 cursor-pointer"
                 aria-label="Close"
               >
-                <X className="h-5 w-5" />
+                <X className="h-4 w-4" />
               </button>
             </div>
 

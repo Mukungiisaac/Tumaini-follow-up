@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Bell, Menu, CheckCircle2, X, Settings, LogOut } from 'lucide-react';
 import { MOCK_MENTORS } from '../../data/mockData';
@@ -19,6 +19,7 @@ export default function Header({
   const navigate = useNavigate();
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const notificationsRef = useRef(null);
   const profileMenuRef = useRef(null);
   const [today, setToday] = useState(() => new Date());
   const user = currentUser || MOCK_MENTORS[0];
@@ -27,6 +28,24 @@ export default function Header({
     const intervalId = setInterval(() => setToday(new Date()), 60_000);
     return () => clearInterval(intervalId);
   }, []);
+
+  useEffect(() => {
+    if (!showNotifications) return undefined;
+
+    const closeOnOutsideClick = (event) => {
+      if (!notificationsRef.current?.contains(event.target)) setShowNotifications(false);
+    };
+    const closeOnEscape = (event) => {
+      if (event.key === 'Escape') setShowNotifications(false);
+    };
+
+    document.addEventListener('pointerdown', closeOnOutsideClick);
+    document.addEventListener('keydown', closeOnEscape);
+    return () => {
+      document.removeEventListener('pointerdown', closeOnOutsideClick);
+      document.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [showNotifications]);
 
   useEffect(() => {
     if (!showProfileMenu) return undefined;
@@ -153,42 +172,61 @@ export default function Header({
         </div>
 
         {/* Notifications dropdown */}
-        <div className="relative">
+        <div ref={notificationsRef} className="relative">
           <button
-            onClick={() => setShowNotifications(!showNotifications)}
-            className="relative p-2 text-slate-600 hover:text-slate-900 rounded-full hover:bg-slate-100 transition-colors cursor-pointer"
+            onClick={() => setShowNotifications((open) => !open)}
+            className={`relative p-2 rounded-full transition-colors cursor-pointer ${
+              showNotifications ? 'bg-slate-100 text-[#0C3440]' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+            }`}
             aria-label={`Notifications, ${notifications.length} recent updates`}
             aria-expanded={showNotifications}
             aria-controls="notifications-panel"
           >
             <Bell className="w-5 h-5" />
-            <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-[#0C3440] rounded-full ring-2 ring-white" />
+            {notifications.length > 0 && (
+              <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-[#0C3440] rounded-full ring-2 ring-white" />
+            )}
           </button>
 
           {showNotifications && (
-            <div id="notifications-panel" className="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-xl border border-slate-100 p-4 z-50 animate-in fade-in zoom-in-95 duration-150">
+            <div
+              id="notifications-panel"
+              className="absolute right-[-3rem] sm:right-0 mt-2 w-[calc(100vw-2rem)] max-w-[340px] sm:w-80 bg-white rounded-2xl shadow-2xl border border-slate-200 p-4 z-50 animate-in fade-in zoom-in-95 duration-150"
+            >
               <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                <h4 className="text-xs font-semibold text-slate-800">Notifications</h4>
-                <span className="text-[10px] font-semibold text-teal-800 bg-teal-50 border border-teal-200 px-2 py-0.5 rounded-full">
-                  {notifications.length} Updates
-                </span>
+                <div className="flex items-center gap-2">
+                  <h4 className="text-xs font-bold text-slate-800">Notifications</h4>
+                  <span className="text-[10px] font-bold text-[#0C3440] bg-[#E8F0F0] border border-[#B8CED0] px-2 py-0.5 rounded-full">
+                    {notifications.length} Updates
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowNotifications(false)}
+                  className="p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-md transition-colors"
+                  aria-label="Close notifications"
+                >
+                  <X className="w-4 h-4" />
+                </button>
               </div>
-              <div className="max-h-60 overflow-y-auto">
+
+              <div className="max-h-64 overflow-y-auto mt-2 divide-y divide-slate-100">
                 {notifications.length === 0 ? (
                   <p className="py-6 text-center text-xs text-slate-500">No recent updates</p>
                 ) : (
-                  <div className="divide-y divide-slate-100">
-                    {notifications.map((notification) => (
-                      <div key={notification.id} className="py-2.5 flex items-start gap-2.5">
-                        <CheckCircle2 className="w-4 h-4 text-[#0C3440] shrink-0 mt-0.5" />
-                        <div className="min-w-0">
-                          <p className="text-xs font-medium text-slate-800">{notification.title}</p>
-                          <p className="mt-1 truncate text-[10px] text-slate-500">{notification.detail}</p>
-                          <span className="text-[10px] text-slate-400">{formatNotificationDate(notification.date)}</span>
-                        </div>
+                  notifications.map((notification) => (
+                    <div
+                      key={notification.id}
+                      className="py-2.5 px-1 flex items-start gap-2.5 hover:bg-slate-50 rounded-lg transition-colors"
+                    >
+                      <CheckCircle2 className="w-4 h-4 text-[#0C3440] shrink-0 mt-0.5" />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs font-semibold text-slate-800 leading-snug">{notification.title}</p>
+                        <p className="mt-0.5 truncate text-[11px] text-slate-500">{notification.detail}</p>
+                        <span className="mt-0.5 block text-[10px] font-mono text-slate-400">{formatNotificationDate(notification.date)}</span>
                       </div>
-                    ))}
-                  </div>
+                    </div>
+                  ))
                 )}
               </div>
             </div>

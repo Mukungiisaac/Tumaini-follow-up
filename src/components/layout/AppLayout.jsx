@@ -26,6 +26,27 @@ function readStoredValue(key, fallback) {
   }
 }
 
+// Session-level cache for Supabase records (stale-while-revalidate)
+const SESSION_CACHE_KEY = 'tumaini-session-records';
+function readSessionCache() {
+  try {
+    const raw = sessionStorage.getItem(SESSION_CACHE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed?.children || !parsed?.houses) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+function writeSessionCache(records) {
+  try {
+    sessionStorage.setItem(SESSION_CACHE_KEY, JSON.stringify(records));
+  } catch {
+    // sessionStorage may be unavailable in some environments
+  }
+}
+
 function readStoredChildren() {
   const children = readStoredValue('tumaini-children', MOCK_CHILDREN);
   if (!Array.isArray(children)) return MOCK_CHILDREN;
@@ -69,13 +90,23 @@ export default function AppLayout() {
   const [isMobileViewport, setIsMobileViewport] = useState(() => window.matchMedia('(max-width: 1023px)').matches);
   const [searchQuery, setSearchQuery] = useState('');
   
-  // App-wide state
-  const [childrenList, setChildrenList] = useState(() => useRemoteRecords ? [] : readStoredChildren());
-  const [houses, setHouses] = useState(() => useRemoteRecords ? [] : readStoredValue('tumaini-houses', MOCK_HOUSES));
-  const [scheduledSessions, setScheduledSessions] = useState(() => useRemoteRecords ? [] : readStoredValue('tumaini-sessions', MOCK_SCHEDULED_SESSIONS));
-  const [activities, setActivities] = useState(() => useRemoteRecords ? [] : readStoredValue('tumaini-activities', MOCK_ACTIVITIES));
+  // App-wide state — seed from session cache immediately for instant render
+  const cachedRecords = useRemoteRecords ? readSessionCache() : null;
+  const [childrenList, setChildrenList] = useState(() =>
+    useRemoteRecords ? (cachedRecords?.children ?? []) : readStoredChildren()
+  );
+  const [houses, setHouses] = useState(() =>
+    useRemoteRecords ? (cachedRecords?.houses ?? []) : readStoredValue('tumaini-houses', MOCK_HOUSES)
+  );
+  const [scheduledSessions, setScheduledSessions] = useState(() =>
+    useRemoteRecords ? (cachedRecords?.sessions ?? []) : readStoredValue('tumaini-sessions', MOCK_SCHEDULED_SESSIONS)
+  );
+  const [activities, setActivities] = useState(() =>
+    useRemoteRecords ? (cachedRecords?.activities ?? []) : readStoredValue('tumaini-activities', MOCK_ACTIVITIES)
+  );
   const [localCurrentUser, setLocalCurrentUser] = useState(() => readStoredValue('tumaini-user', DEFAULT_USER));
-  const [isDataLoading, setIsDataLoading] = useState(useRemoteRecords);
+  // Show skeleton only when there is no cached data at all (true cold start)
+  const [isDataLoading, setIsDataLoading] = useState(useRemoteRecords && !cachedRecords);
   const [dataError, setDataError] = useState('');
   const [localImportCount, setLocalImportCount] = useState(0);
   const [isImportingLocalData, setIsImportingLocalData] = useState(false);
@@ -96,18 +127,21 @@ export default function AppLayout() {
     if (!useRemoteRecords) return undefined;
 
     let isActive = true;
-    const loadRecords = async (showLoading = false) => {
-      if (showLoading) setIsDataLoading(true);
+    const hasCachedData = Boolean(readSessionCache());
+
+    const loadRecords = async (isInitial = false) => {
+      // Only show the blocking skeleton on a true cold start (no cache)
+      if (isInitial && !hasCachedData) setIsDataLoading(true);
       try {
-        console.log('START loading app records');
         const records = await listAppRecords();
-        console.log('FINISHED loading app records', records);
         if (!isActive) return;
+        // Persist to session cache so next navigation is instant
+        writeSessionCache(records);
         setChildrenList(records.children);
         setHouses(records.houses);
         setScheduledSessions(records.sessions);
         setActivities(records.activities);
-        if (showLoading) {
+        if (isInitial) {
           const remoteCount = Object.values(records).reduce((count, items) => count + items.length, 0);
           const localRecords = readSavedLocalRecords();
           const localCount = Object.values(localRecords).reduce((count, items) => count + items.length, 0);
@@ -115,16 +149,18 @@ export default function AppLayout() {
         }
         setDataError('');
       } catch {
-        if (isActive) setDataError('Could not load shared records from Supabase. Check the database tables and access policies.');
+        if (isActive && !hasCachedData) {
+          setDataError('Could not load shared records from Supabase. Check the database tables and access policies.');
+        }
       } finally {
-        if (isActive && showLoading) setIsDataLoading(false);
+        if (isActive) setIsDataLoading(false);
       }
     };
 
     loadRecords(true);
     const channel = supabase
       .channel('shared-app-records')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'app_records' }, () => loadRecords())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'app_records' }, () => loadRecords(false))
       .subscribe();
 
     return () => {
@@ -501,6 +537,7 @@ export default function AppLayout() {
     activities,
     searchQuery,
     currentUser,
+    isDataLoading,
     handleSignOut: auth?.signOut,
     handleUpdateUser,
     openAddChildModal: () => setIsAddChildOpen(true),
@@ -524,14 +561,6 @@ export default function AppLayout() {
     handleDeleteObservation,
     openEditObsModal
   };
-
-  if (isDataLoading) {
-    return (
-      <main className="flex min-h-[60vh] items-center justify-center">
-        <div role="status" aria-label="Loading shared records" className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-slate-600" />
-      </main>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-[#f8fafc] text-slate-900 flex font-sans">

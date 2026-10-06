@@ -1,4 +1,4 @@
-﻿import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Header from './Header';
@@ -476,7 +476,7 @@ export default function AppLayout() {
   // Determine header title based on current path
   const getHeaderTitles = () => {
     const p = location.pathname;
-    if (p === '/') return { title: 'TUMAINI Dashboard', subtitle: "Children's Home Portal" };
+    if (p === '/') return { title: 'Tumaini Dashboard', subtitle: "Children's Home Portal" };
     if (p === '/children') return { title: 'Children Directory', subtitle: 'Browse, search, and manage profiles for all enrolled children' };
     if (p.startsWith('/children/')) return { title: 'Child Profile View', subtitle: 'Detailed holistic development, skill maps, and observations' };
     if (p === '/progress') return { title: 'Progress Tracking Matrix', subtitle: 'Holistic development tracking across core curriculum areas' };
@@ -489,7 +489,7 @@ export default function AppLayout() {
     if (p === '/mentorship') return { title: 'Mentorship Program', subtitle: '1-on-1 conversations, leadership, and personal growth' };
     if (p === '/reports') return { title: 'Development Reports', subtitle: 'Printable individual, termly, and subject growth analytics' };
     if (p === '/settings') return { title: 'System Settings', subtitle: 'Configure cottages, mentors, and system preferences' };
-    return { title: 'TUMAINI Dashboard', subtitle: "Children's Home Portal" };
+    return { title: 'Tumaini Dashboard', subtitle: "Children's Home Portal" };
   };
 
   const titles = getHeaderTitles();

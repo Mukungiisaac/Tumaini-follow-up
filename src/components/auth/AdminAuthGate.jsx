@@ -5,8 +5,8 @@ import { AdminAuthContext } from '../../lib/adminAuthContext';
 
 function SetupRequired() {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-50 p-6">
-      <section className="w-full max-w-md rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+    <main className="fixed inset-0 h-dvh w-screen flex items-center justify-center bg-slate-50 p-4 sm:p-6 overflow-hidden overscroll-none">
+      <section className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-xl">
         <h1 className="text-lg font-semibold text-slate-900">Supabase setup required</h1>
         <p className="mt-2 text-sm leading-6 text-slate-600">
           Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to the project-root .env.local file, then restart the development server.
@@ -308,7 +308,7 @@ export default function AdminAuthGate({ children }) {
 
   if (status === 'loading' || status === 'checking-admin') {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-slate-50">
+      <main className="fixed inset-0 h-dvh w-screen flex items-center justify-center bg-slate-50 overflow-hidden overscroll-none">
         <div role="status" aria-label="Connecting securely" className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-slate-600" />
       </main>
     );
@@ -317,14 +317,14 @@ export default function AdminAuthGate({ children }) {
   if (status === 'authorized') {
     if (requiresPasswordSetup) {
       return (
-        <main className="flex min-h-screen items-center justify-center bg-[#f4f8f7] p-6">
-          <section className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-7 shadow-lg shadow-slate-900/5">
+        <main className="fixed inset-0 h-dvh w-screen flex items-center justify-center bg-[#f4f8f7] p-4 sm:p-6 overflow-hidden overscroll-none">
+          <section className="w-full max-w-md max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-7 shadow-xl shadow-slate-900/5">
             <div className="mb-6 flex items-center gap-3">
-              <img src="/tumaini-logo.svg" alt="Tumaini Children's Village" className="h-12 w-12 shrink-0" />
+              <img src="/tumaini-logo.svg" alt="Tumaini Children's Village" className="h-10 w-10 sm:h-12 sm:w-12 shrink-0" />
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-[#0C3440]">Children's Home Portal</p>
-                <h1 className="mt-0.5 text-lg font-semibold text-slate-900">Create your password</h1>
-                <p className="text-sm text-slate-500">Set a password for your Tumaini account.</p>
+                <h1 className="mt-0.5 text-base sm:text-lg font-semibold text-slate-900">Create your password</h1>
+                <p className="text-xs sm:text-sm text-slate-500">Set a password for your Tumaini account.</p>
               </div>
             </div>
             <form onSubmit={handleSetPassword} className="space-y-4">
@@ -384,7 +384,7 @@ export default function AdminAuthGate({ children }) {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-50 p-6">
+    <main className="fixed inset-0 h-dvh w-screen flex items-center justify-center bg-slate-50 p-4 sm:p-6 overflow-hidden overscroll-none">
       {successMessage && (
         <div
           role="status"
@@ -403,13 +403,13 @@ export default function AdminAuthGate({ children }) {
           </button>
         </div>
       )}
-      <section className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-7 shadow-lg shadow-slate-900/5">
-        <div className="mb-6 flex items-center gap-3">
-          <img src="/tumaini-logo.svg" alt="Tumaini Children's Village" className="h-12 w-12 shrink-0" />
+      <section className="w-full max-w-md max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-8 shadow-xl shadow-slate-900/5">
+        <div className="mb-5 sm:mb-6 flex items-center gap-3">
+          <img src="/tumaini-logo.svg" alt="Tumaini Children's Village" className="h-10 w-10 sm:h-12 sm:w-12 shrink-0" />
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-wider text-[#0C3440]">Children's Home Portal</p>
-            <h1 className="mt-0.5 text-lg font-semibold text-slate-900">Admin sign in</h1>
-            <p className="text-sm text-slate-500">Secure access for authorized staff</p>
+            <h1 className="mt-0.5 text-base sm:text-lg font-semibold text-slate-900">Admin sign in</h1>
+            <p className="text-xs sm:text-sm text-slate-500">Secure access for authorized staff</p>
           </div>
         </div>
 

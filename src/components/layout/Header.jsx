@@ -6,7 +6,7 @@ import { MOCK_MENTORS } from '../../data/mockData';
 export default function Header({
   onOpenSidebar,
   onToggleSidebar,
-  title = 'TUMAINI Dashboard',
+  title = 'Tumaini Dashboard',
   subtitle = "Children's Home Portal",
   onSearchChange,
   onSignOut,

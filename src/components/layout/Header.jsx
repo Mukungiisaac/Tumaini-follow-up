@@ -233,53 +233,70 @@ export default function Header({
           )}
         </div>
 
-        {/* Account menu */}
-        <div ref={profileMenuRef} className="relative border-l border-slate-200 pl-2 sm:pl-3">
+        {/* Account menu & Log out */}
+        <div className="flex items-center gap-2 border-l border-slate-200 pl-2 sm:pl-3">
+          <div ref={profileMenuRef} className="relative">
+            <button
+              type="button"
+              onClick={() => setShowProfileMenu((open) => !open)}
+              className="relative block rounded-full focus:outline-none focus:ring-2 focus:ring-[#0C3440] focus:ring-offset-2 cursor-pointer"
+              title="Open profile menu"
+              aria-label={`Open profile menu for ${user.name}`}
+              aria-expanded={showProfileMenu}
+              aria-controls="profile-menu"
+            >
+              <img
+                src={user.avatar}
+                alt={user.name}
+                onError={(e) => {
+                  e.currentTarget.src = 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80';
+                }}
+                className="w-9 h-9 rounded-full object-cover ring-2 ring-slate-200 shadow-xs transition-all hover:ring-2 hover:ring-[#0C3440]"
+              />
+              <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full ring-2 ring-white" />
+            </button>
+            {showProfileMenu && (
+              <div id="profile-menu" className="absolute right-0 top-full z-50 mt-3 w-60 rounded-xl border border-slate-200 bg-white p-2 shadow-xl animate-in fade-in zoom-in-95 duration-150">
+                <div className="border-b border-slate-100 px-3 py-2.5">
+                  <p className="truncate text-sm font-semibold text-slate-900">{user.name}</p>
+                  {user.role && <p className="mt-0.5 text-xs text-slate-500">{user.role}</p>}
+                  {user.email && <p className="mt-1 truncate text-xs text-slate-500">{user.email}</p>}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowProfileMenu(false);
+                    navigate('/settings');
+                  }}
+                  className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
+                >
+                  <Settings className="h-4 w-4 text-slate-500" /> Profile settings
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowProfileMenu(false);
+                    onSignOut?.();
+                  }}
+                  className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm font-medium text-rose-600 hover:bg-rose-50 hover:text-rose-700 transition-colors cursor-pointer"
+                >
+                  <LogOut className="h-4 w-4 text-rose-500" /> Log out
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Reddish log out button near admin profile */}
           <button
             type="button"
-            onClick={() => setShowProfileMenu((open) => !open)}
-            className="relative block rounded-full focus:outline-none focus:ring-2 focus:ring-[#0C3440] focus:ring-offset-2"
-            title="Open profile menu"
-            aria-label={`Open profile menu for ${user.name}`}
-            aria-expanded={showProfileMenu}
-            aria-controls="profile-menu"
+            onClick={onSignOut}
+            className="flex items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-2.5 py-1.5 text-xs font-semibold text-rose-600 shadow-2xs transition-all hover:border-rose-300 hover:bg-rose-100 hover:text-rose-700 active:scale-95 cursor-pointer"
+            title="Log out"
+            aria-label="Log out"
           >
-            <img
-              src={user.avatar}
-              alt={user.name}
-              onError={(e) => {
-                e.currentTarget.src = 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80';
-              }}
-              className="w-9 h-9 rounded-full object-cover ring-2 ring-slate-200 shadow-xs transition-all"
-            />
-            <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full ring-2 ring-white" />
+            <LogOut className="h-3.5 w-3.5 text-rose-500 shrink-0" />
+            <span className="hidden sm:inline">Log out</span>
           </button>
-          {showProfileMenu && (
-            <div id="profile-menu" className="absolute right-0 top-full z-50 mt-3 w-60 rounded-lg border border-slate-200 bg-white p-2 shadow-lg">
-              <div className="border-b border-slate-100 px-3 py-2.5">
-                <p className="truncate text-sm font-semibold text-slate-900">{user.name}</p>
-                {user.role && <p className="mt-0.5 text-xs text-slate-500">{user.role}</p>}
-                {user.email && <p className="mt-1 truncate text-xs text-slate-500">{user.email}</p>}
-              </div>
-              <button
-                type="button"
-                onClick={() => {
-                  setShowProfileMenu(false);
-                  navigate('/settings');
-                }}
-                className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm font-medium text-slate-700 hover:bg-slate-50"
-              >
-                <Settings className="h-4 w-4 text-slate-500" /> Profile settings
-              </button>
-              <button
-                type="button"
-                onClick={onSignOut}
-                className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm font-medium text-slate-700 hover:bg-slate-50"
-              >
-                <LogOut className="h-4 w-4 text-slate-500" /> Sign out
-              </button>
-            </div>
-          )}
         </div>
       </div>
     </header>

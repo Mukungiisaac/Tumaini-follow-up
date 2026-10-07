@@ -496,7 +496,7 @@ export default function AdminAuthGate({ children }) {
                   setIsPasswordRecovery(true);
                   setRecoveryMessage('');
                 }}
-                className="text-sm font-semibold text-brand-primary hover:text-teal-800"
+                className="text-sm font-semibold text-blue-600 hover:text-blue-700 hover:underline transition-colors cursor-pointer"
               >
                 Forgot password?
               </button>

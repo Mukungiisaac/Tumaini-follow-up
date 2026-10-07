@@ -382,7 +382,8 @@ export default function AppLayout() {
       try {
         await deleteChildImage(oldImagePath);
       } catch (error) {
-        setDataError(`Child photo was saved, but the old Storage file could not be deleted: ${error?.message || 'Unknown Storage error'}`);
+        // Non-critical: the new photo was already saved. Log silently — no need to alarm the user.
+        console.warn('[AppLayout] Old child Storage image could not be deleted (non-critical):', error?.message);
       }
     }
 

@@ -227,27 +227,29 @@ export default function ChildrenDirectoryView() {
                   </dl>
                 </div>
 
-                <div className="flex items-center gap-2 mt-3 sm:mt-4 pt-3 border-t border-slate-100">
+                <div className="flex items-center justify-between gap-2 mt-3 sm:mt-4 pt-3 border-t border-slate-100">
                   <button
                     onClick={() => navigate(`/children/${child.id}`)}
-                    className="flex-1 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-white bg-[#0C3440] hover:bg-[#164957] rounded-lg transition-colors text-center"
+                    className="px-3 py-1.5 text-xs font-semibold text-white bg-[#0C3440] hover:bg-[#164957] rounded-lg transition-colors cursor-pointer"
                   >
                     Open profile
                   </button>
-                  <button
-                    onClick={() => openEditChildModal(child)}
-                    title="Edit Child Profile"
-                    className="p-1.5 sm:p-2 text-slate-600 hover:text-[#0C3440] hover:bg-[#E8F0F0] rounded-lg border border-slate-200 transition-colors"
-                  >
-                    <Edit3 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                  </button>
-                  <button
-                    onClick={openRecordObsModal}
-                    title="Log Observation"
-                    className="p-1.5 sm:p-2 text-[#0C3440] hover:bg-[#E8F0F0] rounded-lg border border-slate-200 transition-colors"
-                  >
-                    <FileEdit className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                  </button>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={() => openEditChildModal(child)}
+                      title="Edit Child Profile"
+                      className="p-1.5 text-slate-600 hover:text-[#0C3440] hover:bg-[#E8F0F0] rounded-lg border border-slate-200 transition-colors cursor-pointer"
+                    >
+                      <Edit3 className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={openRecordObsModal}
+                      title="Log Observation"
+                      className="p-1.5 text-[#0C3440] hover:bg-[#E8F0F0] rounded-lg border border-slate-200 transition-colors cursor-pointer"
+                    >
+                      <FileEdit className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
               </div>
             );
@@ -338,11 +340,10 @@ export default function ChildrenDirectoryView() {
       <button
         onClick={openAddChildModal}
         title="Add New Child"
-        className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] left-4 right-4 z-30 flex items-center justify-center gap-2 rounded-xl bg-[#0C3440] px-4 py-3.5 text-sm font-semibold text-white shadow-xl shadow-[#0C3440]/25 transition-colors hover:bg-[#164957] sm:bottom-6 sm:left-auto sm:right-8 sm:w-auto sm:rounded-full sm:px-5 sm:py-3.5 sm:text-xs sm:font-bold sm:font-mono sm:tracking-wider"
+        className="fixed bottom-5 right-4 z-30 inline-flex items-center gap-2 rounded-full bg-[#0C3440] px-4 py-2.5 text-xs font-bold text-white shadow-lg shadow-[#0C3440]/30 transition-all hover:bg-[#164957] hover:scale-105 active:scale-95 cursor-pointer sm:bottom-6 sm:right-8 sm:px-5 sm:py-3 sm:font-mono sm:tracking-wider"
       >
         <UserPlus className="w-4 h-4" />
-        <span className="sm:hidden">Add child</span>
-        <span className="hidden sm:inline">ADD CHILD</span>
+        <span>Add child</span>
       </button>
     </div>
   );

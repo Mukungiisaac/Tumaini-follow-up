@@ -13,6 +13,7 @@ import {
   Edit3
 } from 'lucide-react';
 import { GRADE_LEVELS, HOUSE_IDS } from '../data/mockData';
+import CustomSelect from '../components/common/CustomSelect';
 
 export default function ChildrenDirectoryView() {
   const { childrenList, searchQuery, openAddChildModal, openEditChildModal, openRecordObsModal } = useOutletContext();
@@ -85,15 +86,16 @@ export default function ChildrenDirectoryView() {
             <label className="text-[10px] font-bold tracking-widest text-slate-400 uppercase font-mono">
               HOUSE
             </label>
-            <select
+            <CustomSelect
               value={selectedHouse}
-              onChange={(e) => setSelectedHouse(e.target.value)}
-              className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0C3440]"
-            >
-              <option value="All">All Houses</option>
-              <option value="Unassigned">Unassigned</option>
-              {HOUSE_IDS.map((id) => <option key={id} value={id}>House {id}</option>)}
-            </select>
+              onChange={setSelectedHouse}
+              options={[
+                { value: 'All', label: 'All Houses' },
+                { value: 'Unassigned', label: 'Unassigned' },
+                ...HOUSE_IDS.map((id) => ({ value: id, label: `House ${id}` }))
+              ]}
+              aria-label="Filter by house"
+            />
           </div>
 
           {/* Grade Level Filter */}
@@ -101,14 +103,15 @@ export default function ChildrenDirectoryView() {
             <label className="text-[10px] font-bold tracking-widest text-slate-400 uppercase font-mono">
               GRADE LEVEL
             </label>
-            <select
+            <CustomSelect
               value={selectedGrade}
-              onChange={(e) => setSelectedGrade(e.target.value)}
-              className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0C3440]"
-            >
-              <option value="All">All Grades</option>
-              {GRADE_LEVELS.map((grade) => <option key={grade} value={grade}>{grade}</option>)}
-            </select>
+              onChange={setSelectedGrade}
+              options={[
+                { value: 'All', label: 'All Grades' },
+                ...GRADE_LEVELS.map((grade) => ({ value: grade, label: grade }))
+              ]}
+              aria-label="Filter by grade level"
+            />
           </div>
         </div>
       </div>
@@ -121,16 +124,19 @@ export default function ChildrenDirectoryView() {
 
         <div className="flex w-full items-center gap-2 sm:w-auto">
           {/* Status Quick Filter */}
-          <select
+          <CustomSelect
             value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value)}
-            className="min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#0C3440] sm:flex-none"
-          >
-            <option value="All">All Statuses</option>
-            <option value="ON TRACK">ON TRACK</option>
-            <option value="PROGRESSING">PROGRESSING</option>
-            <option value="NEEDS SUPPORT">NEEDS SUPPORT</option>
-          </select>
+            onChange={setSelectedStatus}
+            options={[
+              { value: 'All', label: 'All Statuses' },
+              { value: 'ON TRACK', label: 'ON TRACK' },
+              { value: 'PROGRESSING', label: 'PROGRESSING' },
+              { value: 'NEEDS SUPPORT', label: 'NEEDS SUPPORT' }
+            ]}
+            className="min-w-0 flex-1 sm:flex-none sm:w-44"
+            buttonClassName="py-2 rounded-lg"
+            aria-label="Filter by status"
+          />
 
           {/* View Toggle */}
           <div className="flex items-center bg-slate-100 p-1 rounded-lg border border-slate-200">

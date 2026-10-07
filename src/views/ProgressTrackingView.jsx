@@ -3,6 +3,7 @@ import { useOutletContext, useNavigate } from 'react-router-dom';
 import { GRADE_LEVELS, SKILL_LEVELS } from '../data/mockData';
 import { Star, CheckCircle2, ChevronDown, X, Users, Sparkles, Layers } from 'lucide-react';
 import ChildImage from '../components/common/ChildImage';
+import CustomSelect from '../components/common/CustomSelect';
 
 const LEVEL_DESCRIPTIONS = {
   NOT_INTRODUCED: 'Initial stage · Topic has not yet been introduced or assessed',
@@ -137,27 +138,23 @@ export default function ProgressTrackingView() {
       </div>
 
       <div className="flex min-w-0 flex-col gap-3 border-y border-slate-200 py-3 sm:flex-row sm:items-center sm:justify-between">
-        <label className="relative block sm:hidden">
-          <span className="sr-only">Filter by grade</span>
-          <select
+        <div className="block sm:hidden w-full">
+          <CustomSelect
             value={gradeFilter}
-            onChange={(event) => setGradeFilter(event.target.value)}
-            className="h-11 w-full appearance-none rounded-lg border border-slate-200 bg-white px-3 pr-9 text-sm font-medium text-slate-700 outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/15"
-          >
-            {gradesList.map((grade) => (
-              <option key={grade} value={grade}>
-                {grade === 'ALL GRADES' ? 'All grades' : grade}
-              </option>
-            ))}
-          </select>
-          <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
-        </label>
+            onChange={setGradeFilter}
+            options={gradesList.map((grade) => ({
+              value: grade,
+              label: grade === 'ALL GRADES' ? 'All grades' : grade
+            }))}
+            aria-label="Filter by grade"
+          />
+        </div>
         <div className="hidden max-w-full flex-wrap items-center gap-1 rounded-md bg-slate-100 p-1 sm:flex">
           {gradesList.map((g) => (
             <button
               key={g}
               onClick={() => setGradeFilter(g)}
-              className={`shrink-0 rounded px-3 py-2 text-xs font-semibold transition-colors ${
+              className={`shrink-0 rounded px-3 py-2 text-xs font-semibold transition-colors cursor-pointer ${
                 gradeFilter === g
                   ? 'bg-white text-brand-primary shadow-sm'
                   : 'text-slate-600 hover:bg-white/70 hover:text-slate-900'
@@ -169,21 +166,18 @@ export default function ProgressTrackingView() {
           ))}
         </div>
 
-        <label className="relative flex shrink-0 items-center">
-          <span className="sr-only">Filter by skill level</span>
-          <select
+        <div className="w-full sm:w-auto">
+          <CustomSelect
             value={skillFilter}
-            onChange={(event) => setSkillFilter(event.target.value)}
-            className="h-11 w-full min-w-0 appearance-none rounded-lg border border-slate-200 bg-white py-2 pl-3 pr-9 text-sm font-medium text-slate-700 outline-none transition focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/15 sm:w-auto sm:min-w-44 sm:rounded-md"
-          >
-            {skillFilters.map((level) => (
-              <option key={level} value={level}>
-                {level === 'ALL LEVELS' ? 'All skill levels' : SKILL_LEVELS[level].label}
-              </option>
-            ))}
-          </select>
-          <ChevronDown className="pointer-events-none absolute right-3 h-4 w-4 text-slate-500" />
-        </label>
+            onChange={setSkillFilter}
+            options={skillFilters.map((level) => ({
+              value: level,
+              label: level === 'ALL LEVELS' ? 'All skill levels' : SKILL_LEVELS[level].label
+            }))}
+            className="w-full sm:w-48"
+            aria-label="Filter by skill level"
+          />
+        </div>
       </div>
 
       <div className="flex min-w-0 flex-col gap-2 rounded-lg border border-slate-200 bg-white px-3 py-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-6 sm:gap-y-3 sm:px-4">

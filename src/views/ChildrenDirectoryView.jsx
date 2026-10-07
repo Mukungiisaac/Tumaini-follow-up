@@ -3,6 +3,7 @@ import { useOutletContext, useNavigate } from 'react-router-dom';
 import Avatar from '../components/common/Avatar';
 import {
   Search,
+  X,
   Grid,
   List,
   UserPlus,
@@ -16,9 +17,10 @@ import { GRADE_LEVELS, HOUSE_IDS } from '../data/mockData';
 import CustomSelect from '../components/common/CustomSelect';
 
 export default function ChildrenDirectoryView() {
-  const { childrenList, searchQuery, openAddChildModal, openEditChildModal, openRecordObsModal } = useOutletContext();
+  const { childrenList, openAddChildModal, openEditChildModal, openRecordObsModal } = useOutletContext();
   const navigate = useNavigate();
 
+  const [searchQuery, setSearchQuery] = useState('');
   const [selectedHouse, setSelectedHouse] = useState('All');
   const [selectedGrade, setSelectedGrade] = useState('All');
   const [selectedStatus, setSelectedStatus] = useState('All');
@@ -70,14 +72,24 @@ export default function ChildrenDirectoryView() {
               FIND A CHILD
             </label>
             <div className="relative">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 type="text"
                 placeholder="Search by name, house, or key strength..."
                 value={searchQuery}
-                readOnly
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0C3440]"
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-9 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0C3440] transition-colors"
               />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 text-slate-400 hover:text-slate-700 rounded-full hover:bg-slate-200 transition-colors"
+                  title="Clear search"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
             </div>
           </div>
 

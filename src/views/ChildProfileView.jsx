@@ -98,15 +98,15 @@ export default function ChildProfileView() {
 
       {/* Top Split Hero Layout (Page 1) */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-        <div className="grid grid-cols-1 sm:grid-cols-[190px_minmax(0,1fr)] bg-white rounded-xl overflow-hidden border border-slate-200 shadow-xs">
-          <div className="relative min-h-[160px] sm:min-h-full bg-[#E8F0F0]">
+        <div className="grid grid-cols-1 sm:grid-cols-[200px_minmax(0,1fr)] bg-white rounded-xl overflow-hidden border border-slate-200 shadow-xs">
+          <div className="relative aspect-[3/4] max-h-[380px] sm:aspect-auto sm:max-h-none sm:min-h-full bg-[#E8F0F0] overflow-hidden">
             <ChildImage
               src={child.image}
               alt={child.name}
               onError={(event) => {
                 event.currentTarget.style.display = 'none';
               }}
-              className="absolute inset-0 w-full h-full object-cover"
+              className="absolute inset-0 w-full h-full object-cover object-top"
             />
           </div>
 

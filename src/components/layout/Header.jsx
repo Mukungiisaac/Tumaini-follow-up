@@ -506,18 +506,6 @@ export default function Header({
               </div>
             )}
           </div>
-
-          {/* Reddish log out button near admin profile */}
-          <button
-            type="button"
-            onClick={onSignOut}
-            className="flex items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-2.5 py-1.5 text-xs font-semibold text-rose-600 shadow-2xs transition-all hover:border-rose-300 hover:bg-rose-100 hover:text-rose-700 active:scale-95 cursor-pointer"
-            title="Log out"
-            aria-label="Log out"
-          >
-            <LogOut className="h-3.5 w-3.5 text-rose-500 shrink-0" />
-            <span className="hidden sm:inline">Log out</span>
-          </button>
         </div>
       </div>
       </header>

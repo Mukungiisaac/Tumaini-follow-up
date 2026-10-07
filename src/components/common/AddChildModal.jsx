@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Modal from './Modal';
 import { Upload, X } from 'lucide-react';
 import { GRADE_LEVELS, HOUSE_IDS } from '../../data/mockData';
@@ -6,6 +6,18 @@ import StudentInformationFields from './StudentInformationFields';
 import { EMPTY_STUDENT_INFORMATION } from '../../data/studentInformation';
 import ChildImage from './ChildImage';
 import { isChildImageStoragePath } from '../../lib/childImages';
+
+/** Calculate completed years from a YYYY-MM-DD date string. Returns '' if invalid. */
+function calcAgeFromDob(dob) {
+  if (!dob) return '';
+  const birth = new Date(dob);
+  if (isNaN(birth.getTime())) return '';
+  const today = new Date();
+  let age = today.getFullYear() - birth.getFullYear();
+  const monthDiff = today.getMonth() - birth.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) age--;
+  return age >= 0 ? String(age) : '';
+}
 
 /* Inline letter-avatar shown when no photo is provided */
 function InitialAvatar({ name, size = 80 }) {
@@ -45,6 +57,15 @@ export default function AddChildModal({ isOpen, onClose, onAddChild }) {
     if (!formData.imageUrl.startsWith('blob:')) return undefined;
     return () => URL.revokeObjectURL(formData.imageUrl);
   }, [formData.imageUrl]);
+
+  // Auto-calculate age whenever Date of Birth changes inside StudentInformationFields
+  useEffect(() => {
+    const dob = formData.studentInformation?.dateOfBirth;
+    const calculated = calcAgeFromDob(dob);
+    if (calculated) {
+      setFormData((prev) => ({ ...prev, age: calculated }));
+    }
+  }, [formData.studentInformation?.dateOfBirth]);
 
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
@@ -197,14 +218,24 @@ export default function AddChildModal({ isOpen, onClose, onAddChild }) {
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Age</label>
+            <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+              Age
+              {formData.studentInformation?.dateOfBirth && (
+                <span className="ml-1 text-[10px] font-normal normal-case text-emerald-600">· auto-calculated</span>
+              )}
+            </label>
             <input
               type="number"
-              min="3"
-              max="18"
+              min="1"
+              max="25"
               value={formData.age}
-              onChange={(e) => setFormData({ ...formData, age: e.target.value })}
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#0C3440]"
+              readOnly={!!formData.studentInformation?.dateOfBirth}
+              onChange={(e) => !formData.studentInformation?.dateOfBirth && setFormData({ ...formData, age: e.target.value })}
+              className={`w-full px-4 py-2.5 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-[#0C3440] ${
+                formData.studentInformation?.dateOfBirth
+                  ? 'bg-emerald-50 border-emerald-200 text-emerald-800 cursor-default'
+                  : 'border-slate-200'
+              }`}
             />
           </div>
           <div>

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Modal from './Modal';
 import { Upload, X } from 'lucide-react';
 import { GRADE_LEVELS, HOUSE_IDS } from '../../data/mockData';

@@ -1,11 +1,34 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import Modal from './Modal';
 import { Upload, X } from 'lucide-react';
 import { GRADE_LEVELS, HOUSE_IDS } from '../../data/mockData';
 import StudentInformationFields from './StudentInformationFields';
 import { EMPTY_STUDENT_INFORMATION } from '../../data/studentInformation';
 import ChildImage from './ChildImage';
-import { isChildImageStoragePath } from '../../lib/childImages';
+
+/**
+ * Resize + compress a File/Blob to a JPEG base64 data URL.
+ * maxDim: longest edge in px. quality: 0–1 JPEG quality.
+ */
+function compressImageToBase64(file, maxDim = 400, quality = 0.75) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+      const w = Math.round(img.width * scale);
+      const h = Math.round(img.height * scale);
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Could not read image file.')); };
+    img.src = url;
+  });
+}
 
 /** Calculate completed years from a YYYY-MM-DD date string. Returns '' if invalid. */
 function calcAgeFromDob(dob) {
@@ -49,14 +72,8 @@ export default function AddChildModal({ isOpen, onClose, onAddChild }) {
   });
 
   const fileInputRef = useRef(null);
-  const [imageFile, setImageFile] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
-
-  useEffect(() => {
-    if (!formData.imageUrl.startsWith('blob:')) return undefined;
-    return () => URL.revokeObjectURL(formData.imageUrl);
-  }, [formData.imageUrl]);
 
   // Auto-calculate age whenever Date of Birth changes inside StudentInformationFields
   useEffect(() => {
@@ -67,16 +84,20 @@ export default function AddChildModal({ isOpen, onClose, onAddChild }) {
     }
   }, [formData.studentInformation?.dateOfBirth]);
 
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setImageFile(file);
     setSaveError('');
-    setFormData((previous) => ({ ...previous, imageUrl: URL.createObjectURL(file) }));
+    try {
+      const base64 = await compressImageToBase64(file);
+      setFormData((prev) => ({ ...prev, imageUrl: base64 }));
+    } catch {
+      setSaveError('Could not read the selected image. Please try another file.');
+    }
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const clearPhoto = () => {
-    setImageFile(null);
     setFormData(f => ({ ...f, imageUrl: '' }));
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
@@ -90,6 +111,7 @@ export default function AddChildModal({ isOpen, onClose, onAddChild }) {
     let saved;
     let failureMessage = '';
     try {
+      // imageFile is null — photo is already embedded as base64 in formData.imageUrl
       saved = await onAddChild({
       id: `c_${Date.now()}`,
       name: formData.name.trim(),
@@ -113,7 +135,7 @@ export default function AddChildModal({ isOpen, onClose, onAddChild }) {
       observations: [],
       goals: [],
       milestones: []
-      }, imageFile);
+      }, null);
     } catch (error) {
       saved = false;
       failureMessage = error?.message || 'Could not upload the child photo. Please try again.';
@@ -132,7 +154,6 @@ export default function AddChildModal({ isOpen, onClose, onAddChild }) {
       studentInformation: { ...EMPTY_STUDENT_INFORMATION },
       personalStatement: '', imageUrl: ''
     });
-    setImageFile(null);
     setSaveError('');
     onClose();
   };
@@ -175,11 +196,8 @@ export default function AddChildModal({ isOpen, onClose, onAddChild }) {
             <input
               type="url"
               placeholder="Paste image URL..."
-              value={formData.imageUrl.startsWith('data:') || isChildImageStoragePath(formData.imageUrl) ? '' : formData.imageUrl.startsWith('blob:') ? '' : formData.imageUrl}
-              onChange={(e) => {
-                setImageFile(null);
-                setFormData(f => ({ ...f, imageUrl: e.target.value }));
-              }}
+              value={formData.imageUrl.startsWith('data:') ? '' : formData.imageUrl}
+              onChange={(e) => setFormData(f => ({ ...f, imageUrl: e.target.value }))}
               className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#0C3440]"
             />
 

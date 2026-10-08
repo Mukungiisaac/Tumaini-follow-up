@@ -1,6 +1,5 @@
 ﻿import React, { useState, useRef } from 'react';
 import { useOutletContext, useNavigate } from 'react-router-dom';
-import { MOCK_MENTORS as INITIAL_MENTORS } from '../data/mockData';
 import {
   UserCheck, MessageSquare, Shield, Users, Calendar, Clock, MapPin,
   Plus, CheckCircle, XCircle, Edit2, Trash2, UserPlus, Mail, Briefcase, Upload
@@ -9,11 +8,11 @@ import ChildImage from '../components/common/ChildImage';
 import Modal from '../components/common/Modal';
 
 export default function MentorshipView() {
-  const { scheduledSessions = [], openScheduleModal, handleUpdateSessionStatus, childrenList = [] } = useOutletContext();
+  const { scheduledSessions = [], openScheduleModal, handleUpdateSessionStatus, childrenList = [],
+          mentors, handleAddMentor, handleUpdateMentor, handleDeleteMentor, handleUpdateChild } = useOutletContext();
   const navigate = useNavigate();
 
-  // ── Local mentor state ──────────────────────────────────────────────────────
-  const [mentors, setMentors] = useState(INITIAL_MENTORS);
+  // ── Local UI state only ──────────────────────────────────────────────────────
   const [filter, setFilter] = useState('ALL');
 
   // ── Modal state ─────────────────────────────────────────────────────────────
@@ -73,31 +72,27 @@ export default function MentorshipView() {
     e.preventDefault();
     if (!mentorForm.name.trim() || !mentorForm.role.trim() || !mentorForm.email.trim()) return;
     if (selectedMentor) {
-      setMentors(prev => prev.map(m =>
-        m.id === selectedMentor.id ? { ...m, ...mentorForm } : m
-      ));
+      handleUpdateMentor({ ...selectedMentor, ...mentorForm });
     } else {
-      setMentors(prev => [...prev, {
+      handleAddMentor({
         id: `m_${Date.now()}`,
         name: mentorForm.name.trim(),
         role: mentorForm.role.trim(),
         email: mentorForm.email.trim(),
         avatar: mentorForm.avatar.trim() || ''
-      }]);
+      });
     }
     setActiveModal(null);
   };
 
   const handleConfirmDeleteMentor = () => {
     if (!selectedMentor) return;
-    setMentors(prev => prev.filter(m => m.id !== selectedMentor.id));
+    handleDeleteMentor(selectedMentor.id);
     setActiveModal(null);
     setSelectedMentor(null);
   };
 
-  // Toggle child ↔ mentor assignment (updates childrenList via context if available,
-  // otherwise we do a local visual toggle by tracking overrides in state)
-  const { handleUpdateChild } = useOutletContext();
+  // Toggle child ↔ mentor assignment
 
   const toggleAssign = (child) => {
     if (!selectedMentor) return;

@@ -11,7 +11,7 @@ import EditChildModal from '../common/EditChildModal';
 import EditGoalModal from '../common/EditGoalModal';
 import EditObservationModal from '../common/EditObservationModal';
 import ScheduleOneOnOneModal from '../common/ScheduleOneOnOneModal';
-import { MOCK_CHILDREN, MOCK_HOUSES, MOCK_SCHEDULED_SESSIONS } from '../../data/mockData';
+import { MOCK_CHILDREN, MOCK_HOUSES, MOCK_SCHEDULED_SESSIONS, MOCK_MENTORS } from '../../data/mockData';
 import { MOCK_ACTIVITIES } from '../../data/mockActivities';
 import { AdminAuthContext } from '../../lib/adminAuthContext';
 import { insertAppRecords, listAppRecords, removeAppRecord, saveAppRecord } from '../../lib/appRecords';
@@ -69,7 +69,8 @@ function readSavedLocalRecords() {
     children: readArray('tumaini-children'),
     houses: readArray('tumaini-houses'),
     sessions: readArray('tumaini-sessions'),
-    activities: readArray('tumaini-activities')
+    activities: readArray('tumaini-activities'),
+    mentors: readArray('tumaini-mentors')
   };
 }
 
@@ -104,6 +105,9 @@ export default function AppLayout() {
   );
   const [activities, setActivities] = useState(() =>
     useRemoteRecords ? (cachedRecords?.activities ?? []) : readStoredValue('tumaini-activities', MOCK_ACTIVITIES)
+  );
+  const [mentors, setMentors] = useState(() =>
+    useRemoteRecords ? (cachedRecords?.mentors ?? MOCK_MENTORS) : readStoredValue('tumaini-mentors', MOCK_MENTORS)
   );
   const [localCurrentUser, setLocalCurrentUser] = useState(() => readStoredValue('tumaini-user', DEFAULT_USER));
   // Show skeleton only when there is no cached data at all (true cold start)
@@ -162,6 +166,7 @@ export default function AppLayout() {
         setHouses(records.houses);
         setScheduledSessions(records.sessions);
         setActivities(records.activities);
+        if (records.mentors && records.mentors.length > 0) setMentors(records.mentors);
         if (isInitial) {
           const remoteCount = Object.values(records).reduce((count, items) => count + items.length, 0);
           const localRecords = readSavedLocalRecords();
@@ -223,6 +228,14 @@ export default function AppLayout() {
     } catch {
     }
   }, [activities, useRemoteRecords]);
+
+  useEffect(() => {
+    if (useRemoteRecords) return;
+    try {
+      localStorage.setItem('tumaini-mentors', JSON.stringify(mentors));
+    } catch {
+    }
+  }, [mentors, useRemoteRecords]);
 
   useEffect(() => {
     if (useRemoteRecords) return;
@@ -577,11 +590,46 @@ export default function AppLayout() {
 
   const titles = getHeaderTitles();
 
+  const handleAddMentor = (mentor) => {
+    persistRecord('mentors', mentor).then((saved) => {
+      if (saved) {
+        setMentors((prev) => [...prev, mentor]);
+        showToast('Mentor added');
+      }
+    });
+  };
+
+  const handleUpdateMentor = (updatedMentor) => {
+    persistRecord('mentors', updatedMentor).then((saved) => {
+      if (saved) {
+        setMentors((prev) => prev.map((m) => m.id === updatedMentor.id ? updatedMentor : m));
+        showToast('Mentor updated');
+      }
+    });
+  };
+
+  const handleDeleteMentor = (mentorId) => {
+    const doDelete = async () => {
+      if (useRemoteRecords) {
+        try {
+          await removeAppRecord('mentors', mentorId);
+        } catch {
+          setDataError('Could not delete this mentor. Please try again.');
+          return;
+        }
+      }
+      setMentors((prev) => prev.filter((m) => m.id !== mentorId));
+      showToast('Mentor removed');
+    };
+    doDelete();
+  };
+
   const contextValue = {
     childrenList,
     houses,
     scheduledSessions,
     activities,
+    mentors,
     searchQuery,
     currentUser,
     isDataLoading,
@@ -608,7 +656,10 @@ export default function AppLayout() {
     handleUpdateAttendance,
     handleUpdateObservation,
     handleDeleteObservation,
-    openEditObsModal
+    openEditObsModal,
+    handleAddMentor,
+    handleUpdateMentor,
+    handleDeleteMentor
   };
 
   return (

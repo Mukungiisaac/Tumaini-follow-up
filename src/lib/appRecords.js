@@ -12,7 +12,7 @@ export async function listAppRecords() {
   return (data || []).reduce((records, row) => {
     records[row.record_type].push(row.payload);
     return records;
-  }, { children: [], houses: [], sessions: [], activities: [] });
+  }, { children: [], houses: [], sessions: [], activities: [], mentors: [] });
 }
 
 export async function saveAppRecord(recordType, record, userId) {

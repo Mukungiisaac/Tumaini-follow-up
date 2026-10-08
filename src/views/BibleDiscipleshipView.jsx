@@ -1,21 +1,24 @@
 ﻿import React, { useState } from 'react';
+import { useOutletContext } from 'react-router-dom';
 import { MOCK_BIBLE_CURRICULUM } from '../data/mockData';
 import { BookOpen, CheckCircle2, AlertCircle, Eye, Plus, Edit2, Check, Trash2 } from 'lucide-react';
 import Modal from '../components/common/Modal';
 
 export default function BibleDiscipleshipView() {
+  const {
+    memorizedVerses,
+    passageSubmissions,
+    bibleModuleStatuses,
+    storyStatuses,
+    hymnStatuses,
+    handleToggleVerse,
+    handleTogglePassage,
+    handleToggleBibleModuleStatus,
+    handleToggleStoryStatus,
+    handleToggleHymnStatus,
+  } = useOutletContext();
+
   const [activeSubTab, setActiveSubTab] = useState('memory');
-  const [memorized, setMemorized] = useState({});
-  const [passageSubmissions, setPassageSubmissions] = useState({
-    c1: 'Submitted',
-    c2: 'Missing',
-    c3: 'Missing',
-    c4: 'Missing',
-    c5: 'Submitted',
-    c6: 'Missing',
-    c7: 'Missing',
-    c8: 'Submitted'
-  });
   
   const [catechismQuestions, setCatechismQuestions] = useState(MOCK_BIBLE_CURRICULUM.catechismQuestions);
   const [verseCards, setVerseCards] = useState(MOCK_BIBLE_CURRICULUM.memorizationCards);
@@ -48,10 +51,6 @@ export default function BibleDiscipleshipView() {
   const [newModule, setNewModule] = useState({ title: '', leader: '', attendeesCount: '', status: 'Upcoming', keyLesson: '' });
   const [newStory, setNewStory] = useState({ title: '', book: '', keyLesson: '', status: 'Upcoming' });
   const [newHymn, setNewHymn] = useState({ title: '', composer: '', status: 'Not Started' });
-
-  const toggleVerse = (v) => {
-    setMemorized(prev => ({ ...prev, [v]: !prev[v] }));
-  };
 
   // Delete helpers
   const confirmDelete = (type, item) => {
@@ -148,17 +147,6 @@ export default function BibleDiscipleshipView() {
     setActiveModal(null);
   };
 
-  const toggleModuleStatus = (moduleId) => {
-    setBibleStudyModules(bibleStudyModules.map(m =>
-      m.id === moduleId
-        ? {
-            ...m,
-            status: m.status === 'Active' ? 'Upcoming' : m.status === 'Upcoming' ? 'Completed' : 'Active'
-          }
-        : m
-    ));
-  };
-
   // Bible Story Handlers
   const handleEditStory = (story) => {
     setEditingItem(story);
@@ -211,17 +199,6 @@ export default function BibleDiscipleshipView() {
     setActiveModal(null);
   };
 
-  const toggleStoryStatus = (storyId) => {
-    setBibleStories(bibleStories.map(s =>
-      s.id === storyId
-        ? {
-            ...s,
-            status: s.status === 'Active' ? 'Upcoming' : s.status === 'Upcoming' ? 'Completed' : 'Active'
-          }
-        : s
-    ));
-  };
-
   // Hymn Handlers
   const handleEditHymn = (hymn) => {
     setEditingItem(hymn);
@@ -269,17 +246,6 @@ export default function BibleDiscipleshipView() {
 
     setNewHymn({ title: '', composer: '', status: 'Not Started' });
     setActiveModal(null);
-  };
-
-  const toggleHymnStatus = (hymnId) => {
-    setHymns(hymns.map(h =>
-      h.id === hymnId
-        ? {
-            ...h,
-            status: h.status === 'In Progress' ? 'Not Started' : h.status === 'Not Started' ? 'Learned' : 'In Progress'
-          }
-        : h
-    ));
   };
 
   const handleAddQuestion = (e) => {
@@ -439,7 +405,7 @@ export default function BibleDiscipleshipView() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
             {verseCards.map((card) => {
-              const isDone = !!memorized[card.verse];
+              const isDone = !!memorizedVerses[card.verse];
               return (
                 <div
                   key={card.verse}
@@ -473,7 +439,7 @@ export default function BibleDiscipleshipView() {
                           <Trash2 className="w-4 h-4" />
                         </button>
                         <button
-                          onClick={() => toggleVerse(card.verse)}
+                          onClick={() => handleToggleVerse(card.verse)}
                           className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-all border ${
                             isDone
                               ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
@@ -581,17 +547,17 @@ export default function BibleDiscipleshipView() {
                   <h3 className="text-base font-bold text-slate-900 leading-snug flex-1">{g.title}</h3>
                   <div className="flex items-center gap-2">
                     <button
-                      onClick={() => toggleModuleStatus(g.id)}
+                      onClick={() => handleToggleBibleModuleStatus(g.id, bibleModuleStatuses[g.id] ?? g.status)}
                       className={`flex-shrink-0 px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap cursor-pointer transition-colors ${
-                        g.status === 'Active'
+                        (bibleModuleStatuses[g.id] ?? g.status) === 'Active'
                           ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200'
-                          : g.status === 'Completed'
+                          : (bibleModuleStatuses[g.id] ?? g.status) === 'Completed'
                           ? 'bg-blue-100 text-blue-800 hover:bg-blue-200'
                           : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                       }`}
                       title="Click to change status"
                     >
-                      {g.status}
+                      {bibleModuleStatuses[g.id] ?? g.status}
                     </button>
                     <button
                       onClick={() => handleEditModule(g)}
@@ -663,17 +629,17 @@ export default function BibleDiscipleshipView() {
                   </div>
                   <div className="flex items-center gap-2">
                     <button
-                      onClick={() => toggleStoryStatus(story.id)}
+                      onClick={() => handleToggleStoryStatus(story.id, storyStatuses[story.id] ?? story.status)}
                       className={`flex-shrink-0 px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap cursor-pointer transition-colors ${
-                        story.status === 'Active'
+                        (storyStatuses[story.id] ?? story.status) === 'Active'
                           ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200'
-                          : story.status === 'Completed'
+                          : (storyStatuses[story.id] ?? story.status) === 'Completed'
                           ? 'bg-blue-100 text-blue-800 hover:bg-blue-200'
                           : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                       }`}
                       title="Click to change status"
                     >
-                      {story.status}
+                      {storyStatuses[story.id] ?? story.status}
                     </button>
                     <button
                       onClick={() => handleEditStory(story)}
@@ -727,7 +693,7 @@ export default function BibleDiscipleshipView() {
               <div
                 key={hymn.id}
                 className={`rounded-lg border p-6 space-y-4 transition-all ${
-                  hymn.status === 'Learned'
+                  (hymnStatuses[hymn.id] ?? hymn.status) === 'Learned'
                     ? 'bg-gradient-to-br from-emerald-50 to-emerald-25 border-emerald-200'
                     : 'bg-white border-slate-200 hover:shadow-md'
                 }`}
@@ -739,17 +705,17 @@ export default function BibleDiscipleshipView() {
                   </div>
                   <div className="flex items-center gap-2">
                     <button
-                      onClick={() => toggleHymnStatus(hymn.id)}
+                      onClick={() => handleToggleHymnStatus(hymn.id, hymnStatuses[hymn.id] ?? hymn.status)}
                       className={`flex-shrink-0 px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap cursor-pointer transition-colors ${
-                        hymn.status === 'Learned'
+                        (hymnStatuses[hymn.id] ?? hymn.status) === 'Learned'
                           ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200'
-                          : hymn.status === 'In Progress'
+                          : (hymnStatuses[hymn.id] ?? hymn.status) === 'In Progress'
                           ? 'bg-amber-100 text-amber-800 hover:bg-amber-200'
                           : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                       }`}
                       title="Click to change status"
                     >
-                      {hymn.status}
+                      {hymnStatuses[hymn.id] ?? hymn.status}
                     </button>
                     <button
                       onClick={() => handleEditHymn(hymn)}
@@ -768,7 +734,7 @@ export default function BibleDiscipleshipView() {
                   </div>
                 </div>
 
-                {hymn.status === 'Learned' && (
+                {(hymnStatuses[hymn.id] ?? hymn.status) === 'Learned' && (
                   <div className="flex items-center gap-2 text-emerald-700 pt-3 border-t border-emerald-200">
                     <CheckCircle2 className="w-4 h-4" />
                     <span className="text-xs font-semibold">Mastered by learners</span>
@@ -834,10 +800,7 @@ export default function BibleDiscipleshipView() {
 
                       <td className="px-6 py-4">
                         <button
-                          onClick={() => setPassageSubmissions(prev => ({
-                            ...prev,
-                            [child.id]: status === 'Submitted' ? 'Missing' : 'Submitted'
-                          }))}
+                          onClick={() => handleTogglePassage(child.id)}
                           className="p-1.5 rounded-lg text-slate-400 hover:text-brand-primary hover:bg-brand-primary-light transition-colors"
                           title="Toggle status"
                         >

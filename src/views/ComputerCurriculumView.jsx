@@ -1,11 +1,12 @@
 ﻿import React, { useState } from 'react';
+import { useOutletContext } from 'react-router-dom';
 import { MOCK_COMPUTER_CURRICULUM } from '../data/mockData';
 import { Laptop, CheckCircle2, BookOpen, Award, Zap, Edit2, Plus, Trash2 } from 'lucide-react';
 import Modal from '../components/common/Modal';
 
 export default function ComputerCurriculumView() {
+  const { completedModules, handleToggleModule } = useOutletContext();
   const [selectedLevel, setSelectedLevel] = useState(1);
-  const [completedModules, setCompletedModules] = useState({});
   const [curriculumData, setCurriculumData] = useState(MOCK_COMPUTER_CURRICULUM);
   const [activeModal, setActiveModal] = useState(null); // 'edit-module' | 'edit-level' | 'delete-confirm'
   const [editingModule, setEditingModule] = useState(null);
@@ -23,13 +24,6 @@ export default function ComputerCurriculumView() {
   });
 
   const levelData = curriculumData.find((l) => l.level === selectedLevel) || curriculumData[0];
-
-  const toggleModule = (modId) => {
-    setCompletedModules(prev => ({
-      ...prev,
-      [modId]: !prev[modId]
-    }));
-  };
 
   const handleEditModule = (module, level) => {
     setEditingModule(module);
@@ -297,7 +291,7 @@ export default function ComputerCurriculumView() {
                     </button>
 
                     <button
-                      onClick={() => toggleModule(mod.id)}
+                      onClick={() => handleToggleModule(mod.id)}
                       className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all border ${
                         isDone
                           ? 'bg-emerald-100 text-emerald-800 border-emerald-300 shadow-sm'

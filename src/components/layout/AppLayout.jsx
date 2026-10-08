@@ -109,6 +109,30 @@ export default function AppLayout() {
   const [mentors, setMentors] = useState(() =>
     readStoredValue('tumaini-mentors', MOCK_MENTORS)
   );
+
+  // ── Curriculum completion state — persisted to localStorage ──────────────────
+  const [completedModules, setCompletedModules] = useState(() =>
+    readStoredValue('tumaini-completed-modules', {})
+  );
+  const [memorizedVerses, setMemorizedVerses] = useState(() =>
+    readStoredValue('tumaini-memorized-verses', {})
+  );
+  const [passageSubmissions, setPassageSubmissions] = useState(() =>
+    readStoredValue('tumaini-passage-submissions', {
+      c1: 'Submitted', c2: 'Missing', c3: 'Missing', c4: 'Missing',
+      c5: 'Submitted', c6: 'Missing', c7: 'Missing', c8: 'Missing'
+    })
+  );
+  const [bibleModuleStatuses, setBibleModuleStatuses] = useState(() =>
+    readStoredValue('tumaini-bible-module-statuses', {})
+  );
+  const [storyStatuses, setStoryStatuses] = useState(() =>
+    readStoredValue('tumaini-story-statuses', {})
+  );
+  const [hymnStatuses, setHymnStatuses] = useState(() =>
+    readStoredValue('tumaini-hymn-statuses', {})
+  );
+
   const [localCurrentUser, setLocalCurrentUser] = useState(() => readStoredValue('tumaini-user', DEFAULT_USER));
   // Show skeleton only when there is no cached data at all (true cold start)
   const [isDataLoading, setIsDataLoading] = useState(useRemoteRecords && !cachedRecords);
@@ -245,13 +269,51 @@ export default function AppLayout() {
     }
   }, [mentors, useRemoteRecords]);
 
+  // Curriculum completion sync — always localStorage (small flat objects, no Supabase needed)
   useEffect(() => {
-    if (useRemoteRecords) return;
-    try {
-      localStorage.setItem('tumaini-user', JSON.stringify(localCurrentUser));
-    } catch {
-    }
-  }, [localCurrentUser, useRemoteRecords]);
+    try { localStorage.setItem('tumaini-completed-modules', JSON.stringify(completedModules)); } catch {}
+  }, [completedModules]);
+  useEffect(() => {
+    try { localStorage.setItem('tumaini-memorized-verses', JSON.stringify(memorizedVerses)); } catch {}
+  }, [memorizedVerses]);
+  useEffect(() => {
+    try { localStorage.setItem('tumaini-passage-submissions', JSON.stringify(passageSubmissions)); } catch {}
+  }, [passageSubmissions]);
+  useEffect(() => {
+    try { localStorage.setItem('tumaini-bible-module-statuses', JSON.stringify(bibleModuleStatuses)); } catch {}
+  }, [bibleModuleStatuses]);
+  useEffect(() => {
+    try { localStorage.setItem('tumaini-story-statuses', JSON.stringify(storyStatuses)); } catch {}
+  }, [storyStatuses]);
+  useEffect(() => {
+    try { localStorage.setItem('tumaini-hymn-statuses', JSON.stringify(hymnStatuses)); } catch {}
+  }, [hymnStatuses]);
+
+  // Completion handlers
+  const handleToggleModule = (modId) => {
+    setCompletedModules(prev => ({ ...prev, [modId]: !prev[modId] }));
+  };
+  const handleToggleVerse = (verse) => {
+    setMemorizedVerses(prev => ({ ...prev, [verse]: !prev[verse] }));
+  };
+  const handleTogglePassage = (childId) => {
+    setPassageSubmissions(prev => ({
+      ...prev,
+      [childId]: prev[childId] === 'Submitted' ? 'Missing' : 'Submitted'
+    }));
+  };
+  const handleToggleBibleModuleStatus = (moduleId, currentStatus) => {
+    const next = currentStatus === 'Active' ? 'Upcoming' : currentStatus === 'Upcoming' ? 'Completed' : 'Active';
+    setBibleModuleStatuses(prev => ({ ...prev, [moduleId]: next }));
+  };
+  const handleToggleStoryStatus = (storyId, currentStatus) => {
+    const next = currentStatus === 'Active' ? 'Upcoming' : currentStatus === 'Upcoming' ? 'Completed' : 'Active';
+    setStoryStatuses(prev => ({ ...prev, [storyId]: next }));
+  };
+  const handleToggleHymnStatus = (hymnId, currentStatus) => {
+    const next = currentStatus === 'In Progress' ? 'Not Started' : currentStatus === 'Not Started' ? 'Learned' : 'In Progress';
+    setHymnStatuses(prev => ({ ...prev, [hymnId]: next }));
+  };
 
   const persistRecord = async (recordType, record) => {
     if (!useRemoteRecords) return true;
@@ -660,7 +722,20 @@ export default function AppLayout() {
     openEditObsModal,
     handleAddMentor,
     handleUpdateMentor,
-    handleDeleteMentor
+    handleDeleteMentor,
+    // Curriculum completion (persisted)
+    completedModules,
+    memorizedVerses,
+    passageSubmissions,
+    bibleModuleStatuses,
+    storyStatuses,
+    hymnStatuses,
+    handleToggleModule,
+    handleToggleVerse,
+    handleTogglePassage,
+    handleToggleBibleModuleStatus,
+    handleToggleStoryStatus,
+    handleToggleHymnStatus,
   };
 
   return (

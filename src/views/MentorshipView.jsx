@@ -117,14 +117,14 @@ export default function MentorshipView() {
     <div className="space-y-8 animate-in fade-in duration-300">
 
       {/* ── Header Banner ─────────────────────────────────────────────────────── */}
-      <div className="bg-gradient-to-br from-brand-primary to-[#0a2d38] text-white p-8 lg:p-10 rounded-xl shadow-lg">
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-          <div className="space-y-3">
+      <div className="bg-gradient-to-br from-brand-primary to-[#0a2d38] text-white p-6 lg:p-10 rounded-xl shadow-lg">
+        <div className="flex flex-col gap-5">
+          <div className="space-y-2">
             <div className="flex items-center gap-2 text-brand-primary-light text-xs font-semibold uppercase tracking-wider">
               <UserCheck className="w-4 h-4" />
               <span>Holistic Child Mentorship</span>
             </div>
-            <h1 className="text-3xl lg:text-4xl font-bold leading-tight">
+            <h1 className="text-2xl lg:text-4xl font-bold leading-tight">
               Mentorship & Character Development
             </h1>
             <p className="text-sm text-slate-200 max-w-xl leading-relaxed">
@@ -132,18 +132,18 @@ export default function MentorshipView() {
             </p>
           </div>
 
-          <div className="flex items-center gap-3 shrink-0">
-            <div className="bg-white/10 p-4 rounded-xl border border-white/10 text-center min-w-[72px]">
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="bg-white/10 px-4 py-3 rounded-xl border border-white/10 text-center min-w-[70px]">
               <span className="text-2xl font-bold text-white block">{mentors.length}</span>
               <p className="text-[10px] text-brand-primary-light uppercase tracking-wider">Mentors</p>
             </div>
-            <div className="bg-white/10 p-4 rounded-xl border border-white/10 text-center min-w-[72px]">
+            <div className="bg-white/10 px-4 py-3 rounded-xl border border-white/10 text-center min-w-[70px]">
               <span className="text-2xl font-bold text-white block">{scheduledSessions.length}</span>
               <p className="text-[10px] text-brand-primary-light uppercase tracking-wider">Sessions</p>
             </div>
             <button
               onClick={() => openScheduleModal('')}
-              className="flex items-center gap-2 px-4 py-2.5 bg-white text-brand-primary rounded-lg font-semibold text-sm hover:bg-slate-100 transition-colors shadow-sm cursor-pointer"
+              className="flex items-center gap-2 px-4 py-2.5 bg-white text-brand-primary rounded-lg font-semibold text-sm active:bg-slate-200 transition-colors shadow-sm"
             >
               <Plus className="w-4 h-4" /> Schedule 1-on-1
             </button>
@@ -152,21 +152,21 @@ export default function MentorshipView() {
       </div>
 
       {/* ── Scheduled Sessions ────────────────────────────────────────────────── */}
-      <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm space-y-5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="bg-white rounded-xl p-4 sm:p-6 border border-slate-200 shadow-sm space-y-5">
+        <div className="flex flex-col gap-4">
           <div>
             <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
               <Calendar className="w-5 h-5 text-brand-primary" /> Scheduled 1-on-1 Meetings
             </h3>
             <p className="text-xs text-slate-500">Upcoming and completed mentor sessions with location and time.</p>
           </div>
-          <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-lg w-fit">
+          <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-lg w-fit overflow-x-auto">
             {[['ALL', 'All', scheduledSessions.length], ['Scheduled', 'Upcoming', scheduledSessions.filter(s => s.status === 'Scheduled').length], ['Completed', 'Completed', scheduledSessions.filter(s => s.status === 'Completed').length]].map(([val, label, count]) => (
               <button
                 key={val}
                 onClick={() => setFilter(val)}
-                className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors cursor-pointer ${
-                  filter === val ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+                className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors whitespace-nowrap ${
+                  filter === val ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600'
                 }`}
               >
                 {label} ({count})
@@ -256,67 +256,71 @@ export default function MentorshipView() {
           </button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {mentors.map((m) => {
             const mapped = getMappedCount(m.name);
             return (
-              <div key={m.id} className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden hover:shadow-md transition-all group">
-                {/* Top action bar */}
-                <div className="flex items-center justify-end gap-1 px-4 pt-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button
-                    onClick={() => openEditMentor(m)}
-                    className="p-1.5 text-slate-400 hover:text-brand-primary hover:bg-brand-primary-light rounded-lg transition-colors cursor-pointer"
-                    title="Edit mentor"
-                  >
-                    <Edit2 className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    onClick={() => openAssign(m)}
-                    className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
-                    title="Assign students"
-                  >
-                    <UserPlus className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    onClick={() => openDeleteMentor(m)}
-                    className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
-                    title="Delete mentor"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
+              <div key={m.id} className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                {/* Always-visible action bar — no hover dependency */}
+                <div className="flex items-center justify-between px-3 pt-3 pb-1">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Mentor</span>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => openEditMentor(m)}
+                      className="p-2 text-slate-500 hover:text-brand-primary active:text-brand-primary bg-slate-100 hover:bg-brand-primary-light rounded-lg transition-colors"
+                      title="Edit mentor"
+                    >
+                      <Edit2 className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => openAssign(m)}
+                      className="p-2 text-slate-500 hover:text-emerald-600 active:text-emerald-600 bg-slate-100 hover:bg-emerald-50 rounded-lg transition-colors"
+                      title="Assign students"
+                    >
+                      <UserPlus className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => openDeleteMentor(m)}
+                      className="p-2 text-slate-500 hover:text-rose-600 active:text-rose-600 bg-slate-100 hover:bg-rose-50 rounded-lg transition-colors"
+                      title="Delete mentor"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
 
                 {/* Avatar + info */}
-                <div className="px-6 pb-5 pt-1 text-center space-y-3">
-                  <div className="relative inline-block">
-                    {m.avatar ? (
-                      <img
-                        src={m.avatar}
-                        alt={m.name}
-                        className="w-20 h-20 rounded-full object-cover mx-auto ring-4 ring-brand-primary-light shadow-md"
-                        onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
-                      />
-                    ) : null}
-                    <div
-                      style={{ display: m.avatar ? 'none' : 'flex' }}
-                      className="w-20 h-20 rounded-full bg-brand-primary text-white text-2xl font-bold items-center justify-center mx-auto ring-4 ring-brand-primary-light shadow-md"
-                    >
-                      {m.name.charAt(0)}
-                    </div>
+                <div className="px-4 pb-4 text-center space-y-2.5">
+                  {m.avatar ? (
+                    <img
+                      src={m.avatar}
+                      alt={m.name}
+                      className="w-16 h-16 rounded-full object-cover mx-auto ring-4 ring-brand-primary-light shadow-md"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        e.target.nextSibling.style.display = 'flex';
+                      }}
+                    />
+                  ) : null}
+                  <div
+                    style={{ display: m.avatar ? 'none' : 'flex' }}
+                    className="w-16 h-16 rounded-full bg-brand-primary text-white text-xl font-bold items-center justify-center mx-auto ring-4 ring-brand-primary-light shadow-md"
+                  >
+                    {m.name.charAt(0)}
                   </div>
 
                   <div>
-                    <h4 className="text-base font-bold text-slate-900">{m.name}</h4>
-                    <p className="text-xs font-bold text-brand-primary uppercase tracking-wider mt-0.5">{m.role}</p>
-                    <div className="flex items-center justify-center gap-1.5 mt-1.5">
-                      <Mail className="w-3 h-3 text-slate-400" />
-                      <p className="text-xs text-slate-500 truncate max-w-[160px]">{m.email}</p>
+                    <h4 className="text-sm font-bold text-slate-900 leading-tight">{m.name}</h4>
+                    <p className="text-[10px] font-bold text-brand-primary uppercase tracking-wider mt-0.5 leading-tight">{m.role}</p>
+                    <div className="flex items-center justify-center gap-1 mt-1.5">
+                      <Mail className="w-3 h-3 text-slate-400 flex-shrink-0" />
+                      <p className="text-[11px] text-slate-500 truncate max-w-[140px]">{m.email}</p>
                     </div>
                   </div>
 
-                  {/* Stats + actions */}
-                  <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
-                    <div className="flex items-center gap-1.5">
+                  {/* Stats row */}
+                  <div className="pt-2.5 border-t border-slate-100 flex items-center justify-between">
+                    <div className="flex items-center gap-1">
                       <Users className="w-3.5 h-3.5 text-slate-400" />
                       <span className="text-xs text-slate-600">
                         <strong className="text-slate-900">{mapped}</strong> student{mapped !== 1 ? 's' : ''}
@@ -324,26 +328,26 @@ export default function MentorshipView() {
                     </div>
                     <button
                       onClick={() => openScheduleModal('')}
-                      className="text-xs font-semibold text-brand-primary hover:text-[#0a2d38] transition-colors cursor-pointer"
+                      className="text-[11px] font-semibold text-brand-primary active:text-[#0a2d38] transition-colors"
                     >
-                      Book 1-on-1
+                      Book
                     </button>
                   </div>
 
-                  {/* Assigned students preview */}
+                  {/* Assigned students avatars */}
                   {mapped > 0 && (
-                    <div className="flex -space-x-2 justify-center pt-1">
-                      {getAssignedChildren(m.name).slice(0, 5).map(c => (
+                    <div className="flex -space-x-2 justify-center pt-0.5">
+                      {getAssignedChildren(m.name).slice(0, 4).map(c => (
                         <ChildImage
                           key={c.id}
                           src={c.image}
                           alt={c.name}
-                          className="w-7 h-7 rounded-full object-cover ring-2 ring-white"
+                          className="w-6 h-6 rounded-full object-cover ring-2 ring-white"
                         />
                       ))}
-                      {mapped > 5 && (
-                        <div className="w-7 h-7 rounded-full bg-slate-200 ring-2 ring-white flex items-center justify-center text-[10px] font-bold text-slate-600">
-                          +{mapped - 5}
+                      {mapped > 4 && (
+                        <div className="w-6 h-6 rounded-full bg-slate-200 ring-2 ring-white flex items-center justify-center text-[9px] font-bold text-slate-600">
+                          +{mapped - 4}
                         </div>
                       )}
                     </div>

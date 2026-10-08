@@ -65,7 +65,7 @@ export default function ChildProfileView() {
         ...child.studentInformation,
         ...caseHistoryDraft
       }
-    });
+    }, null, 'Saved successfully');
     setIsEditingCaseHistory(false);
   };
 
@@ -82,7 +82,7 @@ export default function ChildProfileView() {
     handleUpdateChild?.({
       ...child,
       academicRecords: [record, ...(child.academicRecords || [])]
-    });
+    }, null, 'Saved successfully');
     setAcademicEntry({ subject: '', term: '', schoolYear: '', result: '', notes: '' });
   };
 

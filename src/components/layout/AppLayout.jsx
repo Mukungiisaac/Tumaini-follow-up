@@ -1,5 +1,6 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
+import { CheckCircle2, X } from 'lucide-react';
 import Sidebar from './Sidebar';
 import Header from './Header';
 import AddChildModal from '../common/AddChildModal';
@@ -110,6 +111,26 @@ export default function AppLayout() {
   const [dataError, setDataError] = useState('');
   const [localImportCount, setLocalImportCount] = useState(0);
   const [isImportingLocalData, setIsImportingLocalData] = useState(false);
+  const [toast, setToast] = useState(null);
+  const toastTimeoutRef = useRef(null);
+
+  const showToast = (message = 'Saved successfully', type = 'success') => {
+    if (toastTimeoutRef.current) {
+      clearTimeout(toastTimeoutRef.current);
+    }
+    setToast({ message, type, id: Date.now() });
+    toastTimeoutRef.current = setTimeout(() => {
+      setToast(null);
+    }, 3500);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (toastTimeoutRef.current) {
+        clearTimeout(toastTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const currentUser = useRemoteRecords && auth?.user
     ? {
@@ -266,7 +287,10 @@ export default function AppLayout() {
 
   const handleUpdateHouse = (updatedHouse) => {
     persistRecord('houses', updatedHouse).then((saved) => {
-      if (saved) setHouses((prev) => prev.map((house) => house.id === updatedHouse.id ? updatedHouse : house));
+      if (saved) {
+        setHouses((prev) => prev.map((house) => house.id === updatedHouse.id ? updatedHouse : house));
+        showToast('Updated successfully');
+      }
     });
   };
 
@@ -279,12 +303,14 @@ export default function AppLayout() {
           department: updatedUserData.department || currentUser.department || '',
           avatar_url: updatedUserData.avatar ?? currentUser.avatar ?? ''
         });
+        showToast('Updated successfully');
       } catch {
         setDataError('Could not update the admin profile. Please try again.');
       }
       return;
     }
     setLocalCurrentUser((prev) => ({ ...prev, ...updatedUserData }));
+    showToast('Updated successfully');
   };
 
   // Modals state
@@ -346,10 +372,11 @@ export default function AppLayout() {
       return false;
     }
     setChildrenList((prev) => [childToSave, ...prev]);
+    showToast('Saved successfully');
     return true;
   };
 
-  const handleUpdateChild = async (updatedChild, imageFile) => {
+  const handleUpdateChild = async (updatedChild, imageFile, successMessage = 'Updated successfully') => {
     const existingChild = childrenList.find((item) => item.id === updatedChild.id);
     if (!existingChild) return false;
 
@@ -387,6 +414,7 @@ export default function AppLayout() {
       }
     }
 
+    showToast(successMessage);
     return true;
   };
 
@@ -400,6 +428,7 @@ export default function AppLayout() {
       ...child,
       goals: (child.goals || []).map((goal) => goal.id === updatedGoal.id ? updatedGoal : goal)
     }));
+    showToast('Updated successfully');
   };
 
   const openEditGoalModal = (goalToEdit) => {
@@ -412,6 +441,7 @@ export default function AppLayout() {
       ...child,
       observations: [obs, ...(child.observations || [])]
     }));
+    showToast('Saved successfully');
   };
 
   const handleUpdateObservation = (updatedObs) => {
@@ -421,6 +451,7 @@ export default function AppLayout() {
       ...current,
       observations: current.observations.map((observation) => observation.id === updatedObs.id ? updatedObs : observation)
     }));
+    showToast('Updated successfully');
   };
 
   const handleDeleteObservation = (obsId) => {
@@ -439,6 +470,7 @@ export default function AppLayout() {
 
   const handleAddGoal = (goal) => {
     mutateChild(goal.childId, (child) => ({ ...child, goals: [goal, ...(child.goals || [])] }));
+    showToast('Saved successfully');
   };
 
   const handleRecordMilestone = (milestone) => {
@@ -446,6 +478,7 @@ export default function AppLayout() {
       ...child,
       milestones: [milestone, ...(child.milestones || [])]
     }));
+    showToast('Saved successfully');
   };
 
   const handleUpdateChildSkill = (childId, skillId, newLevel) => {
@@ -453,11 +486,15 @@ export default function AppLayout() {
       ...child,
       skillLevels: { ...(child.skillLevels || {}), [skillId]: newLevel }
     }));
+    showToast('Updated successfully');
   };
 
   const handleScheduleSession = (newSession) => {
     persistRecord('sessions', newSession).then((saved) => {
-      if (saved) setScheduledSessions((prev) => [newSession, ...prev]);
+      if (saved) {
+        setScheduledSessions((prev) => [newSession, ...prev]);
+        showToast('Saved successfully');
+      }
     });
   };
 
@@ -466,19 +503,28 @@ export default function AppLayout() {
     if (!session) return;
     const updatedSession = { ...session, status: newStatus };
     persistRecord('sessions', updatedSession).then((saved) => {
-      if (saved) setScheduledSessions((prev) => prev.map((item) => item.id === sessionId ? updatedSession : item));
+      if (saved) {
+        setScheduledSessions((prev) => prev.map((item) => item.id === sessionId ? updatedSession : item));
+        showToast('Updated successfully');
+      }
     });
   };
 
   const handleAddActivity = (activity) => {
     persistRecord('activities', activity).then((saved) => {
-      if (saved) setActivities((prev) => [activity, ...prev]);
+      if (saved) {
+        setActivities((prev) => [activity, ...prev]);
+        showToast('Saved successfully');
+      }
     });
   };
 
   const handleUpdateActivity = (updatedActivity) => {
     persistRecord('activities', updatedActivity).then((saved) => {
-      if (saved) setActivities((prev) => prev.map((activity) => activity.id === updatedActivity.id ? updatedActivity : activity));
+      if (saved) {
+        setActivities((prev) => prev.map((activity) => activity.id === updatedActivity.id ? updatedActivity : activity));
+        showToast('Updated successfully');
+      }
     });
   };
 
@@ -539,6 +585,8 @@ export default function AppLayout() {
     searchQuery,
     currentUser,
     isDataLoading,
+    showToast,
+    showSuccessToast: showToast,
     handleSignOut: auth?.signOut,
     handleUpdateUser,
     openAddChildModal: () => setIsAddChildOpen(true),
@@ -665,6 +713,28 @@ export default function AppLayout() {
         initialChildId={scheduleChildId}
         onScheduleSession={handleScheduleSession}
       />
+
+      {/* Green Success Pop Message */}
+      {toast && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="fixed top-5 left-1/2 -translate-x-1/2 z-[9999] flex items-center gap-3 px-4 py-3 sm:px-5 sm:py-3.5 max-w-[calc(100vw-2rem)] rounded-2xl bg-emerald-600 text-white font-medium text-sm shadow-xl shadow-emerald-950/25 border border-emerald-500/80 animate-in fade-in slide-in-from-top-4 duration-300 pointer-events-auto"
+        >
+          <div className="flex items-center justify-center w-6 h-6 rounded-full bg-white/20 text-white shrink-0">
+            <CheckCircle2 className="w-4 h-4" />
+          </div>
+          <span className="font-semibold text-white tracking-wide">{toast.message}</span>
+          <button
+            type="button"
+            onClick={() => setToast(null)}
+            className="ml-2 -mr-1 p-1 hover:bg-emerald-700/80 rounded-lg text-emerald-100 hover:text-white transition-colors cursor-pointer"
+            aria-label="Dismiss notification"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

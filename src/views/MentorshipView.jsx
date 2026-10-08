@@ -26,9 +26,28 @@ export default function MentorshipView() {
   const handleAvatarFile = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => setMentorForm(prev => ({ ...prev, avatar: ev.target.result }));
-    reader.readAsDataURL(file);
+    // Resize to max 200×200 before storing as base64 to stay within localStorage limits
+    const img = new Image();
+    const objectUrl = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+      const MAX = 200;
+      const scale = Math.min(MAX / img.width, MAX / img.height, 1);
+      const canvas = document.createElement('canvas');
+      canvas.width  = Math.round(img.width  * scale);
+      canvas.height = Math.round(img.height * scale);
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      const compressed = canvas.toDataURL('image/jpeg', 0.8);
+      setMentorForm(prev => ({ ...prev, avatar: compressed }));
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      // fallback: store raw but may hit quota
+      const reader = new FileReader();
+      reader.onload = (ev) => setMentorForm(prev => ({ ...prev, avatar: ev.target.result }));
+      reader.readAsDataURL(file);
+    };
+    img.src = objectUrl;
   };
 
   // ── Helpers ─────────────────────────────────────────────────────────────────
@@ -418,42 +437,69 @@ export default function MentorshipView() {
           </div>
           <div>
             <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Avatar (optional)</label>
-            {/* Preview */}
-            {mentorForm.avatar && (
-              <div className="flex justify-center mb-3">
-                <img
-                  src={mentorForm.avatar}
-                  alt="Preview"
-                  className="w-20 h-20 rounded-full object-cover ring-4 ring-brand-primary-light shadow-md"
-                  onError={e => e.target.style.display = 'none'}
-                />
+            <div className="flex items-center gap-4">
+              {/* Live preview circle */}
+              <div className="flex-shrink-0 relative">
+                {mentorForm.avatar ? (
+                  <img
+                    src={mentorForm.avatar}
+                    alt="Preview"
+                    className="w-16 h-16 rounded-full object-cover ring-4 ring-brand-primary-light shadow-md"
+                    onError={e => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
+                  />
+                ) : null}
+                <div
+                  style={{ display: mentorForm.avatar ? 'none' : 'flex' }}
+                  className="w-16 h-16 rounded-full bg-slate-200 text-slate-500 text-xl font-bold items-center justify-center ring-4 ring-brand-primary-light shadow-md"
+                >
+                  {mentorForm.name ? mentorForm.name.charAt(0).toUpperCase() : '?'}
+                </div>
+                {/* Remove button overlay */}
+                {mentorForm.avatar && (
+                  <button
+                    type="button"
+                    onClick={() => setMentorForm(prev => ({ ...prev, avatar: '' }))}
+                    className="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 text-white rounded-full flex items-center justify-center text-xs font-bold shadow"
+                    title="Remove photo"
+                  >
+                    ×
+                  </button>
+                )}
               </div>
-            )}
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={mentorForm.avatar.startsWith('data:') ? '' : mentorForm.avatar}
-                onChange={e => setMentorForm({ ...mentorForm, avatar: e.target.value })}
-                placeholder="Paste image URL..."
-                className="flex-1 px-4 py-3 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all"
-              />
-              <button
-                type="button"
-                onClick={() => avatarFileRef.current?.click()}
-                className="flex-shrink-0 w-11 h-11 flex items-center justify-center bg-brand-primary text-white rounded-lg hover:bg-[#0a2d38] transition-colors shadow-sm cursor-pointer"
-                title="Upload from device"
-              >
-                <Upload className="w-5 h-5" />
-              </button>
-              <input
-                ref={avatarFileRef}
-                type="file"
-                accept="image/*"
-                onChange={handleAvatarFile}
-                className="hidden"
-              />
+
+              {/* URL + upload controls */}
+              <div className="flex-1 space-y-2">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={mentorForm.avatar.startsWith('data:') ? '' : mentorForm.avatar}
+                    onChange={e => setMentorForm({ ...mentorForm, avatar: e.target.value })}
+                    placeholder="Paste image URL..."
+                    className="flex-1 px-3 py-2.5 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => avatarFileRef.current?.click()}
+                    className="flex-shrink-0 w-10 h-10 flex items-center justify-center bg-brand-primary text-white rounded-lg active:bg-[#0a2d38] transition-colors shadow-sm"
+                    title="Upload from device"
+                  >
+                    <Upload className="w-4 h-4" />
+                  </button>
+                  <input
+                    ref={avatarFileRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAvatarFile}
+                    className="hidden"
+                  />
+                </div>
+                <p className="text-xs text-slate-400 italic">
+                  {mentorForm.avatar.startsWith('data:')
+                    ? '✓ Photo uploaded from device'
+                    : 'Paste a URL or tap the upload icon'}
+                </p>
+              </div>
             </div>
-            <p className="text-xs text-slate-400 mt-1.5 italic">Paste a URL or upload a photo from your device.</p>
           </div>
           <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
             <button type="button" onClick={() => setActiveModal(null)} className="px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-100 rounded-lg transition-colors">Cancel</button>

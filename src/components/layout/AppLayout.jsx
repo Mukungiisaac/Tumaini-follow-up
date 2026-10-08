@@ -107,7 +107,7 @@ export default function AppLayout() {
     useRemoteRecords ? (cachedRecords?.activities ?? []) : readStoredValue('tumaini-activities', MOCK_ACTIVITIES)
   );
   const [mentors, setMentors] = useState(() =>
-    useRemoteRecords ? (cachedRecords?.mentors ?? MOCK_MENTORS) : readStoredValue('tumaini-mentors', MOCK_MENTORS)
+    readStoredValue('tumaini-mentors', MOCK_MENTORS)
   );
   const [localCurrentUser, setLocalCurrentUser] = useState(() => readStoredValue('tumaini-user', DEFAULT_USER));
   // Show skeleton only when there is no cached data at all (true cold start)
@@ -166,7 +166,6 @@ export default function AppLayout() {
         setHouses(records.houses);
         setScheduledSessions(records.sessions);
         setActivities(records.activities);
-        if (records.mentors && records.mentors.length > 0) setMentors(records.mentors);
         if (isInitial) {
           const remoteCount = Object.values(records).reduce((count, items) => count + items.length, 0);
           const localRecords = readSavedLocalRecords();
@@ -232,8 +231,17 @@ export default function AppLayout() {
   useEffect(() => {
     if (useRemoteRecords) return;
     try {
-      localStorage.setItem('tumaini-mentors', JSON.stringify(mentors));
+      // Strip avatars to max 50KB each before storing to avoid quota errors
+      const stripped = mentors.map(m => ({
+        ...m,
+        avatar: typeof m.avatar === 'string' && m.avatar.startsWith('data:') && m.avatar.length > 50000
+          ? m.avatar.substring(0, 50000) // truncate oversized base64 — should never hit this after canvas resize
+          : m.avatar
+      }));
+      localStorage.setItem('tumaini-mentors', JSON.stringify(stripped));
     } catch {
+      // localStorage quota exceeded — mentors will reset on refresh
+      console.warn('[AppLayout] Could not persist mentor data to localStorage. Storage may be full.');
     }
   }, [mentors, useRemoteRecords]);
 
@@ -591,37 +599,30 @@ export default function AppLayout() {
   const titles = getHeaderTitles();
 
   const handleAddMentor = (mentor) => {
-    persistRecord('mentors', mentor).then((saved) => {
-      if (saved) {
-        setMentors((prev) => [...prev, mentor]);
-        showToast('Mentor added');
-      }
+    setMentors((prev) => {
+      const updated = [...prev, mentor];
+      try { localStorage.setItem('tumaini-mentors', JSON.stringify(updated)); } catch {}
+      return updated;
     });
+    showToast('Mentor added');
   };
 
   const handleUpdateMentor = (updatedMentor) => {
-    persistRecord('mentors', updatedMentor).then((saved) => {
-      if (saved) {
-        setMentors((prev) => prev.map((m) => m.id === updatedMentor.id ? updatedMentor : m));
-        showToast('Mentor updated');
-      }
+    setMentors((prev) => {
+      const updated = prev.map((m) => m.id === updatedMentor.id ? updatedMentor : m);
+      try { localStorage.setItem('tumaini-mentors', JSON.stringify(updated)); } catch {}
+      return updated;
     });
+    showToast('Mentor updated');
   };
 
   const handleDeleteMentor = (mentorId) => {
-    const doDelete = async () => {
-      if (useRemoteRecords) {
-        try {
-          await removeAppRecord('mentors', mentorId);
-        } catch {
-          setDataError('Could not delete this mentor. Please try again.');
-          return;
-        }
-      }
-      setMentors((prev) => prev.filter((m) => m.id !== mentorId));
-      showToast('Mentor removed');
-    };
-    doDelete();
+    setMentors((prev) => {
+      const updated = prev.filter((m) => m.id !== mentorId);
+      try { localStorage.setItem('tumaini-mentors', JSON.stringify(updated)); } catch {}
+      return updated;
+    });
+    showToast('Mentor removed');
   };
 
   const contextValue = {

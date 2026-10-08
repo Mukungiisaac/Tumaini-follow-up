@@ -1,6 +1,6 @@
 ﻿import React, { useState } from 'react';
 import { MOCK_BIBLE_CURRICULUM } from '../data/mockData';
-import { BookOpen, CheckCircle2, AlertCircle, Eye, Plus, X } from 'lucide-react';
+import { BookOpen, CheckCircle2, AlertCircle, Eye, Plus, Edit2, Check } from 'lucide-react';
 import Modal from '../components/common/Modal';
 
 export default function BibleDiscipleshipView() {
@@ -19,16 +19,248 @@ export default function BibleDiscipleshipView() {
   
   const [catechismQuestions, setCatechismQuestions] = useState(MOCK_BIBLE_CURRICULUM.catechismQuestions);
   const [verseCards, setVerseCards] = useState(MOCK_BIBLE_CURRICULUM.memorizationCards);
-  const [genesisModules, setGenesisModules] = useState(MOCK_BIBLE_CURRICULUM.genesisModules);
+  const [bibleStudyModules, setBibleStudyModules] = useState(MOCK_BIBLE_CURRICULUM.genesisModules.map((m, idx) => ({
+    ...m,
+    id: idx,
+    keyLesson: m.keyLesson || '',
+    completed: m.completed || false
+  })));
   
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [activeModal, setActiveModal] = useState(null); // 'verse' | 'catechism' | 'genesis'
+  // Bible Stories state
+  const [bibleStories, setBibleStories] = useState([
+    { id: 0, title: 'David and Goliath', book: '1 Samuel 17', keyLesson: 'Faith and courage in God', status: 'Completed' },
+    { id: 1, title: 'Noah and the Ark', book: 'Genesis 6-9', keyLesson: 'Obedience and God\'s faithfulness', status: 'Active' },
+    { id: 2, title: 'Daniel in the Lion\'s Den', book: 'Daniel 6', keyLesson: 'Prayer and trust in God', status: 'Upcoming' }
+  ]);
+
+  // Hymns state
+  const [hymns, setHymns] = useState([
+    { id: 0, title: 'Amazing Grace', composer: 'John Newton', status: 'Learned' },
+    { id: 1, title: 'How Great Thou Art', composer: 'Carl Boberg', status: 'In Progress' },
+    { id: 2, title: 'It Is Well With My Soul', composer: 'Horatio Spafford', status: 'Not Started' }
+  ]);
+  
+  const [activeModal, setActiveModal] = useState(null); // 'verse' | 'catechism' | 'module' | 'story' | 'hymn' | 'edit-verse' | 'edit-catechism' | 'edit-module' | 'edit-story' | 'edit-hymn'
+  const [editingItem, setEditingItem] = useState(null);
   const [newQuestion, setNewQuestion] = useState({ question: '', answer: '' });
   const [newVerse, setNewVerse] = useState({ verse: '', text: '', theme: '' });
-  const [newGenesis, setNewGenesis] = useState({ title: '', leader: '', attendeesCount: '', status: 'Upcoming' });
+  const [newModule, setNewModule] = useState({ title: '', leader: '', attendeesCount: '', status: 'Upcoming', keyLesson: '' });
+  const [newStory, setNewStory] = useState({ title: '', book: '', keyLesson: '', status: 'Upcoming' });
+  const [newHymn, setNewHymn] = useState({ title: '', composer: '', status: 'Not Started' });
 
   const toggleVerse = (v) => {
     setMemorized(prev => ({ ...prev, [v]: !prev[v] }));
+  };
+
+  // Edit Handlers
+  const handleEditVerse = (card) => {
+    setEditingItem(card);
+    setNewVerse({ verse: card.verse, text: card.text, theme: card.theme });
+    setActiveModal('edit-verse');
+  };
+
+  const handleUpdateVerse = (e) => {
+    e.preventDefault();
+    if (!newVerse.verse.trim() || !newVerse.text.trim() || !newVerse.theme.trim()) return;
+
+    setVerseCards(verseCards.map(card =>
+      card.verse === editingItem.verse
+        ? { verse: newVerse.verse, text: newVerse.text, theme: newVerse.theme }
+        : card
+    ));
+
+    setNewVerse({ verse: '', text: '', theme: '' });
+    setEditingItem(null);
+    setActiveModal(null);
+  };
+
+  const handleEditQuestion = (question) => {
+    setEditingItem(question);
+    setNewQuestion({ question: question.question, answer: question.answer });
+    setActiveModal('edit-catechism');
+  };
+
+  const handleUpdateQuestion = (e) => {
+    e.preventDefault();
+    if (!newQuestion.question.trim() || !newQuestion.answer.trim()) return;
+
+    setCatechismQuestions(catechismQuestions.map(q =>
+      q.qNo === editingItem.qNo
+        ? { ...q, question: newQuestion.question, answer: newQuestion.answer }
+        : q
+    ));
+
+    setNewQuestion({ question: '', answer: '' });
+    setEditingItem(null);
+    setActiveModal(null);
+  };
+
+  const handleEditModule = (module) => {
+    setEditingItem(module);
+    setNewModule({
+      title: module.title,
+      leader: module.leader,
+      attendeesCount: module.attendeesCount.toString(),
+      status: module.status,
+      keyLesson: module.keyLesson || ''
+    });
+    setActiveModal('edit-module');
+  };
+
+  const handleUpdateModule = (e) => {
+    e.preventDefault();
+    if (!newModule.title.trim() || !newModule.leader.trim() || !newModule.attendeesCount.trim()) return;
+
+    setBibleStudyModules(bibleStudyModules.map(m =>
+      m.id === editingItem.id
+        ? {
+            ...m,
+            title: newModule.title,
+            leader: newModule.leader,
+            attendeesCount: parseInt(newModule.attendeesCount),
+            status: newModule.status,
+            keyLesson: newModule.keyLesson
+          }
+        : m
+    ));
+
+    setNewModule({ title: '', leader: '', attendeesCount: '', status: 'Upcoming', keyLesson: '' });
+    setEditingItem(null);
+    setActiveModal(null);
+  };
+
+  const toggleModuleStatus = (moduleId) => {
+    setBibleStudyModules(bibleStudyModules.map(m =>
+      m.id === moduleId
+        ? {
+            ...m,
+            status: m.status === 'Active' ? 'Upcoming' : m.status === 'Upcoming' ? 'Completed' : 'Active'
+          }
+        : m
+    ));
+  };
+
+  // Bible Story Handlers
+  const handleEditStory = (story) => {
+    setEditingItem(story);
+    setNewStory({
+      title: story.title,
+      book: story.book,
+      keyLesson: story.keyLesson || '',
+      status: story.status
+    });
+    setActiveModal('edit-story');
+  };
+
+  const handleUpdateStory = (e) => {
+    e.preventDefault();
+    if (!newStory.title.trim() || !newStory.book.trim()) return;
+
+    setBibleStories(bibleStories.map(s =>
+      s.id === editingItem.id
+        ? {
+            ...s,
+            title: newStory.title,
+            book: newStory.book,
+            keyLesson: newStory.keyLesson,
+            status: newStory.status
+          }
+        : s
+    ));
+
+    setNewStory({ title: '', book: '', keyLesson: '', status: 'Upcoming' });
+    setEditingItem(null);
+    setActiveModal(null);
+  };
+
+  const handleAddStory = (e) => {
+    e.preventDefault();
+    if (!newStory.title.trim() || !newStory.book.trim()) return;
+
+    setBibleStories([
+      ...bibleStories,
+      {
+        id: bibleStories.length,
+        title: newStory.title,
+        book: newStory.book,
+        keyLesson: newStory.keyLesson || '',
+        status: newStory.status
+      }
+    ]);
+
+    setNewStory({ title: '', book: '', keyLesson: '', status: 'Upcoming' });
+    setActiveModal(null);
+  };
+
+  const toggleStoryStatus = (storyId) => {
+    setBibleStories(bibleStories.map(s =>
+      s.id === storyId
+        ? {
+            ...s,
+            status: s.status === 'Active' ? 'Upcoming' : s.status === 'Upcoming' ? 'Completed' : 'Active'
+          }
+        : s
+    ));
+  };
+
+  // Hymn Handlers
+  const handleEditHymn = (hymn) => {
+    setEditingItem(hymn);
+    setNewHymn({
+      title: hymn.title,
+      composer: hymn.composer,
+      status: hymn.status
+    });
+    setActiveModal('edit-hymn');
+  };
+
+  const handleUpdateHymn = (e) => {
+    e.preventDefault();
+    if (!newHymn.title.trim() || !newHymn.composer.trim()) return;
+
+    setHymns(hymns.map(h =>
+      h.id === editingItem.id
+        ? {
+            ...h,
+            title: newHymn.title,
+            composer: newHymn.composer,
+            status: newHymn.status
+          }
+        : h
+    ));
+
+    setNewHymn({ title: '', composer: '', status: 'Not Started' });
+    setEditingItem(null);
+    setActiveModal(null);
+  };
+
+  const handleAddHymn = (e) => {
+    e.preventDefault();
+    if (!newHymn.title.trim() || !newHymn.composer.trim()) return;
+
+    setHymns([
+      ...hymns,
+      {
+        id: hymns.length,
+        title: newHymn.title,
+        composer: newHymn.composer,
+        status: newHymn.status
+      }
+    ]);
+
+    setNewHymn({ title: '', composer: '', status: 'Not Started' });
+    setActiveModal(null);
+  };
+
+  const toggleHymnStatus = (hymnId) => {
+    setHymns(hymns.map(h =>
+      h.id === hymnId
+        ? {
+            ...h,
+            status: h.status === 'In Progress' ? 'Not Started' : h.status === 'Not Started' ? 'Learned' : 'In Progress'
+          }
+        : h
+    ));
   };
 
   const handleAddQuestion = (e) => {
@@ -66,21 +298,24 @@ export default function BibleDiscipleshipView() {
     setActiveModal(null);
   };
 
-  const handleAddGenesis = (e) => {
+  const handleAddModule = (e) => {
     e.preventDefault();
-    if (!newGenesis.title.trim() || !newGenesis.leader.trim() || !newGenesis.attendeesCount.trim()) return;
+    if (!newModule.title.trim() || !newModule.leader.trim() || !newModule.attendeesCount.trim()) return;
 
-    setGenesisModules([
-      ...genesisModules,
+    setBibleStudyModules([
+      ...bibleStudyModules,
       {
-        title: newGenesis.title,
-        leader: newGenesis.leader,
-        status: newGenesis.status,
-        attendeesCount: parseInt(newGenesis.attendeesCount)
+        id: bibleStudyModules.length,
+        title: newModule.title,
+        leader: newModule.leader,
+        status: newModule.status,
+        attendeesCount: parseInt(newModule.attendeesCount),
+        keyLesson: newModule.keyLesson || '',
+        completed: false
       }
     ]);
 
-    setNewGenesis({ title: '', leader: '', attendeesCount: '', status: 'Upcoming' });
+    setNewModule({ title: '', leader: '', attendeesCount: '', status: 'Upcoming', keyLesson: '' });
     setActiveModal(null);
   };
 
@@ -146,7 +381,9 @@ export default function BibleDiscipleshipView() {
         {[
           { id: 'memory', label: 'Verse Cards' },
           { id: 'catechism', label: 'Catechism Questions' },
-          { id: 'genesis', label: 'Genesis Modules' },
+          { id: 'modules', label: 'Bible Study Modules' },
+          { id: 'stories', label: 'Bible Stories' },
+          { id: 'hymns', label: 'Hymns' },
           { id: 'passages', label: 'Submissions' }
         ].map(tab => (
           <button
@@ -201,16 +438,25 @@ export default function BibleDiscipleshipView() {
                         </span>
                         <h3 className="text-lg font-bold text-slate-900 mt-3 font-serif">{card.verse}</h3>
                       </div>
-                      <button
-                        onClick={() => toggleVerse(card.verse)}
-                        className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-all border ${
-                          isDone
-                            ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
-                            : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
-                        }`}
-                      >
-                        {isDone ? 'Recited' : 'Mark'}
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handleEditVerse(card)}
+                          className="flex-shrink-0 p-2 text-slate-400 hover:text-brand-primary hover:bg-brand-primary-light rounded-lg transition-colors cursor-pointer"
+                          title="Edit verse"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => toggleVerse(card.verse)}
+                          className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-all border ${
+                            isDone
+                              ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                              : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                          }`}
+                        >
+                          {isDone ? 'Recited' : 'Mark'}
+                        </button>
+                      </div>
                     </div>
 
                     <p className="text-sm leading-relaxed text-slate-700 italic bg-slate-50 p-4 rounded-lg border border-slate-200">
@@ -248,11 +494,20 @@ export default function BibleDiscipleshipView() {
                 key={cq.qNo}
                 className="bg-white rounded-lg border border-slate-200 p-6 space-y-4 hover:shadow-md transition-all"
               >
-                <div>
-                  <span className="text-xs font-bold text-brand-primary uppercase tracking-wider">
-                    Question #{cq.qNo}
-                  </span>
-                  <h3 className="text-base font-bold text-slate-900 mt-2">{cq.question}</h3>
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <span className="text-xs font-bold text-brand-primary uppercase tracking-wider">
+                      Question #{cq.qNo}
+                    </span>
+                    <h3 className="text-base font-bold text-slate-900 mt-2">{cq.question}</h3>
+                  </div>
+                  <button
+                    onClick={() => handleEditQuestion(cq)}
+                    className="flex-shrink-0 p-2 text-slate-400 hover:text-brand-primary hover:bg-brand-primary-light rounded-lg transition-colors cursor-pointer"
+                    title="Edit question"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                  </button>
                 </div>
 
                 <div className="bg-brand-primary-light rounded-lg p-4 border border-brand-primary-light/50 space-y-1.5">
@@ -265,17 +520,17 @@ export default function BibleDiscipleshipView() {
         </div>
       )}
 
-      {/* Tab 3: Genesis Study Modules */}
-      {activeSubTab === 'genesis' && (
+      {/* Tab 3: Bible Study Modules */}
+      {activeSubTab === 'modules' && (
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold text-slate-900 mb-2">Genesis Study Modules</h2>
-              <p className="text-sm text-slate-600">Deep dive studies on foundational biblical passages</p>
+              <h2 className="text-2xl font-bold text-slate-900 mb-2">Bible Study Modules</h2>
+              <p className="text-sm text-slate-600">Deep dive studies on biblical books and passages (Genesis, Exodus, etc.)</p>
               <div className="h-1 w-20 bg-brand-primary rounded-full mt-3" />
             </div>
             <button
-              onClick={() => setActiveModal('genesis')}
+              onClick={() => setActiveModal('module')}
               className="flex items-center gap-1.5 px-3 py-2 bg-brand-primary text-white rounded-lg font-semibold text-xs hover:bg-[#0a2d38] transition-colors shadow-sm whitespace-nowrap"
             >
               <Plus className="w-3.5 h-3.5" />
@@ -284,20 +539,35 @@ export default function BibleDiscipleshipView() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-            {genesisModules.map((g, idx) => (
+            {bibleStudyModules.map((g) => (
               <div
-                key={idx}
+                key={g.id}
                 className="bg-white rounded-lg border border-slate-200 p-6 space-y-4 hover:shadow-md transition-all"
               >
-                <div className="flex items-start justify-between">
+                <div className="flex items-start justify-between gap-2">
                   <h3 className="text-base font-bold text-slate-900 leading-snug flex-1">{g.title}</h3>
-                  <span className={`flex-shrink-0 px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${
-                    g.status === 'Active'
-                      ? 'bg-emerald-100 text-emerald-800'
-                      : 'bg-slate-100 text-slate-700'
-                  }`}>
-                    {g.status}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => toggleModuleStatus(g.id)}
+                      className={`flex-shrink-0 px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap cursor-pointer transition-colors ${
+                        g.status === 'Active'
+                          ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200'
+                          : g.status === 'Completed'
+                          ? 'bg-blue-100 text-blue-800 hover:bg-blue-200'
+                          : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                      }`}
+                      title="Click to change status"
+                    >
+                      {g.status}
+                    </button>
+                    <button
+                      onClick={() => handleEditModule(g)}
+                      className="flex-shrink-0 p-2 text-slate-400 hover:text-brand-primary hover:bg-brand-primary-light rounded-lg transition-colors cursor-pointer"
+                      title="Edit module"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
 
                 <div className="space-y-2 border-t border-slate-200 pt-3">
@@ -309,6 +579,12 @@ export default function BibleDiscipleshipView() {
                     <p className="text-xs text-slate-500 uppercase tracking-wider font-semibold mb-1">Participants</p>
                     <p className="text-sm font-semibold text-slate-900">{g.attendeesCount} Children</p>
                   </div>
+                  {g.keyLesson && (
+                    <div className="pt-2 border-t border-slate-200">
+                      <p className="text-xs text-slate-500 uppercase tracking-wider font-semibold mb-1">Key Lesson</p>
+                      <p className="text-sm text-slate-700 leading-relaxed">{g.keyLesson}</p>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
@@ -316,7 +592,141 @@ export default function BibleDiscipleshipView() {
         </div>
       )}
 
-      {/* Tab 4: Passage Submissions */}
+      {/* Tab 4: Bible Stories */}
+      {activeSubTab === 'stories' && (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-slate-900 mb-2">Bible Stories</h2>
+              <p className="text-sm text-slate-600">Individual stories and narratives from across Scripture</p>
+              <div className="h-1 w-20 bg-brand-primary rounded-full mt-3" />
+            </div>
+            <button
+              onClick={() => setActiveModal('story')}
+              className="flex items-center gap-1.5 px-3 py-2 bg-brand-primary text-white rounded-lg font-semibold text-xs hover:bg-[#0a2d38] transition-colors shadow-sm whitespace-nowrap"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              Add Story
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+            {bibleStories.map((story) => (
+              <div
+                key={story.id}
+                className="bg-white rounded-lg border border-slate-200 p-6 space-y-4 hover:shadow-md transition-all"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1">
+                    <h3 className="text-base font-bold text-slate-900 leading-snug">{story.title}</h3>
+                    <p className="text-xs text-brand-primary font-semibold mt-1">{story.book}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => toggleStoryStatus(story.id)}
+                      className={`flex-shrink-0 px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap cursor-pointer transition-colors ${
+                        story.status === 'Active'
+                          ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200'
+                          : story.status === 'Completed'
+                          ? 'bg-blue-100 text-blue-800 hover:bg-blue-200'
+                          : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                      }`}
+                      title="Click to change status"
+                    >
+                      {story.status}
+                    </button>
+                    <button
+                      onClick={() => handleEditStory(story)}
+                      className="flex-shrink-0 p-2 text-slate-400 hover:text-brand-primary hover:bg-brand-primary-light rounded-lg transition-colors cursor-pointer"
+                      title="Edit story"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+
+                {story.keyLesson && (
+                  <div className="pt-3 border-t border-slate-200">
+                    <p className="text-xs text-slate-500 uppercase tracking-wider font-semibold mb-1">Key Lesson</p>
+                    <p className="text-sm text-slate-700 leading-relaxed">{story.keyLesson}</p>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Tab 5: Hymns */}
+      {activeSubTab === 'hymns' && (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-slate-900 mb-2">Hymns & Worship Songs</h2>
+              <p className="text-sm text-slate-600">Track hymns being taught and learner mastery progress</p>
+              <div className="h-1 w-20 bg-brand-primary rounded-full mt-3" />
+            </div>
+            <button
+              onClick={() => setActiveModal('hymn')}
+              className="flex items-center gap-1.5 px-3 py-2 bg-brand-primary text-white rounded-lg font-semibold text-xs hover:bg-[#0a2d38] transition-colors shadow-sm whitespace-nowrap"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              Add Hymn
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+            {hymns.map((hymn) => (
+              <div
+                key={hymn.id}
+                className={`rounded-lg border p-6 space-y-4 transition-all ${
+                  hymn.status === 'Learned'
+                    ? 'bg-gradient-to-br from-emerald-50 to-emerald-25 border-emerald-200'
+                    : 'bg-white border-slate-200 hover:shadow-md'
+                }`}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1">
+                    <h3 className="text-base font-bold text-slate-900 leading-snug">{hymn.title}</h3>
+                    <p className="text-xs text-slate-600 mt-1">by {hymn.composer}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => toggleHymnStatus(hymn.id)}
+                      className={`flex-shrink-0 px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap cursor-pointer transition-colors ${
+                        hymn.status === 'Learned'
+                          ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200'
+                          : hymn.status === 'In Progress'
+                          ? 'bg-amber-100 text-amber-800 hover:bg-amber-200'
+                          : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                      }`}
+                      title="Click to change status"
+                    >
+                      {hymn.status}
+                    </button>
+                    <button
+                      onClick={() => handleEditHymn(hymn)}
+                      className="flex-shrink-0 p-2 text-slate-400 hover:text-brand-primary hover:bg-brand-primary-light rounded-lg transition-colors cursor-pointer"
+                      title="Edit hymn"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+
+                {hymn.status === 'Learned' && (
+                  <div className="flex items-center gap-2 text-emerald-700 pt-3 border-t border-emerald-200">
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span className="text-xs font-semibold">Mastered by learners</span>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Tab 6: Passage Submissions */}
       {activeSubTab === 'passages' && (
         <div className="space-y-6">
           <div>
@@ -528,9 +938,9 @@ export default function BibleDiscipleshipView() {
         </form>
       </Modal>
 
-      {/* Add Genesis Module Modal */}
-      <Modal isOpen={activeModal === 'genesis'} onClose={() => setActiveModal(null)} title="Add Genesis Study Module" maxWidth="max-w-2xl">
-        <form onSubmit={handleAddGenesis} className="space-y-5">
+      {/* Add Bible Study Module Modal */}
+      <Modal isOpen={activeModal === 'module'} onClose={() => setActiveModal(null)} title="Add Bible Study Module" maxWidth="max-w-2xl">
+        <form onSubmit={handleAddModule} className="space-y-5">
           <div>
             <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
               Module Title *
@@ -538,9 +948,9 @@ export default function BibleDiscipleshipView() {
             <input
               type="text"
               required
-              placeholder="e.g. Part 4: The Call of Jacob"
-              value={newGenesis.title}
-              onChange={(e) => setNewGenesis({ ...newGenesis, title: e.target.value })}
+              placeholder="e.g. Exodus 1-15: The Journey from Egypt"
+              value={newModule.title}
+              onChange={(e) => setNewModule({ ...newModule, title: e.target.value })}
               className="w-full px-4 py-3 rounded-lg border border-slate-300 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all"
             />
           </div>
@@ -553,8 +963,8 @@ export default function BibleDiscipleshipView() {
               type="text"
               required
               placeholder="e.g. Sarah Johnson"
-              value={newGenesis.leader}
-              onChange={(e) => setNewGenesis({ ...newGenesis, leader: e.target.value })}
+              value={newModule.leader}
+              onChange={(e) => setNewModule({ ...newModule, leader: e.target.value })}
               className="w-full px-4 py-3 rounded-lg border border-slate-300 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all"
             />
           </div>
@@ -569,8 +979,8 @@ export default function BibleDiscipleshipView() {
                 required
                 min="1"
                 placeholder="e.g. 32"
-                value={newGenesis.attendeesCount}
-                onChange={(e) => setNewGenesis({ ...newGenesis, attendeesCount: e.target.value })}
+                value={newModule.attendeesCount}
+                onChange={(e) => setNewModule({ ...newModule, attendeesCount: e.target.value })}
                 className="w-full px-4 py-3 rounded-lg border border-slate-300 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all"
               />
             </div>
@@ -580,14 +990,28 @@ export default function BibleDiscipleshipView() {
                 Status *
               </label>
               <select
-                value={newGenesis.status}
-                onChange={(e) => setNewGenesis({ ...newGenesis, status: e.target.value })}
+                value={newModule.status}
+                onChange={(e) => setNewModule({ ...newModule, status: e.target.value })}
                 className="w-full px-4 py-3 rounded-lg border border-slate-300 text-sm text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all"
               >
                 <option value="Active">Active</option>
                 <option value="Upcoming">Upcoming</option>
+                <option value="Completed">Completed</option>
               </select>
             </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+              Key Lesson (Optional)
+            </label>
+            <textarea
+              rows="3"
+              placeholder="Brief summary of the module's key learning points"
+              value={newModule.keyLesson}
+              onChange={(e) => setNewModule({ ...newModule, keyLesson: e.target.value })}
+              className="w-full px-4 py-3 rounded-lg border border-slate-300 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all resize-none"
+            />
           </div>
 
           <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
@@ -600,7 +1024,7 @@ export default function BibleDiscipleshipView() {
             </button>
             <button
               type="submit"
-              disabled={!newGenesis.title.trim() || !newGenesis.leader.trim() || !newGenesis.attendeesCount.trim()}
+              disabled={!newModule.title.trim() || !newModule.leader.trim() || !newModule.attendeesCount.trim()}
               className="px-6 py-2.5 text-sm font-semibold text-white bg-brand-primary hover:bg-[#0a2d38] rounded-lg transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Add Module
@@ -608,7 +1032,501 @@ export default function BibleDiscipleshipView() {
           </div>
         </form>
       </Modal>
+
+      {/* Edit Verse Modal */}
+      <Modal isOpen={activeModal === 'edit-verse'} onClose={() => { setActiveModal(null); setEditingItem(null); }} title="Edit Scripture Verse Card" maxWidth="max-w-2xl">
+        <form onSubmit={handleUpdateVerse} className="space-y-5">
+          <div>
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+              Verse Reference *
+            </label>
+            <input
+              type="text"
+              required
+              placeholder="e.g. Genesis 1:1, Psalm 23:1"
+              value={newVerse.verse}
+              onChange={(e) => setNewVerse({ ...newVerse, verse: e.target.value })}
+              className="w-full px-4 py-3 rounded-lg border border-slate-300 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+              Scripture Text *
+            </label>
+            <textarea
+              required
+              rows="3"
+              placeholder="Enter the verse text"
+              value={newVerse.text}
+              onChange={(e) => setNewVerse({ ...newVerse, text: e.target.value })}
+              className="w-full px-4 py-3 rounded-lg border border-slate-300 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all resize-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+              Theme *
+            </label>
+            <input
+              type="text"
+              required
+              placeholder="e.g. Trust & Provision, Creation, Guidance"
+              value={newVerse.theme}
+              onChange={(e) => setNewVerse({ ...newVerse, theme: e.target.value })}
+              className="w-full px-4 py-3 rounded-lg border border-slate-300 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all"
+            />
+          </div>
+
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
+            <button
+              type="button"
+              onClick={() => { setActiveModal(null); setEditingItem(null); }}
+              className="px-6 py-2.5 text-sm font-semibold text-slate-700 hover:text-slate-900 rounded-lg hover:bg-slate-100 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={!newVerse.verse.trim() || !newVerse.text.trim() || !newVerse.theme.trim()}
+              className="px-6 py-2.5 text-sm font-semibold text-white bg-brand-primary hover:bg-[#0a2d38] rounded-lg transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Update Verse
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Edit Catechism Question Modal */}
+      <Modal isOpen={activeModal === 'edit-catechism'} onClose={() => { setActiveModal(null); setEditingItem(null); }} title="Edit Catechism Question" maxWidth="max-w-2xl">
+        <form onSubmit={handleUpdateQuestion} className="space-y-5">
+          <div>
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+              Question *
+            </label>
+            <input
+              type="text"
+              required
+              placeholder="Enter the catechism question"
+              value={newQuestion.question}
+              onChange={(e) => setNewQuestion({ ...newQuestion, question: e.target.value })}
+              className="w-full px-4 py-3 rounded-lg border border-slate-300 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+              Answer *
+            </label>
+            <textarea
+              required
+              rows="4"
+              placeholder="Enter the answer to the question"
+              value={newQuestion.answer}
+              onChange={(e) => setNewQuestion({ ...newQuestion, answer: e.target.value })}
+              className="w-full px-4 py-3 rounded-lg border border-slate-300 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all resize-none"
+            />
+          </div>
+
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
+            <button
+              type="button"
+              onClick={() => { setActiveModal(null); setEditingItem(null); }}
+              className="px-6 py-2.5 text-sm font-semibold text-slate-700 hover:text-slate-900 rounded-lg hover:bg-slate-100 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={!newQuestion.question.trim() || !newQuestion.answer.trim()}
+              className="px-6 py-2.5 text-sm font-semibold text-white bg-brand-primary hover:bg-[#0a2d38] rounded-lg transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Update Question
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Edit Bible Study Module Modal */}
+      <Modal isOpen={activeModal === 'edit-module'} onClose={() => { setActiveModal(null); setEditingItem(null); }} title="Edit Bible Study Module" maxWidth="max-w-2xl">
+        <form onSubmit={handleUpdateModule} className="space-y-5">
+          <div>
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+              Module Title *
+            </label>
+            <input
+              type="text"
+              required
+              placeholder="e.g. Exodus 1-15: The Journey from Egypt"
+              value={newModule.title}
+              onChange={(e) => setNewModule({ ...newModule, title: e.target.value })}
+              className="w-full px-4 py-3 rounded-lg border border-slate-300 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+              Discussion Leader *
+            </label>
+            <input
+              type="text"
+              required
+              placeholder="e.g. Sarah Johnson"
+              value={newModule.leader}
+              onChange={(e) => setNewModule({ ...newModule, leader: e.target.value })}
+              className="w-full px-4 py-3 rounded-lg border border-slate-300 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                Number of Participants *
+              </label>
+              <input
+                type="number"
+                required
+                min="1"
+                placeholder="e.g. 32"
+                value={newModule.attendeesCount}
+                onChange={(e) => setNewModule({ ...newModule, attendeesCount: e.target.value })}
+                className="w-full px-4 py-3 rounded-lg border border-slate-300 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                Status *
+              </label>
+              <select
+                value={newModule.status}
+                onChange={(e) => setNewModule({ ...newModule, status: e.target.value })}
+                className="w-full px-4 py-3 rounded-lg border border-slate-300 text-sm text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all"
+              >
+                <option value="Active">Active</option>
+                <option value="Upcoming">Upcoming</option>
+                <option value="Completed">Completed</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+              Key Lesson (Optional)
+            </label>
+            <textarea
+              rows="3"
+              placeholder="Brief summary of the module's key learning points"
+              value={newModule.keyLesson}
+              onChange={(e) => setNewModule({ ...newModule, keyLesson: e.target.value })}
+              className="w-full px-4 py-3 rounded-lg border border-slate-300 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all resize-none"
+            />
+          </div>
+
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
+            <button
+              type="button"
+              onClick={() => { setActiveModal(null); setEditingItem(null); }}
+              className="px-6 py-2.5 text-sm font-semibold text-slate-700 hover:text-slate-900 rounded-lg hover:bg-slate-100 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={!newModule.title.trim() || !newModule.leader.trim() || !newModule.attendeesCount.trim()}
+              className="px-6 py-2.5 text-sm font-semibold text-white bg-brand-primary hover:bg-[#0a2d38] rounded-lg transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Update Module
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Add Bible Story Modal */}
+      <Modal isOpen={activeModal === 'story'} onClose={() => setActiveModal(null)} title="Add Bible Story" maxWidth="max-w-2xl">
+        <form onSubmit={handleAddStory} className="space-y-5">
+          <div>
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+              Story Title *
+            </label>
+            <input
+              type="text"
+              required
+              placeholder="e.g. The Good Samaritan, Feeding of the 5000"
+              value={newStory.title}
+              onChange={(e) => setNewStory({ ...newStory, title: e.target.value })}
+              className="w-full px-4 py-3 rounded-lg border border-slate-300 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+              Bible Reference *
+            </label>
+            <input
+              type="text"
+              required
+              placeholder="e.g. Luke 10:25-37, John 6:1-15"
+              value={newStory.book}
+              onChange={(e) => setNewStory({ ...newStory, book: e.target.value })}
+              className="w-full px-4 py-3 rounded-lg border border-slate-300 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+              Key Lesson (Optional)
+            </label>
+            <textarea
+              rows="3"
+              placeholder="What children should learn from this story"
+              value={newStory.keyLesson}
+              onChange={(e) => setNewStory({ ...newStory, keyLesson: e.target.value })}
+              className="w-full px-4 py-3 rounded-lg border border-slate-300 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all resize-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+              Status *
+            </label>
+            <select
+              value={newStory.status}
+              onChange={(e) => setNewStory({ ...newStory, status: e.target.value })}
+              className="w-full px-4 py-3 rounded-lg border border-slate-300 text-sm text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all"
+            >
+              <option value="Active">Active</option>
+              <option value="Upcoming">Upcoming</option>
+              <option value="Completed">Completed</option>
+            </select>
+          </div>
+
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
+            <button
+              type="button"
+              onClick={() => setActiveModal(null)}
+              className="px-6 py-2.5 text-sm font-semibold text-slate-700 hover:text-slate-900 rounded-lg hover:bg-slate-100 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={!newStory.title.trim() || !newStory.book.trim()}
+              className="px-6 py-2.5 text-sm font-semibold text-white bg-brand-primary hover:bg-[#0a2d38] rounded-lg transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Add Story
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Edit Bible Story Modal */}
+      <Modal isOpen={activeModal === 'edit-story'} onClose={() => { setActiveModal(null); setEditingItem(null); }} title="Edit Bible Story" maxWidth="max-w-2xl">
+        <form onSubmit={handleUpdateStory} className="space-y-5">
+          <div>
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+              Story Title *
+            </label>
+            <input
+              type="text"
+              required
+              placeholder="e.g. The Good Samaritan, Feeding of the 5000"
+              value={newStory.title}
+              onChange={(e) => setNewStory({ ...newStory, title: e.target.value })}
+              className="w-full px-4 py-3 rounded-lg border border-slate-300 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+              Bible Reference *
+            </label>
+            <input
+              type="text"
+              required
+              placeholder="e.g. Luke 10:25-37, John 6:1-15"
+              value={newStory.book}
+              onChange={(e) => setNewStory({ ...newStory, book: e.target.value })}
+              className="w-full px-4 py-3 rounded-lg border border-slate-300 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+              Key Lesson (Optional)
+            </label>
+            <textarea
+              rows="3"
+              placeholder="What children should learn from this story"
+              value={newStory.keyLesson}
+              onChange={(e) => setNewStory({ ...newStory, keyLesson: e.target.value })}
+              className="w-full px-4 py-3 rounded-lg border border-slate-300 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all resize-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+              Status *
+            </label>
+            <select
+              value={newStory.status}
+              onChange={(e) => setNewStory({ ...newStory, status: e.target.value })}
+              className="w-full px-4 py-3 rounded-lg border border-slate-300 text-sm text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all"
+            >
+              <option value="Active">Active</option>
+              <option value="Upcoming">Upcoming</option>
+              <option value="Completed">Completed</option>
+            </select>
+          </div>
+
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
+            <button
+              type="button"
+              onClick={() => { setActiveModal(null); setEditingItem(null); }}
+              className="px-6 py-2.5 text-sm font-semibold text-slate-700 hover:text-slate-900 rounded-lg hover:bg-slate-100 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={!newStory.title.trim() || !newStory.book.trim()}
+              className="px-6 py-2.5 text-sm font-semibold text-white bg-brand-primary hover:bg-[#0a2d38] rounded-lg transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Update Story
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Add Hymn Modal */}
+      <Modal isOpen={activeModal === 'hymn'} onClose={() => setActiveModal(null)} title="Add Hymn" maxWidth="max-w-2xl">
+        <form onSubmit={handleAddHymn} className="space-y-5">
+          <div>
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+              Hymn Title *
+            </label>
+            <input
+              type="text"
+              required
+              placeholder="e.g. Amazing Grace, How Great Thou Art"
+              value={newHymn.title}
+              onChange={(e) => setNewHymn({ ...newHymn, title: e.target.value })}
+              className="w-full px-4 py-3 rounded-lg border border-slate-300 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+              Composer/Author *
+            </label>
+            <input
+              type="text"
+              required
+              placeholder="e.g. John Newton, Carl Boberg"
+              value={newHymn.composer}
+              onChange={(e) => setNewHymn({ ...newHymn, composer: e.target.value })}
+              className="w-full px-4 py-3 rounded-lg border border-slate-300 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+              Learning Status *
+            </label>
+            <select
+              value={newHymn.status}
+              onChange={(e) => setNewHymn({ ...newHymn, status: e.target.value })}
+              className="w-full px-4 py-3 rounded-lg border border-slate-300 text-sm text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all"
+            >
+              <option value="Not Started">Not Started</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Learned">Learned</option>
+            </select>
+          </div>
+
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
+            <button
+              type="button"
+              onClick={() => setActiveModal(null)}
+              className="px-6 py-2.5 text-sm font-semibold text-slate-700 hover:text-slate-900 rounded-lg hover:bg-slate-100 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={!newHymn.title.trim() || !newHymn.composer.trim()}
+              className="px-6 py-2.5 text-sm font-semibold text-white bg-brand-primary hover:bg-[#0a2d38] rounded-lg transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Add Hymn
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Edit Hymn Modal */}
+      <Modal isOpen={activeModal === 'edit-hymn'} onClose={() => { setActiveModal(null); setEditingItem(null); }} title="Edit Hymn" maxWidth="max-w-2xl">
+        <form onSubmit={handleUpdateHymn} className="space-y-5">
+          <div>
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+              Hymn Title *
+            </label>
+            <input
+              type="text"
+              required
+              placeholder="e.g. Amazing Grace, How Great Thou Art"
+              value={newHymn.title}
+              onChange={(e) => setNewHymn({ ...newHymn, title: e.target.value })}
+              className="w-full px-4 py-3 rounded-lg border border-slate-300 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+              Composer/Author *
+            </label>
+            <input
+              type="text"
+              required
+              placeholder="e.g. John Newton, Carl Boberg"
+              value={newHymn.composer}
+              onChange={(e) => setNewHymn({ ...newHymn, composer: e.target.value })}
+              className="w-full px-4 py-3 rounded-lg border border-slate-300 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+              Learning Status *
+            </label>
+            <select
+              value={newHymn.status}
+              onChange={(e) => setNewHymn({ ...newHymn, status: e.target.value })}
+              className="w-full px-4 py-3 rounded-lg border border-slate-300 text-sm text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all"
+            >
+              <option value="Not Started">Not Started</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Learned">Learned</option>
+            </select>
+          </div>
+
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
+            <button
+              type="button"
+              onClick={() => { setActiveModal(null); setEditingItem(null); }}
+              className="px-6 py-2.5 text-sm font-semibold text-slate-700 hover:text-slate-900 rounded-lg hover:bg-slate-100 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={!newHymn.title.trim() || !newHymn.composer.trim()}
+              className="px-6 py-2.5 text-sm font-semibold text-white bg-brand-primary hover:bg-[#0a2d38] rounded-lg transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Update Hymn
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }
-

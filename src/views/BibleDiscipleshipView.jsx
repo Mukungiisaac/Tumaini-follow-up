@@ -1,6 +1,6 @@
 ﻿import React, { useState } from 'react';
 import { MOCK_BIBLE_CURRICULUM } from '../data/mockData';
-import { BookOpen, CheckCircle2, AlertCircle, Eye, Plus, Edit2, Check } from 'lucide-react';
+import { BookOpen, CheckCircle2, AlertCircle, Eye, Plus, Edit2, Check, Trash2 } from 'lucide-react';
 import Modal from '../components/common/Modal';
 
 export default function BibleDiscipleshipView() {
@@ -40,8 +40,9 @@ export default function BibleDiscipleshipView() {
     { id: 2, title: 'It Is Well With My Soul', composer: 'Horatio Spafford', status: 'Not Started' }
   ]);
   
-  const [activeModal, setActiveModal] = useState(null); // 'verse' | 'catechism' | 'module' | 'story' | 'hymn' | 'edit-verse' | 'edit-catechism' | 'edit-module' | 'edit-story' | 'edit-hymn'
+  const [activeModal, setActiveModal] = useState(null);
   const [editingItem, setEditingItem] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null); // { type: 'verse'|'catechism'|'module'|'story'|'hymn', item }
   const [newQuestion, setNewQuestion] = useState({ question: '', answer: '' });
   const [newVerse, setNewVerse] = useState({ verse: '', text: '', theme: '' });
   const [newModule, setNewModule] = useState({ title: '', leader: '', attendeesCount: '', status: 'Upcoming', keyLesson: '' });
@@ -50,6 +51,24 @@ export default function BibleDiscipleshipView() {
 
   const toggleVerse = (v) => {
     setMemorized(prev => ({ ...prev, [v]: !prev[v] }));
+  };
+
+  // Delete helpers
+  const confirmDelete = (type, item) => {
+    setDeleteTarget({ type, item });
+    setActiveModal('delete-confirm');
+  };
+
+  const handleConfirmDelete = () => {
+    if (!deleteTarget) return;
+    const { type, item } = deleteTarget;
+    if (type === 'verse')     setVerseCards(c => c.filter(x => x.verse !== item.verse));
+    if (type === 'catechism') setCatechismQuestions(q => q.filter(x => x.qNo !== item.qNo));
+    if (type === 'module')    setBibleStudyModules(m => m.filter(x => x.id !== item.id));
+    if (type === 'story')     setBibleStories(s => s.filter(x => x.id !== item.id));
+    if (type === 'hymn')      setHymns(h => h.filter(x => x.id !== item.id));
+    setActiveModal(null);
+    setDeleteTarget(null);
   };
 
   // Edit Handlers
@@ -447,6 +466,13 @@ export default function BibleDiscipleshipView() {
                           <Edit2 className="w-4 h-4" />
                         </button>
                         <button
+                          onClick={() => confirmDelete('verse', card)}
+                          className="flex-shrink-0 p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                          title="Delete verse"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                        <button
                           onClick={() => toggleVerse(card.verse)}
                           className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-all border ${
                             isDone
@@ -508,6 +534,13 @@ export default function BibleDiscipleshipView() {
                   >
                     <Edit2 className="w-4 h-4" />
                   </button>
+                  <button
+                    onClick={() => confirmDelete('catechism', cq)}
+                    className="flex-shrink-0 p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                    title="Delete question"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                 </div>
 
                 <div className="bg-brand-primary-light rounded-lg p-4 border border-brand-primary-light/50 space-y-1.5">
@@ -566,6 +599,13 @@ export default function BibleDiscipleshipView() {
                       title="Edit module"
                     >
                       <Edit2 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => confirmDelete('module', g)}
+                      className="flex-shrink-0 p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                      title="Delete module"
+                    >
+                      <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
@@ -642,6 +682,13 @@ export default function BibleDiscipleshipView() {
                     >
                       <Edit2 className="w-4 h-4" />
                     </button>
+                    <button
+                      onClick={() => confirmDelete('story', story)}
+                      className="flex-shrink-0 p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                      title="Delete story"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </div>
                 </div>
 
@@ -710,6 +757,13 @@ export default function BibleDiscipleshipView() {
                       title="Edit hymn"
                     >
                       <Edit2 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => confirmDelete('hymn', hymn)}
+                      className="flex-shrink-0 p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                      title="Delete hymn"
+                    >
+                      <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
@@ -823,6 +877,48 @@ export default function BibleDiscipleshipView() {
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        isOpen={activeModal === 'delete-confirm'}
+        onClose={() => { setActiveModal(null); setDeleteTarget(null); }}
+        title="Confirm Delete"
+        maxWidth="max-w-sm"
+      >
+        <div className="space-y-5">
+          <div className="flex items-start gap-4">
+            <div className="flex-shrink-0 w-10 h-10 rounded-full bg-rose-100 flex items-center justify-center">
+              <Trash2 className="w-5 h-5 text-rose-600" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-slate-900 mb-1">
+                {deleteTarget?.type === 'verse'     && `Delete verse "${deleteTarget.item.verse}"?`}
+                {deleteTarget?.type === 'catechism' && `Delete Question #${deleteTarget.item.qNo}?`}
+                {deleteTarget?.type === 'module'    && `Delete module "${deleteTarget.item.title}"?`}
+                {deleteTarget?.type === 'story'     && `Delete story "${deleteTarget.item.title}"?`}
+                {deleteTarget?.type === 'hymn'      && `Delete hymn "${deleteTarget.item.title}"?`}
+              </p>
+              <p className="text-sm text-slate-600">This will permanently remove this item. This cannot be undone.</p>
+            </div>
+          </div>
+          <div className="flex items-center justify-end gap-3 pt-2 border-t border-slate-200">
+            <button
+              type="button"
+              onClick={() => { setActiveModal(null); setDeleteTarget(null); }}
+              className="px-5 py-2.5 text-sm font-semibold text-slate-700 hover:text-slate-900 rounded-lg hover:bg-slate-100 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleConfirmDelete}
+              className="px-5 py-2.5 text-sm font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-lg transition-colors shadow-sm"
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      </Modal>
 
       {/* Add Verse Modal */}
       <Modal isOpen={activeModal === 'verse'} onClose={() => setActiveModal(null)} title="Add Scripture Verse Card" maxWidth="max-w-2xl">

@@ -165,59 +165,67 @@ export default function AddChildModal({ isOpen, onClose, onAddChild }) {
       <form onSubmit={handleSubmit} className="space-y-5">
 
         {/* Profile Photo Section */}
-        <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200/80 flex items-center gap-5">
-          {/* Live preview */}
-          <div className="relative shrink-0">
-            {hasPhoto ? (
-              <ChildImage
-                src={formData.imageUrl}
-                alt="Preview"
-                className="w-20 h-20 rounded-full object-cover ring-4 ring-[#E8F0F0] shadow-md"
+        <div className="bg-gradient-to-br from-slate-50 to-slate-100/50 rounded-xl p-5 border border-slate-200 shadow-sm">
+          <div className="flex items-start gap-5">
+            {/* Live preview */}
+            <div className="relative shrink-0">
+              {hasPhoto ? (
+                <ChildImage
+                  src={formData.imageUrl}
+                  alt="Preview"
+                  className="w-24 h-24 rounded-full object-cover ring-4 ring-white shadow-lg"
+                />
+              ) : (
+                <InitialAvatar name={formData.name || '?'} size={96} />
+              )}
+              {hasPhoto && (
+                <button
+                  type="button"
+                  onClick={clearPhoto}
+                  className="absolute -top-1 -right-1 p-1 bg-rose-500 text-white rounded-full shadow-md hover:bg-rose-600 transition-colors cursor-pointer"
+                  title="Remove photo"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+
+            <div className="flex-1 space-y-3">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Profile Photo <span className="text-slate-400 font-normal normal-case tracking-normal">(optional)</span>
+                </label>
+                <p className="text-xs text-slate-500">Upload a photo or paste an image URL</p>
+              </div>
+
+              {/* URL input */}
+              <input
+                type="url"
+                placeholder="Paste image URL..."
+                value={formData.imageUrl.startsWith('data:') ? '' : formData.imageUrl}
+                onChange={(e) => setFormData(f => ({ ...f, imageUrl: e.target.value }))}
+                className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all"
               />
-            ) : (
-              <InitialAvatar name={formData.name || '?'} size={80} />
-            )}
-            {hasPhoto && (
+
+              {/* File upload button */}
               <button
                 type="button"
-                onClick={clearPhoto}
-                className="absolute -top-1 -right-1 p-0.5 bg-rose-500 text-white rounded-full shadow cursor-pointer"
-                title="Remove photo"
+                onClick={() => fileInputRef.current?.click()}
+                className="inline-flex items-center justify-center w-10 h-10 bg-brand-primary text-white border border-brand-primary rounded-lg hover:bg-[#0a2d38] transition-colors cursor-pointer shadow-sm"
+                title="Upload from device"
               >
-                <X className="w-3 h-3" />
+                <Upload className="w-5 h-5" />
               </button>
-            )}
-          </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="hidden"
+              />
 
-          <div className="flex-1 space-y-2">
-            <p className="text-xs font-bold text-slate-700 uppercase font-mono">Profile Photo <span className="text-slate-400 font-normal normal-case">(optional)</span></p>
-
-            {/* URL input */}
-            <input
-              type="url"
-              placeholder="Paste image URL..."
-              value={formData.imageUrl.startsWith('data:') ? '' : formData.imageUrl}
-              onChange={(e) => setFormData(f => ({ ...f, imageUrl: e.target.value }))}
-              className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#0C3440]"
-            />
-
-            {/* File upload */}
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="flex items-center gap-2 px-3 py-1.5 bg-[#E8F0F0] text-[#0C3440] border border-[#B8CED0] rounded-xl text-xs font-bold hover:bg-[#0C3440] hover:text-white transition-colors cursor-pointer"
-            >
-              <Upload className="w-3.5 h-3.5" /> Upload from device
-            </button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-              className="hidden"
-            />
-
-            <p className="text-[10px] text-slate-400">If no photo is provided, the child's initials will be displayed automatically.</p>
+              <p className="text-xs text-slate-500 italic">If no photo is provided, the child's initials will be displayed automatically.</p>
+            </div>
           </div>
         </div>
 

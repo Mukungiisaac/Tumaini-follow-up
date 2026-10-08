@@ -377,16 +377,8 @@ export const MOCK_BIBLE_CURRICULUM = {
 };
 
 export const MEETING_LOCATIONS = [
-  "Cottage 'B' Study Room",
-  "Hope House Counseling Corner",
-  "Joy Villa Quiet Room",
-  "Peace Cabin Terrace",
-  "Village Library - Desk 3",
-  "IT Lab - Gazebo",
-  "Head Mentor Office",
-  "Outdoor Garden Bench",
-  "Chapel Quiet Alcove",
-  "Dining Hall Side Room",
+  "At the Field",
+  "Dining Hall",
   "Other (Custom location...)"
 ];
 

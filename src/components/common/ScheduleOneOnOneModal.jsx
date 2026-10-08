@@ -121,7 +121,7 @@ export default function ScheduleOneOnOneModal({
               >
                 {childrenList.map((c) => (
                   <option key={c.id} value={c.id}>
-                    {c.name} ({c.grade} â€¢ {c.cottage})
+                    {c.name} ({c.grade} • {c.cottage})
                   </option>
                 ))}
               </select>
@@ -181,28 +181,44 @@ export default function ScheduleOneOnOneModal({
           <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 mb-1.5">
             <MapPin className="w-3.5 h-3.5 text-[#0C3440] shrink-0" /> Meeting Place / Location
           </label>
-          <select
-            value={formData.location}
-            onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-            className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#0C3440] bg-white truncate"
-          >
-            {MEETING_LOCATIONS.map((loc) => (
-              <option key={loc} value={loc}>
-                {loc}
-              </option>
-            ))}
-          </select>
+          {(() => {
+            const selectedChild = childrenList.find(c => c.id === formData.childId);
+            const houseId = selectedChild?.houseId;
+            const houseOption = houseId ? `House ${houseId}` : null;
 
-          {formData.location === 'Other (Custom location...)' && (
-            <input
-              type="text"
-              required
-              placeholder="Specify custom place (e.g. Village Playground Gazebo, Dining Terrace...)"
-              value={formData.customLocation}
-              onChange={(e) => setFormData({ ...formData, customLocation: e.target.value })}
-              className="w-full mt-3 px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#0C3440]"
-            />
-          )}
+            // Build the options list: fixed options + house if available + Other
+            const options = [
+              "At the Field",
+              "Dining Hall",
+              ...(houseOption ? [houseOption] : []),
+              "Other (Custom location...)"
+            ];
+
+            return (
+              <>
+                <select
+                  value={options.includes(formData.location) ? formData.location : (formData.location === 'Other (Custom location...)' ? 'Other (Custom location...)' : options[0])}
+                  onChange={(e) => setFormData({ ...formData, location: e.target.value, customLocation: '' })}
+                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#0C3440] bg-white"
+                >
+                  {options.map((loc) => (
+                    <option key={loc} value={loc}>{loc}</option>
+                  ))}
+                </select>
+
+                {formData.location === 'Other (Custom location...)' && (
+                  <input
+                    type="text"
+                    required
+                    placeholder="Type a custom location..."
+                    value={formData.customLocation}
+                    onChange={(e) => setFormData({ ...formData, customLocation: e.target.value })}
+                    className="w-full mt-3 px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#0C3440]"
+                  />
+                )}
+              </>
+            );
+          })()}
         </div>
 
         {/* Focus Topic / Reason */}

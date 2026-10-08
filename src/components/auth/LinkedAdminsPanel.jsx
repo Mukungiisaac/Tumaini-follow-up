@@ -28,8 +28,11 @@ export default function LinkedAdminsPanel({ email }) {
       .then((data) => {
         if (isMounted) setAdmins(data.admins || []);
       })
-      .catch(() => {
-        if (isMounted) setMessage('Could not load linked email access. Check the Supabase function deployment.');
+      .catch((error) => {
+        console.error('Failed to load linked admins:', error);
+        if (isMounted) {
+          setMessage('Could not load linked email access. The Supabase Edge Function may not be deployed. See deployment instructions below.');
+        }
       });
 
     return () => {
@@ -52,11 +55,16 @@ export default function LinkedAdminsPanel({ email }) {
 
   const refreshAdmins = async () => {
     setIsLoading(true);
+    setMessage('');
     try {
       const data = await callAdminFunction({ action: 'list' });
       setAdmins(data.admins || []);
-    } catch {
-      setMessage('Could not load linked email access. Check the Supabase function deployment.');
+      if ((data.admins || []).length === 0) {
+        setMessage('No linked admin emails found yet. Use the form above to authorize staff members.');
+      }
+    } catch (error) {
+      console.error('Failed to refresh admins:', error);
+      setMessage('Could not load linked email access. The Supabase Edge Function may not be deployed. See deployment instructions below.');
     } finally {
       setIsLoading(false);
     }
@@ -76,8 +84,9 @@ export default function LinkedAdminsPanel({ email }) {
       setInviteEmail('');
       setDisplayName('');
       await refreshAdmins();
-    } catch {
-      setMessage('Could not authorize this email. Check the address and Supabase function configuration.');
+    } catch (error) {
+      console.error('Failed to invite admin:', error);
+      setMessage('Could not authorize this email. Check the Supabase Edge Function deployment and configuration.');
     } finally {
       setIsSubmitting(false);
     }
@@ -89,8 +98,9 @@ export default function LinkedAdminsPanel({ email }) {
       await callAdminFunction({ action: 'set-active', userId: admin.user_id, active });
       await refreshAdmins();
       setMessage(`${admin.email} access ${active ? 'restored' : 'revoked'}.`);
-    } catch {
-      setMessage('Could not update this account. The host account cannot be disabled.');
+    } catch (error) {
+      console.error('Failed to update admin status:', error);
+      setMessage('Could not update this account. The host account cannot be disabled, or the function is not deployed.');
     }
   };
 
@@ -148,7 +158,35 @@ export default function LinkedAdminsPanel({ email }) {
         </button>
       </form>
 
-      {message && <p role="status" className="text-sm text-slate-600">{message}</p>}
+      {message && (
+        <div className={`text-sm p-4 rounded-lg border ${message.includes('Could not') ? 'bg-amber-50 border-amber-200 text-amber-800' : 'bg-slate-50 border-slate-200 text-slate-700'}`}>
+          <p role="status" className="font-medium">{message}</p>
+          {message.includes('Could not') && (
+            <details className="mt-3 text-xs space-y-2">
+              <summary className="cursor-pointer font-semibold text-amber-900 hover:text-amber-700">Show deployment instructions</summary>
+              <div className="mt-2 p-3 bg-white rounded border border-amber-200 space-y-2">
+                <p className="font-semibold">Deploy the Edge Function:</p>
+                <pre className="bg-slate-900 text-slate-100 p-2 rounded overflow-x-auto">
+                  supabase functions deploy manage-linked-admins --project-ref YOUR_PROJECT_REF
+                </pre>
+                <p className="font-semibold mt-3">Configure secrets:</p>
+                <pre className="bg-slate-900 text-slate-100 p-2 rounded overflow-x-auto text-xs">
+{`supabase secrets set \\
+  HOST_ADMIN_EMAIL=tumainicomprehensive@gmail.com \\
+  SITE_URL=http://localhost:5174 \\
+  PUBLIC_SUPABASE_KEY=YOUR_ANON_KEY \\
+  SUPABASE_SERVICE_ROLE_KEY=YOUR_SERVICE_ROLE_KEY \\
+  --project-ref YOUR_PROJECT_REF`}
+                </pre>
+                <p className="mt-2 text-amber-800">
+                  <strong>Note:</strong> Replace YOUR_PROJECT_REF with your Supabase project reference (found in Project Settings).
+                  For production, use your actual site URL instead of localhost.
+                </p>
+              </div>
+            </details>
+          )}
+        </div>
+      )}
 
       <div className="divide-y divide-slate-100 border-y border-slate-100">
         {admins.map((admin) => (
